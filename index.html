@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tournament Stableford Scorecard</title>
+  <title>Tournament Stableford Scoreboard</title>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     body { font-family: Arial, Helvetica, sans-serif; margin: 10px; background: #f9f9f9; }
@@ -49,35 +49,38 @@
     .team-table { width: 380px; font-size: 0.9rem; }
     .team-total-row { background: #e8f5e9; font-weight: bold; }
     .hide-for-capture { display: none !important; }
-    #save-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #2e7d32; color: white; padding: 6px 15px; border-radius: 20px; opacity: 0; transition: opacity 0.3s; z-index: 9999; font-size: 0.8rem; }
+    .admin-only { display: none; }
     
+    #save-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #2e7d32; color: white; padding: 6px 15px; border-radius: 20px; opacity: 0; transition: opacity 0.3s; z-index: 9999; font-size: 0.8rem; }
     .final-total-box { font-size: 1.1rem; color: #1b5e20; background: #c8e6c9 !important; border-left: 2px solid #2e7d32 !important; }
+    #mode-tag { font-size: 0.7rem; color: #999; text-align: center; margin-top: 10px; font-style: italic; }
   </style>
 </head>
 <body>
 
 <div id="controls">
-  <button class="add" onclick="addPlayer()">+ Player</button>
   <button class="toggle-rd" onclick="toggleRound()">Rd <span id="next-rd-label">2</span> View</button>
   <button class="image-btn" onclick="saveAsImage()">📸 Save Image</button>
-  <button class="backup-btn" onclick="exportData()">📤 Export JSON</button>
-  <button class="backup-btn" onclick="importData()">📥 Import JSON</button>
-  <button class="clear-all" onclick="clearAllData()">🗑️ Reset</button>
+  
+  <button class="add admin-only" onclick="addPlayer()">+ Player</button>
+  <button class="backup-btn admin-only" onclick="exportData()">📤 Export JSON</button>
+  <button class="backup-btn admin-only" onclick="importData()">📥 Import JSON</button>
+  <button class="clear-all admin-only" onclick="clearAllData()">🗑️ Reset</button>
 </div>
 
-<div id="save-toast">✓ Progress Saved</div>
+<div id="save-toast">✓ Data Synced</div>
 
 <div id="capture-area">
-  <h1>Emerald Tour Stableford Hcap Tournament</h1>
+  <h1>Emerald Tour Stableford</h1>
   <div class="venue-container">
-    <input type="text" id="venue-name" class="venue-input" placeholder="Enter Course/Venue Name..." oninput="saveState()">
+    <input type="text" id="venue-name" class="venue-input" placeholder="Course Name" oninput="saveState()" readonly>
   </div>
   <div id="round-display" class="round-indicator">Viewing: Round 1</div>
 
   <table id="scorecard">
     <thead>
       <tr>
-        <th class="action-col">X</th>
+        <th class="action-col admin-only">X</th>
         <th class="name-col">Player</th>
         <th class="hcap-col">HCP</th>
         <th class="team-col">T</th>
@@ -93,7 +96,7 @@
   <div class="team-container">
     <table class="team-table">
       <thead>
-        <tr class="team-header-row"><th colspan="4"><input type="text" id="team-a-name" class="team-name-input" value="Team A" oninput="saveState()"></th></tr>
+        <tr class="team-header-row"><th colspan="4"><input type="text" id="team-a-name" class="team-name-input" value="Team A" readonly></th></tr>
         <tr><th style="text-align:left; padding-left:10px;">Name</th><th width="40">R1</th><th width="40">R2</th><th width="50">Total</th></tr>
       </thead>
       <tbody id="team-a-body"></tbody>
@@ -102,7 +105,7 @@
 
     <table class="team-table">
       <thead>
-        <tr class="team-header-row"><th colspan="4"><input type="text" id="team-b-name" class="team-name-input" value="Team B" oninput="saveState()"></th></tr>
+        <tr class="team-header-row"><th colspan="4"><input type="text" id="team-b-name" class="team-name-input" value="Team B" readonly></th></tr>
         <tr><th style="text-align:left; padding-left:10px;">Name</th><th width="40">R1</th><th width="40">R2</th><th width="50">Total</th></tr>
       </thead>
       <tbody id="team-b-body"></tbody>
@@ -111,37 +114,60 @@
   </div>
 </div>
 
+<div id="mode-tag">Public Viewer Mode</div>
+
 <script>
 let players = [];
 let currentViewingRound = 1;
 const STORAGE_KEY = 'golf_compact_v4';
-const REMOTE_DATA_URL = 'data.json'; // The file in your GitHub repo
+const REMOTE_DATA_URL = 'data.json'; 
 
 window.onload = () => { 
+  checkAdmin();
   initializeHeader(); 
-  loadState(); 
+  loadOfficialData(); 
 };
 
-// ... (keep initializeHeader, toggleRound, addPlayer, renderPlayers) ...
-
-async function loadState() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  
-  if (saved) {
-    applyState(JSON.parse(saved));
-  } else {
-    // If no local data, try to pull from the hosted data.json
-    try {
-      const response = await fetch(REMOTE_DATA_URL);
-      if (response.ok) {
-        const remoteData = await response.json();
-        applyState(remoteData);
-        console.log("Data pulled from GitHub backup.");
-      }
-    } catch (err) {
-      console.log("No remote data.json found or server error.");
-    }
+function checkAdmin() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('admin') === 'true') {
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'inline-block');
+    document.querySelectorAll('input').forEach(el => el.readOnly = false);
+    document.getElementById('mode-tag').textContent = "Admin Mode Active";
   }
+}
+
+function initializeHeader() {
+  const pRow = document.getElementById('par-row');
+  const sRow = document.getElementById('si-row');
+  // Clear any existing dynamic cells before adding
+  const existingPs = pRow.querySelectorAll('td:not([colspan])');
+  const existingSs = sRow.querySelectorAll('td:not([colspan])');
+  existingPs.forEach(el => el.remove());
+  existingSs.forEach(el => el.remove());
+
+  for (let i = 1; i <= 18; i++) {
+    pRow.innerHTML += `<td><input type="number" class="par-input" value="4" readonly oninput="updateCalculations()"></td>`;
+    sRow.innerHTML += `<td><input type="number" class="si-input" value="${i}" readonly oninput="updateCalculations()"></td>`;
+  }
+}
+
+async function loadOfficialData() {
+  try {
+    const response = await fetch(REMOTE_DATA_URL + '?t=' + Date.now());
+    if (response.ok) {
+      const state = await response.json();
+      applyState(state);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } else {
+      loadLocal();
+    }
+  } catch (e) { loadLocal(); }
+}
+
+function loadLocal() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) applyState(JSON.parse(saved));
 }
 
 function applyState(state) {
@@ -156,37 +182,132 @@ function applyState(state) {
   if(state.sis) state.sis.forEach((v, i) => { 
     if(document.querySelectorAll('.si-input')[i]) document.querySelectorAll('.si-input')[i].value = v; 
   });
-  
   renderPlayers();
 }
 
-// Add this function to allow manual syncing from the GitHub file
-async function syncFromCloud() {
-  if(confirm("Discard current changes and pull data from data.json?")) {
-    try {
-      const response = await fetch(REMOTE_DATA_URL + '?nocache=' + new Date().getTime());
-      const remoteData = await response.json();
-      applyState(remoteData);
-      saveState(); // Save to local storage
-      alert("Synced successfully!");
-    } catch (err) {
-      alert("Could not find data.json on the server.");
+function renderPlayers() {
+  const tbody = document.getElementById('players-body');
+  tbody.innerHTML = '';
+  players.forEach((p, pIdx) => {
+    const scores = currentViewingRound === 1 ? p.r1Scores : p.r2Scores;
+    const rdTotal = currentViewingRound === 1 ? p.r1Total : p.r2Total;
+    const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
+
+    let trScore = `<tr>
+      <td class="action-col admin-only"><button onclick="deletePlayer(${pIdx})" style="background:red; padding:1px 5px; font-size:0.7rem;">x</button></td>
+      <td class="name-col"><input class="player-name-input" value="${p.name}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].name=this.value; saveState();"></td>
+      <td><input type="number" class="par-input" style="width:30px; background:white; border-color:#ccc;" value="${p.handicap}" ${isAdmin ? '' : 'readonly'} oninput="players[${pIdx}].handicap=this.value; updateCalculations();"></td>
+      <td class="team-col">${p.team}</td>`;
+    
+    for(let i=0; i<18; i++) {
+      trScore += `<td><input type="number" class="score-input" data-p="${pIdx}" data-h="${i}" value="${scores[i] || ''}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
     }
-  }
+    trScore += `<td style="background:#eee;"></td></tr>`;
+    
+    let trNet = `<tr class="net-pts-row"><td colspan="4" style="text-align:right; font-size:0.55rem; color:#777;">NET/PTS</td>`;
+    for(let i=0; i<18; i++) trNet += `<td id="net-${pIdx}-${i}">-</td>`;
+    trNet += `<td id="p-total-${pIdx}" class="final-total-box">${rdTotal}</td></tr>`;
+    
+    tbody.innerHTML += trScore + trNet;
+  });
+  updateCalculations();
 }
 
-// ... (keep exportData, importData, and other helper functions) ...
-</script>
+function updateCalculations() {
+  players.forEach((p, pIdx) => {
+    let rdTotal = 0;
+    const hcap = parseInt(p.handicap) || 0;
+    const inputs = document.querySelectorAll(`.score-input[data-p="${pIdx}"]`);
+    
+    inputs.forEach((inp, hIdx) => {
+      const score = parseInt(inp.value);
+      const par = parseInt(document.querySelectorAll('.par-input')[hIdx].value) || 4;
+      const si = parseInt(document.querySelectorAll('.si-input')[hIdx].value) || (hIdx + 1);
+      const netCell = document.getElementById(`net-${pIdx}-${hIdx}`);
+      
+      if (currentViewingRound === 1) p.r1Scores[hIdx] = inp.value; else p.r2Scores[hIdx] = inp.value;
 
-// Backup Functions
+      if (!isNaN(score) && score > 0) {
+        const strokes = Math.floor(hcap / 18) + (si <= (hcap % 18) ? 1 : 0);
+        const net = score - strokes;
+        const diff = net - par;
+        let pts = (diff <= -2) ? 4 : (diff === -1) ? 3 : (diff === 0) ? 2 : (diff === 1) ? 1 : 0;
+        rdTotal += pts;
+        if(netCell) netCell.innerHTML = `<span style="color:#444">${net}</span><br><span style="color:#2e7d32">${pts}</span>`;
+      } else if (netCell) { netCell.textContent = '-'; }
+    });
+    
+    if (currentViewingRound === 1) p.r1Total = rdTotal; else p.r2Total = rdTotal;
+    const totalCell = document.getElementById(`p-total-${pIdx}`);
+    if(totalCell) totalCell.textContent = rdTotal;
+  });
+  updateTeamTables();
+  saveState();
+}
+
+function updateTeamTables() {
+  const bodies = { A: document.getElementById('team-a-body'), B: document.getElementById('team-b-body') };
+  const teamTotals = { A: {r1:0, r2:0}, B: {r1:0, r2:0} };
+  bodies.A.innerHTML = ''; bodies.B.innerHTML = '';
+
+  const sortedPlayers = [...players].sort((a, b) => (b.r1Total + b.r2Total) - (a.r1Total + a.r2Total));
+
+  sortedPlayers.forEach(p => {
+    const grand = p.r1Total + p.r2Total;
+    bodies[p.team].innerHTML += `<tr><td style="text-align:left; padding-left:10px;">${p.name}</td><td>${p.r1Total}</td><td>${p.r2Total}</td><td style="font-weight:bold">${grand}</td></tr>`;
+    teamTotals[p.team].r1 += p.r1Total;
+    teamTotals[p.team].r2 += p.r2Total;
+  });
+
+  ['A', 'B'].forEach(t => {
+    document.getElementById(`t${t}-r1`).textContent = teamTotals[t].r1;
+    document.getElementById(`t${t}-r2`).textContent = teamTotals[t].r2;
+    document.getElementById(`t${t}-grand`).textContent = teamTotals[t].r1 + teamTotals[t].r2;
+  });
+}
+
+function toggleRound() {
+  currentViewingRound = currentViewingRound === 1 ? 2 : 1;
+  document.getElementById('round-display').textContent = `Viewing: Round ${currentViewingRound}`;
+  document.getElementById('next-rd-label').textContent = currentViewingRound === 1 ? 2 : 1;
+  renderPlayers();
+}
+
+function saveState() {
+  if (new URLSearchParams(window.location.search).get('admin') !== 'true') return;
+  const state = { 
+    players, 
+    venueName: document.getElementById('venue-name').value,
+    teamAName: document.getElementById('team-a-name').value, 
+    teamBName: document.getElementById('team-b-name').value, 
+    pars: Array.from(document.querySelectorAll('.par-input')).slice(0,18).map(i => i.value), 
+    sis: Array.from(document.querySelectorAll('.si-input')).slice(0,18).map(i => i.value) 
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const toast = document.getElementById('save-toast');
+  toast.style.opacity = '1'; setTimeout(() => toast.style.opacity = '0', 600);
+}
+
+function addPlayer() {
+  const name = prompt("Name:");
+  if (!name) return;
+  const team = prompt("Team (A or B):", "A").toUpperCase();
+  players.push({ name, handicap: 0, team: (team === 'B' ? 'B' : 'A'), r1Scores: Array(18).fill(''), r2Scores: Array(18).fill(''), r1Total: 0, r2Total: 0 });
+  renderPlayers();
+  saveState();
+}
+
+function deletePlayer(idx) { if(confirm("Delete?")) { players.splice(idx, 1); renderPlayers(); saveState(); } }
+
+function clearAllData() { if(confirm("Reset all tournament data?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
+
 function exportData() {
-  const data = localStorage.getItem(STORAGE_KEY);
-  if(!data) return alert("No data to export");
-  const blob = new Blob([data], {type: "application/json"});
-  const url = URL.createObjectURL(blob);
+  const state = localStorage.getItem(STORAGE_KEY);
+  if(!state) return alert("No data to export");
+  const blob = new Blob([state], {type: "application/json"});
   const a = document.createElement('a');
-  a.href = url;
-  a.download = `golf-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.href = URL.createObjectURL(blob);
+  a.download = `data.json`;
   a.click();
 }
 
@@ -197,27 +318,20 @@ function importData() {
   input.onchange = e => {
     const file = e.target.files[0];
     const reader = new FileReader();
-    reader.onload = readerEvent => {
-      try {
-        const content = readerEvent.target.result;
-        JSON.parse(content); // Validate JSON
-        localStorage.setItem(STORAGE_KEY, content);
-        location.reload();
-      } catch (err) { alert("Invalid JSON file"); }
+    reader.onload = re => {
+      localStorage.setItem(STORAGE_KEY, re.target.result);
+      location.reload();
     };
     reader.readAsText(file);
   };
   input.click();
 }
 
-function deletePlayer(idx) { if(confirm("Delete?")) { players.splice(idx, 1); renderPlayers(); saveState(); } }
-function clearAllData() { if(confirm("Reset all tournament data?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
-
 function saveAsImage() {
   document.querySelectorAll('.action-col').forEach(el => el.classList.add('hide-for-capture'));
   html2canvas(document.getElementById('capture-area'), { scale: 2, backgroundColor: '#f9f9f9' }).then(canvas => {
     const link = document.createElement('a');
-    link.download = `Tournament-Final-Score.png`;
+    link.download = `Scorecard.png`;
     link.href = canvas.toDataURL();
     link.click();
     document.querySelectorAll('.action-col').forEach(el => el.classList.remove('hide-for-capture'));
@@ -225,5 +339,4 @@ function saveAsImage() {
 }
 </script>
 </body>
-
 </html>
