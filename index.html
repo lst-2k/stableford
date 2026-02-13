@@ -20,58 +20,70 @@
 
     .table-wrapper { 
       width: 100%; 
-      overflow-x: auto; 
+      overflow-x: auto; /* Always allow scroll if needed */
       border-radius: 8px; 
       box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
       margin-bottom: 15px;
       background: white;
+      -webkit-overflow-scrolling: touch;
     }
     
     table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
     
-    /* Column Widths */
-    .col-name { width: 90px; }
-    .col-hcp { width: 30px; }
-    .col-team { width: 20px; }
-    .col-hole { width: auto; }
-    .col-total { width: 40px; }
+    /* Default Portrait / Generic Sizes */
+    .col-name { width: 100px; }
+    .col-hcp { width: 35px; }
+    .col-team { width: 25px; }
+    .col-hole { width: 35px; } /* Fixed width for holes in portrait to force scrolling */
+    .col-total { width: 45px; }
 
-    th, td { border: 0.5px solid #ddd; padding: 4px 1px; text-align: center; font-size: 0.75rem; overflow: hidden; }
+    th, td { border: 0.5px solid #ddd; padding: 5px 2px; text-align: center; font-size: 0.8rem; }
     th { background: #2e7d32; color: white; }
 
-    /* LANDSCAPE OPTIMIZATION: Shrink elements to fit 18 holes */
+    /* LANDSCAPE OPTIMIZATION: Shrink to FIT without scrolling */
     @media screen and (orientation: landscape) {
-      body { padding: 2px; }
+      .table-wrapper { overflow-x: hidden; } /* Disable scroll in landscape */
+      table { width: 100%; table-layout: fixed; }
       th, td { font-size: 0.7rem; padding: 2px 0; }
       .player-name-input { width: 85px !important; font-size: 0.75rem !important; }
       .score-input, .par-input, .si-input { width: 22px !important; height: 22px !important; font-size: 0.8rem !important; }
       .col-name { width: 90px; }
-      .col-hcp { width: 28px; }
+      .col-hcp { width: 30px; }
+      .col-team { width: 22px; }
+      .col-hole { width: auto; } /* Auto width lets them shrink to fit the screen */
       .col-total { width: 35px; }
+      .net-label { font-size: 0.5rem; }
+      .pts-label { font-size: 0.7rem; }
+    }
+
+    /* PORTRAIT OPTIMIZATION: Ensure it looks good while scrolling */
+    @media screen and (orientation: portrait) {
+       table { width: 850px; } /* Force table to be wide enough to be readable */
+       .player-name-input { width: 95px; }
     }
 
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; }
 
-    .score-input, .par-input, .si-input { width: 26px; height: 26px; border: 1px solid #ccc; text-align: center; border-radius: 3px; font-size: 0.85rem; }
+    .score-input, .par-input, .si-input { width: 28px; height: 28px; border: 1px solid #ccc; text-align: center; border-radius: 3px; font-size: 0.9rem; }
     .par-input, .si-input { background: #fff8e1; font-weight: bold; border-color: #ffd54f; }
     
-    .player-name-input { font-weight: bold; width: 85px; border: none; background: transparent; font-size: 0.8rem; }
+    .player-name-input { font-weight: bold; border: none; background: transparent; font-size: 0.85rem; }
     .final-total-box { font-size: 1rem; font-weight: bold; color: #1b5e20; background: #c8e6c9 !important; }
 
     #controls { text-align: center; margin-bottom: 10px; background: #fff; padding: 5px; border-radius: 8px; }
-    button { padding: 6px 10px; font-size: 0.75rem; margin: 2px; cursor: pointer; border: none; border-radius: 4px; color: white; font-weight: 800; }
+    button { padding: 6px 12px; font-size: 0.8rem; margin: 2px; cursor: pointer; border: none; border-radius: 4px; color: white; font-weight: 800; }
     .toggle-rd { background: #1565c0; }
     .image-btn { background: #673ab7; }
     .admin-only { display: none; background: #4caf50; }
 
     .net-pts-row { background: #f1f8e9; line-height: 1.1; }
-    .net-label { font-size: 0.55rem; color: #777; display: block; }
-    .pts-label { font-size: 0.75rem; color: #2e7d32; font-weight: bold; }
+    .net-label { font-size: 0.6rem; color: #777; display: block; }
+    .pts-label { font-size: 0.8rem; color: #2e7d32; font-weight: bold; }
 
     .team-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; width: 100%; }
-    .team-table { width: 100%; border-radius: 8px; overflow: hidden; background: white; font-size: 0.8rem; }
+    .team-table { width: 100%; border-radius: 8px; overflow: hidden; background: white; font-size: 0.85rem; }
     
     @media (min-width: 768px) { 
       .team-container { flex-direction: row; justify-content: space-between; } 
@@ -132,7 +144,6 @@
 
 <script>
 let players = [];
-let history = [];
 let currentViewingRound = 1;
 const STORAGE_KEY = 'golf_compact_v5';
 const REMOTE_DATA_URL = 'data.json';
@@ -179,7 +190,6 @@ function loadLocal() {
 
 function applyState(state) {
   players = state.players || [];
-  history = state.history || [];
   document.getElementById('venue-name').value = state.venueName || '';
   document.getElementById('team-a-name').value = state.teamAName || 'Team A';
   document.getElementById('team-b-name').value = state.teamBName || 'Team B';
@@ -252,7 +262,7 @@ function updateTeamTables() {
 
 function saveState() {
   if (new URLSearchParams(window.location.search).get('admin') !== 'true') return;
-  const state = { players, history, venueName: document.getElementById('venue-name').value, teamAName: document.getElementById('team-a-name').value, teamBName: document.getElementById('team-b-name').value, pars: Array.from(document.querySelectorAll('.par-input')).slice(0,18).map(i => i.value), sis: Array.from(document.querySelectorAll('.si-input')).slice(0,18).map(i => i.value) };
+  const state = { players, venueName: document.getElementById('venue-name').value, teamAName: document.getElementById('team-a-name').value, teamBName: document.getElementById('team-b-name').value, pars: Array.from(document.querySelectorAll('.par-input')).slice(0,18).map(i => i.value), sis: Array.from(document.querySelectorAll('.si-input')).slice(0,18).map(i => i.value) };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
