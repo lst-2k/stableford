@@ -2,153 +2,148 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tournament Stableford Scoreboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"/>
+  <title>New Emerald Tour - Scoreboard</title>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
-    body { font-family: Arial, Helvetica, sans-serif; margin: 10px; background: #f9f9f9; }
-    h1 { color: #2e7d32; text-align: center; margin-bottom: 5px; font-size: 1.4rem; }
-    .venue-container { text-align: center; margin-bottom: 10px; }
-    .venue-input { border: none; border-bottom: 2px solid #2e7d32; background: transparent; font-size: 1.1rem; text-align: center; width: 300px; color: #333; font-weight: bold; }
-    .round-indicator { text-align: center; font-size: 1.1rem; font-weight: bold; color: #1565c0; margin-bottom: 10px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 10px; background: #f0f2f5; width: 100%; box-sizing: border-box; }
+    h1 { color: #1b5e20; text-align: center; margin-bottom: 2px; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3; }
     
-    #capture-area { padding: 5px; background: #f9f9f9; width: fit-content; margin: 0 auto; }
-    table { border-collapse: collapse; margin: 5px auto; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    th, td { border: 1px solid #ccc; padding: 4px 2px; text-align: center; }
-    th { background: #2e7d32; color: white; font-size: 0.8rem; }
+    #mode-tag { font-size: 0.65rem; color: #777; text-align: center; margin-bottom: 10px; font-style: italic; }
+    .venue-container { text-align: center; margin-bottom: 5px; }
+    .venue-input { border: none; border-bottom: 2px solid #2e7d32; background: transparent; font-size: 1.1rem; text-align: center; width: 80%; color: #333; font-weight: bold; }
+    .round-indicator { text-align: center; font-size: 1rem; font-weight: bold; color: #1565c0; margin-bottom: 10px; background: white; display: inline-block; padding: 4px 15px; border-radius: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-left: 50%; transform: translateX(-50%); }
+    
+    #capture-area { padding: 5px; background: #f0f2f5; margin: 0 auto; width: 100%; }
 
-    .hole-col { width: 32px; min-width: 32px; }
-    .hcap-col { width: 35px; }
-    .team-col { width: 25px; font-weight: bold; font-size: 0.85rem; }
-    .name-col { min-width: 140px; text-align: left; padding-left: 8px; }
+    .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; background: white; }
+    th, td { border: 0.5px solid #ddd; padding: 6px 2px; text-align: center; font-size: 0.8rem; }
+    th { background: #2e7d32; color: white; }
 
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; }
 
-    .par-input, .si-input, .score-input { 
-      width: 28px; border: 1px solid #aaa; text-align: center; font-size: 1rem; padding: 3px 0; border-radius: 2px;
-    }
-    .par-input, .si-input { background: #fff8e1; font-weight: bold; border-color: #777; }
+    .score-input, .par-input, .si-input { width: 28px; height: 28px; border: 1px solid #ccc; text-align: center; border-radius: 4px; font-size: 0.9rem; }
+    .par-input, .si-input { background: #fff8e1; font-weight: bold; border-color: #ffd54f; }
     
-    .net-pts-row { background: #f1f8e9; font-size: 0.65rem; font-weight: bold; line-height: 1.1; }
-    .player-name-input { font-weight: bold; width: 95%; border: none; background: transparent; font-size: 0.95rem; }
-    
-    .team-header-row th { background: #1b5e20; font-size: 1.1rem; padding: 6px; }
-    .team-name-input { background: transparent; color: white; border: 1px dashed rgba(255,255,255,0.3); text-align: center; font-weight: bold; width: 90%; }
+    .player-name-input { font-weight: bold; width: 110px; border: none; background: transparent; font-size: 0.85rem; }
+    .final-total-box { font-size: 1.1rem; font-weight: bold; color: #1b5e20; background: #c8e6c9 !important; }
 
-    #controls { text-align: center; margin-bottom: 10px; padding: 8px; background: #fff; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
-    button { padding: 6px 12px; font-size: 0.85rem; margin: 2px; cursor: pointer; border: none; border-radius: 4px; color: white; font-weight: bold; }
-    .add { background: #4caf50; }
+    #controls { text-align: center; margin-bottom: 10px; background: #fff; padding: 10px; border-radius: 8px; }
+    button { padding: 8px 12px; font-size: 0.8rem; margin: 3px; cursor: pointer; border: none; border-radius: 6px; color: white; font-weight: 800; }
     .toggle-rd { background: #1565c0; }
     .image-btn { background: #673ab7; }
-    .backup-btn { background: #607d8b; }
-    .clear-all { background: #d32f2f; }
+    .admin-only { display: none; background: #4caf50; }
+    .danger-btn { background: #d32f2f !important; }
 
-    .team-container { display: flex; justify-content: center; gap: 10px; flex-wrap: nowrap; margin-top: 15px; }
-    .team-table { width: 380px; font-size: 0.9rem; }
-    .team-total-row { background: #e8f5e9; font-weight: bold; }
-    .hide-for-capture { display: none !important; }
-    .admin-only { display: none; }
+    .net-pts-row { background: #f1f8e9; line-height: 1.2; }
+    .net-label { font-size: 0.6rem; color: #777; display: block; }
+    .pts-label { font-size: 0.8rem; color: #2e7d32; font-weight: bold; }
+
+    .team-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+    .team-table { width: 100%; border-radius: 8px; overflow: hidden; }
     
-    #save-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #2e7d32; color: white; padding: 6px 15px; border-radius: 20px; opacity: 0; transition: opacity 0.3s; z-index: 9999; font-size: 0.8rem; }
-    .final-total-box { font-size: 1.1rem; color: #1b5e20; background: #c8e6c9 !important; border-left: 2px solid #2e7d32 !important; }
-    #mode-tag { font-size: 0.7rem; color: #999; text-align: center; margin-top: 10px; font-style: italic; }
+    #history-section { margin-top: 30px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .history-title { color: #1b5e20; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
+    .history-item { display: grid; grid-template-columns: 1fr 2fr 1fr; font-size: 0.75rem; padding: 8px 0; border-bottom: 1px solid #f0f0f0; align-items: center; }
+
+    @media (min-width: 768px) { .team-container { flex-direction: row; justify-content: space-between; } .team-table { width: 49%; } }
   </style>
 </head>
 <body>
 
 <div id="controls">
-  <button class="toggle-rd" onclick="toggleRound()">Rd <span id="next-rd-label">2</span> View</button>
-  <button class="image-btn" onclick="saveAsImage()">📸 Save Image</button>
-  
-  <button class="add admin-only" onclick="addPlayer()">+ Player</button>
-  <button class="backup-btn admin-only" onclick="exportData()">📤 Export JSON</button>
-  <button class="backup-btn admin-only" onclick="importData()">📥 Import JSON</button>
-  <button class="clear-all admin-only" onclick="clearAllData()">🗑️ Reset</button>
+  <button class="toggle-rd" onclick="toggleRound()">View Round <span id="next-rd-label">2</span></button>
+  <button class="image-btn" onclick="saveAsImage()">📸 Capture</button>
+  <button class="admin-only" onclick="addPlayer()">+ Player</button>
+  <button class="admin-only" onclick="recordToHistory()">🏆 Record Result</button>
+  <button class="admin-only" style="background:#455a64" onclick="exportData()">📤 Export JSON</button>
+  <button class="admin-only danger-btn" onclick="clearAllData()">🗑️ Reset All</button>
 </div>
-
-<div id="save-toast">✓ Data Synced</div>
 
 <div id="capture-area">
-  <h1>Emerald Tour Stableford</h1>
+  <h1>New Emerald Tour - Team Stableford Scorecard</h1>
+  <div id="mode-tag">Member View</div>
   <div class="venue-container">
-    <input type="text" id="venue-name" class="venue-input" placeholder="Course Name" oninput="saveState()" readonly>
+    <input type="text" id="venue-name" class="venue-input" placeholder="Venue Name" oninput="saveState()" readonly>
   </div>
-  <div id="round-display" class="round-indicator">Viewing: Round 1</div>
+  <div id="round-display" class="round-indicator">Round 1</div>
 
-  <table id="scorecard">
-    <thead>
-      <tr>
-        <th class="action-col admin-only">X</th>
-        <th class="name-col">Player</th>
-        <th class="hcap-col">HCP</th>
-        <th class="team-col">T</th>
-        <script>for(let i=1; i<=18; i++) document.write(`<th class="hole-col">${i}</th>`);</script>
-        <th style="width: 45px;">Total</th>
-      </tr>
-      <tr id="par-row"><td colspan="4" style="text-align:right; font-weight:bold; background:#eee; font-size:0.6rem;">PAR</td></tr>
-      <tr id="si-row"><td colspan="4" style="text-align:right; font-weight:bold; background:#eee; font-size:0.6rem;">SI</td></tr>
-    </thead>
-    <tbody id="players-body"></tbody>
-  </table>
+  <div class="table-wrapper">
+    <table id="scorecard">
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th style="width:30px">HCP</th>
+          <th style="width:25px">T</th>
+          <script>for(let i=1; i<=18; i++) document.write(`<th style="width:35px">${i}</th>`);</script>
+          <th style="width:45px">Total</th>
+        </tr>
+        <tr id="par-row"><td colspan="3" style="text-align:right; font-weight:bold; background:#eee;">PAR</td></tr>
+        <tr id="si-row"><td colspan="3" style="text-align:right; font-weight:bold; background:#eee;">SI</td></tr>
+      </thead>
+      <tbody id="players-body"></tbody>
+    </table>
+  </div>
 
   <div class="team-container">
-    <table class="team-table">
-      <thead>
-        <tr class="team-header-row"><th colspan="4"><input type="text" id="team-a-name" class="team-name-input" value="Team A" readonly></th></tr>
-        <tr><th style="text-align:left; padding-left:10px;">Name</th><th width="40">R1</th><th width="40">R2</th><th width="50">Total</th></tr>
-      </thead>
-      <tbody id="team-a-body"></tbody>
-      <tfoot><tr class="team-total-row"><td style="text-align:left; padding-left:10px;">Team Total</td><td id="tA-r1">0</td><td id="tA-r2">0</td><td id="tA-grand">0</td></tr></tfoot>
+    <table class="team-table" id="team-a-display">
+        <thead><tr style="background:#1b5e20; color:white">
+            <th colspan="4"><input type="text" id="team-a-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:bold" value="Team A" readonly></th>
+        </tr><tr style="background:#f1f8e9"><th>Name</th><th>R1</th><th>R2</th><th>Tot</th></tr></thead>
+        <tbody id="team-a-body"></tbody>
+        <tr style="background:#e8f5e9; font-weight:bold"><td>Total</td><td id="tA-r1">0</td><td id="tA-r2">0</td><td id="tA-grand">0</td></tr>
     </table>
-
-    <table class="team-table">
-      <thead>
-        <tr class="team-header-row"><th colspan="4"><input type="text" id="team-b-name" class="team-name-input" value="Team B" readonly></th></tr>
-        <tr><th style="text-align:left; padding-left:10px;">Name</th><th width="40">R1</th><th width="40">R2</th><th width="50">Total</th></tr>
-      </thead>
-      <tbody id="team-b-body"></tbody>
-      <tfoot><tr class="team-total-row"><td style="text-align:left; padding-left:10px;">Team Total</td><td id="tB-r1">0</td><td id="tB-r2">0</td><td id="tB-grand">0</td></tr></tfoot>
+    <table class="team-table" id="team-b-display">
+        <thead><tr style="background:#1b5e20; color:white">
+            <th colspan="4"><input type="text" id="team-b-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:bold" value="Team B" readonly></th>
+        </tr><tr style="background:#f1f8e9"><th>Name</th><th>R1</th><th>R2</th><th>Tot</th></tr></thead>
+        <tbody id="team-b-body"></tbody>
+        <tr style="background:#e8f5e9; font-weight:bold"><td>Total</td><td id="tB-r1">0</td><td id="tB-r2">0</td><td id="tB-grand">0</td></tr>
     </table>
   </div>
-</div>
 
-<div id="mode-tag">Public Viewer Mode</div>
+  <div id="history-section">
+    <div class="history-title">TOURNAMENT HISTORY</div>
+    <div id="history-list"></div>
+  </div>
+</div>
 
 <script>
 let players = [];
+let history = [];
 let currentViewingRound = 1;
-const STORAGE_KEY = 'golf_compact_v4';
-const REMOTE_DATA_URL = 'data.json'; 
+const STORAGE_KEY = 'golf_compact_v5';
+const REMOTE_DATA_URL = 'data.json';
 
-window.onload = () => { 
-  checkAdmin();
+window.onload = () => {
   initializeHeader(); 
-  loadOfficialData(); 
+  checkAdmin();      
+  loadOfficialData();
 };
 
 function checkAdmin() {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('admin') === 'true') {
+  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
+  if (isAdmin) {
     document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'inline-block');
     document.querySelectorAll('input').forEach(el => el.readOnly = false);
-    document.getElementById('mode-tag').textContent = "Admin Mode Active";
+    document.getElementById('mode-tag').textContent = "ADMIN MODE";
   }
 }
 
 function initializeHeader() {
+  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
   const pRow = document.getElementById('par-row');
   const sRow = document.getElementById('si-row');
-  // Clear any existing dynamic cells before adding
-  const existingPs = pRow.querySelectorAll('td:not([colspan])');
-  const existingSs = sRow.querySelectorAll('td:not([colspan])');
-  existingPs.forEach(el => el.remove());
-  existingSs.forEach(el => el.remove());
+  
+  while(pRow.cells.length > 1) pRow.deleteCell(1);
+  while(sRow.cells.length > 1) sRow.deleteCell(1);
 
   for (let i = 1; i <= 18; i++) {
-    pRow.innerHTML += `<td><input type="number" class="par-input" value="4" readonly oninput="updateCalculations()"></td>`;
-    sRow.innerHTML += `<td><input type="number" class="si-input" value="${i}" readonly oninput="updateCalculations()"></td>`;
+    pRow.innerHTML += `<td><input type="number" class="par-input" value="4" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
+    sRow.innerHTML += `<td><input type="number" class="si-input" value="${i}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
   }
 }
 
@@ -158,10 +153,7 @@ async function loadOfficialData() {
     if (response.ok) {
       const state = await response.json();
       applyState(state);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } else {
-      loadLocal();
-    }
+    } else { loadLocal(); }
   } catch (e) { loadLocal(); }
 }
 
@@ -172,42 +164,33 @@ function loadLocal() {
 
 function applyState(state) {
   players = state.players || [];
+  history = state.history || [];
   document.getElementById('venue-name').value = state.venueName || '';
   document.getElementById('team-a-name').value = state.teamAName || 'Team A';
   document.getElementById('team-b-name').value = state.teamBName || 'Team B';
-  
-  if(state.pars) state.pars.forEach((v, i) => { 
-    if(document.querySelectorAll('.par-input')[i]) document.querySelectorAll('.par-input')[i].value = v; 
-  });
-  if(state.sis) state.sis.forEach((v, i) => { 
-    if(document.querySelectorAll('.si-input')[i]) document.querySelectorAll('.si-input')[i].value = v; 
-  });
+  if(state.pars) state.pars.forEach((v, i) => { if(document.querySelectorAll('.par-input')[i]) document.querySelectorAll('.par-input')[i].value = v; });
+  if(state.sis) state.sis.forEach((v, i) => { if(document.querySelectorAll('.si-input')[i]) document.querySelectorAll('.si-input')[i].value = v; });
   renderPlayers();
+  renderHistory();
 }
 
 function renderPlayers() {
   const tbody = document.getElementById('players-body');
   tbody.innerHTML = '';
+  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
+
   players.forEach((p, pIdx) => {
     const scores = currentViewingRound === 1 ? p.r1Scores : p.r2Scores;
-    const rdTotal = currentViewingRound === 1 ? p.r1Total : p.r2Total;
-    const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
-
     let trScore = `<tr>
-      <td class="action-col admin-only"><button onclick="deletePlayer(${pIdx})" style="background:red; padding:1px 5px; font-size:0.7rem;">x</button></td>
-      <td class="name-col"><input class="player-name-input" value="${p.name}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].name=this.value; saveState();"></td>
-      <td><input type="number" class="par-input" style="width:30px; background:white; border-color:#ccc;" value="${p.handicap}" ${isAdmin ? '' : 'readonly'} oninput="players[${pIdx}].handicap=this.value; updateCalculations();"></td>
-      <td class="team-col">${p.team}</td>`;
-    
-    for(let i=0; i<18; i++) {
-      trScore += `<td><input type="number" class="score-input" data-p="${pIdx}" data-h="${i}" value="${scores[i] || ''}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
-    }
+      <td style="text-align:left; padding-left:5px"><input class="player-name-input" value="${p.name}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].name=this.value; saveState();"></td>
+      <td><input type="number" class="score-input" value="${p.handicap}" ${isAdmin ? '' : 'readonly'} oninput="players[${pIdx}].handicap=this.value; updateCalculations();"></td>
+      <td style="font-weight:bold">${p.team}</td>`;
+    for(let i=0; i<18; i++) trScore += `<td><input type="number" class="score-input" data-p="${pIdx}" data-h="${i}" value="${scores[i] || ''}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
     trScore += `<td style="background:#eee;"></td></tr>`;
     
-    let trNet = `<tr class="net-pts-row"><td colspan="4" style="text-align:right; font-size:0.55rem; color:#777;">NET/PTS</td>`;
+    let trNet = `<tr class="net-pts-row"><td colspan="3" style="text-align:right; font-size:0.5rem; color:#777;">NET/PTS</td>`;
     for(let i=0; i<18; i++) trNet += `<td id="net-${pIdx}-${i}">-</td>`;
-    trNet += `<td id="p-total-${pIdx}" class="final-total-box">${rdTotal}</td></tr>`;
-    
+    trNet += `<td id="p-total-${pIdx}" class="final-total-box">0</td></tr>`;
     tbody.innerHTML += trScore + trNet;
   });
   updateCalculations();
@@ -218,28 +201,24 @@ function updateCalculations() {
     let rdTotal = 0;
     const hcap = parseInt(p.handicap) || 0;
     const inputs = document.querySelectorAll(`.score-input[data-p="${pIdx}"]`);
-    
     inputs.forEach((inp, hIdx) => {
       const score = parseInt(inp.value);
       const par = parseInt(document.querySelectorAll('.par-input')[hIdx].value) || 4;
       const si = parseInt(document.querySelectorAll('.si-input')[hIdx].value) || (hIdx + 1);
-      const netCell = document.getElementById(`net-${pIdx}-${hIdx}`);
-      
       if (currentViewingRound === 1) p.r1Scores[hIdx] = inp.value; else p.r2Scores[hIdx] = inp.value;
-
+      
+      const netCell = document.getElementById(`net-${pIdx}-${hIdx}`);
       if (!isNaN(score) && score > 0) {
         const strokes = Math.floor(hcap / 18) + (si <= (hcap % 18) ? 1 : 0);
         const net = score - strokes;
         const diff = net - par;
         let pts = (diff <= -2) ? 4 : (diff === -1) ? 3 : (diff === 0) ? 2 : (diff === 1) ? 1 : 0;
         rdTotal += pts;
-        if(netCell) netCell.innerHTML = `<span style="color:#444">${net}</span><br><span style="color:#2e7d32">${pts}</span>`;
-      } else if (netCell) { netCell.textContent = '-'; }
+        netCell.innerHTML = `<span class="net-label">${net}</span><span class="pts-label">${pts}</span>`;
+      } else { netCell.textContent = '-'; }
     });
-    
     if (currentViewingRound === 1) p.r1Total = rdTotal; else p.r2Total = rdTotal;
-    const totalCell = document.getElementById(`p-total-${pIdx}`);
-    if(totalCell) totalCell.textContent = rdTotal;
+    document.getElementById(`p-total-${pIdx}`).textContent = rdTotal;
   });
   updateTeamTables();
   saveState();
@@ -247,94 +226,85 @@ function updateCalculations() {
 
 function updateTeamTables() {
   const bodies = { A: document.getElementById('team-a-body'), B: document.getElementById('team-b-body') };
-  const teamTotals = { A: {r1:0, r2:0}, B: {r1:0, r2:0} };
+  const totals = { A: {r1:0, r2:0}, B: {r1:0, r2:0} };
   bodies.A.innerHTML = ''; bodies.B.innerHTML = '';
-
-  const sortedPlayers = [...players].sort((a, b) => (b.r1Total + b.r2Total) - (a.r1Total + a.r2Total));
-
-  sortedPlayers.forEach(p => {
-    const grand = p.r1Total + p.r2Total;
-    bodies[p.team].innerHTML += `<tr><td style="text-align:left; padding-left:10px;">${p.name}</td><td>${p.r1Total}</td><td>${p.r2Total}</td><td style="font-weight:bold">${grand}</td></tr>`;
-    teamTotals[p.team].r1 += p.r1Total;
-    teamTotals[p.team].r2 += p.r2Total;
+  players.forEach(p => {
+    bodies[p.team].innerHTML += `<tr><td>${p.name}</td><td>${p.r1Total}</td><td>${p.r2Total}</td><td style="font-weight:bold">${p.r1Total+p.r2Total}</td></tr>`;
+    totals[p.team].r1 += p.r1Total; totals[p.team].r2 += p.r2Total;
   });
-
   ['A', 'B'].forEach(t => {
-    document.getElementById(`t${t}-r1`).textContent = teamTotals[t].r1;
-    document.getElementById(`t${t}-r2`).textContent = teamTotals[t].r2;
-    document.getElementById(`t${t}-grand`).textContent = teamTotals[t].r1 + teamTotals[t].r2;
+    document.getElementById(`t${t}-r1`).textContent = totals[t].r1;
+    document.getElementById(`t${t}-r2`).textContent = totals[t].r2;
+    document.getElementById(`t${t}-grand`).textContent = totals[t].r1 + totals[t].r2;
   });
 }
 
-function toggleRound() {
-  currentViewingRound = currentViewingRound === 1 ? 2 : 1;
-  document.getElementById('round-display').textContent = `Viewing: Round ${currentViewingRound}`;
-  document.getElementById('next-rd-label').textContent = currentViewingRound === 1 ? 2 : 1;
-  renderPlayers();
+function recordToHistory() {
+  const venue = document.getElementById('venue-name').value || "Unknown Venue";
+  const date = new Date().toLocaleDateString();
+  const scoreA = document.getElementById('tA-grand').textContent;
+  const scoreB = document.getElementById('tB-grand').textContent;
+  const nameA = document.getElementById('team-a-name').value;
+  const nameB = document.getElementById('team-b-name').value;
+  history.unshift({ venue, date, scoreA, scoreB, nameA, nameB });
+  renderHistory();
+  saveState();
+  alert("Result recorded!");
+}
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  list.innerHTML = history.map(item => `
+    <div class="history-item">
+      <div style="color:#777; font-size:0.65rem;">${item.date}</div>
+      <div style="text-align:center">
+        <div style="font-size:0.6rem; color:#999">${item.venue}</div>
+        <div style="font-weight:bold">${item.nameA} ${item.scoreA} - ${item.scoreB} ${item.nameB}</div>
+      </div>
+      <div style="text-align:right; font-weight:bold; color:#2e7d32">
+        ${item.scoreA > item.scoreB ? item.nameA : item.scoreB > item.scoreA ? item.nameB : "Draw"}
+      </div>
+    </div>
+  `).join('');
 }
 
 function saveState() {
   if (new URLSearchParams(window.location.search).get('admin') !== 'true') return;
   const state = { 
-    players, 
-    venueName: document.getElementById('venue-name').value,
-    teamAName: document.getElementById('team-a-name').value, 
-    teamBName: document.getElementById('team-b-name').value, 
+    players, history, venueName: document.getElementById('venue-name').value,
+    teamAName: document.getElementById('team-a-name').value, teamBName: document.getElementById('team-b-name').value, 
     pars: Array.from(document.querySelectorAll('.par-input')).slice(0,18).map(i => i.value), 
     sis: Array.from(document.querySelectorAll('.si-input')).slice(0,18).map(i => i.value) 
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  const toast = document.getElementById('save-toast');
-  toast.style.opacity = '1'; setTimeout(() => toast.style.opacity = '0', 600);
+}
+
+function toggleRound() {
+  currentViewingRound = currentViewingRound === 1 ? 2 : 1;
+  document.getElementById('round-display').textContent = `Round ${currentViewingRound}`;
+  document.getElementById('next-rd-label').textContent = currentViewingRound === 1 ? 2 : 1;
+  renderPlayers();
 }
 
 function addPlayer() {
-  const name = prompt("Name:");
-  if (!name) return;
+  const name = prompt("Name:"); if (!name) return;
   const team = prompt("Team (A or B):", "A").toUpperCase();
   players.push({ name, handicap: 0, team: (team === 'B' ? 'B' : 'A'), r1Scores: Array(18).fill(''), r2Scores: Array(18).fill(''), r1Total: 0, r2Total: 0 });
   renderPlayers();
   saveState();
 }
 
-function deletePlayer(idx) { if(confirm("Delete?")) { players.splice(idx, 1); renderPlayers(); saveState(); } }
-
-function clearAllData() { if(confirm("Reset all tournament data?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
-
 function exportData() {
   const state = localStorage.getItem(STORAGE_KEY);
-  if(!state) return alert("No data to export");
   const blob = new Blob([state], {type: "application/json"});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `data.json`;
-  a.click();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `data.json`; a.click();
 }
 
-function importData() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  input.onchange = e => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = re => {
-      localStorage.setItem(STORAGE_KEY, re.target.result);
-      location.reload();
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
+function clearAllData() { if(confirm("Clear current scores? History remains.")) { players = []; renderPlayers(); saveState(); } }
 
 function saveAsImage() {
-  document.querySelectorAll('.action-col').forEach(el => el.classList.add('hide-for-capture'));
-  html2canvas(document.getElementById('capture-area'), { scale: 2, backgroundColor: '#f9f9f9' }).then(canvas => {
-    const link = document.createElement('a');
-    link.download = `Scorecard.png`;
-    link.href = canvas.toDataURL();
-    link.click();
-    document.querySelectorAll('.action-col').forEach(el => el.classList.remove('hide-for-capture'));
+  html2canvas(document.getElementById('capture-area'), { scale: 2 }).then(canvas => {
+    const link = document.createElement('a'); link.download = `Scores.png`; link.href = canvas.toDataURL(); link.click();
   });
 }
 </script>
