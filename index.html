@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tournament Stableford Scorecard</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 10px; background: #f9f9f9; }
+    h1 { color: #2e7d32; text-align: center; margin-bottom: 5px; font-size: 1.4rem; }
+    .venue-container { text-align: center; margin-bottom: 10px; }
+    .venue-input { border: none; border-bottom: 2px solid #2e7d32; background: transparent; font-size: 1.1rem; text-align: center; width: 300px; color: #333; font-weight: bold; }
+    .round-indicator { text-align: center; font-size: 1.1rem; font-weight: bold; color: #1565c0; margin-bottom: 10px; }
+    
+    #capture-area { padding: 5px; background: #f9f9f9; width: fit-content; margin: 0 auto; }
+    table { border-collapse: collapse; margin: 5px auto; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    th, td { border: 1px solid #ccc; padding: 4px 2px; text-align: center; }
+    th { background: #2e7d32; color: white; font-size: 0.8rem; }
+
+    .hole-col { width: 32px; min-width: 32px; }
+    .hcap-col { width: 35px; }
+    .team-col { width: 25px; font-weight: bold; font-size: 0.85rem; }
+    .name-col { min-width: 140px; text-align: left; padding-left: 8px; }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+
+    .par-input, .si-input, .score-input { 
+      width: 28px; border: 1px solid #aaa; text-align: center; font-size: 1rem; padding: 3px 0; border-radius: 2px;
+    }
+    .par-input, .si-input { background: #fff8e1; font-weight: bold; border-color: #777; }
+    
+    .net-pts-row { background: #f1f8e9; font-size: 0.65rem; font-weight: bold; line-height: 1.1; }
+    .player-name-input { font-weight: bold; width: 95%; border: none; background: transparent; font-size: 0.95rem; }
+    
+    .team-header-row th { background: #1b5e20; font-size: 1.1rem; padding: 6px; }
+    .team-name-input { background: transparent; color: white; border: 1px dashed rgba(255,255,255,0.3); text-align: center; font-weight: bold; width: 90%; }
+
+    #controls { text-align: center; margin-bottom: 10px; padding: 8px; background: #fff; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
+    button { padding: 6px 12px; font-size: 0.85rem; margin: 2px; cursor: pointer; border: none; border-radius: 4px; color: white; font-weight: bold; }
+    .add { background: #4caf50; }
+    .toggle-rd { background: #1565c0; }
+    .image-btn { background: #673ab7; }
+    .backup-btn { background: #607d8b; }
+    .clear-all { background: #d32f2f; }
+
+    .team-container { display: flex; justify-content: center; gap: 10px; flex-wrap: nowrap; margin-top: 15px; }
+    .team-table { width: 380px; font-size: 0.9rem; }
+    .team-total-row { background: #e8f5e9; font-weight: bold; }
+    .hide-for-capture { display: none !important; }
+    #save-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #2e7d32; color: white; padding: 6px 15px; border-radius: 20px; opacity: 0; transition: opacity 0.3s; z-index: 9999; font-size: 0.8rem; }
+    
+    .final-total-box { font-size: 1.1rem; color: #1b5e20; background: #c8e6c9 !important; border-left: 2px solid #2e7d32 !important; }
+  </style>
+</head>
+<body>
+
+<div id="controls">
+  <button class="add" onclick="addPlayer()">+ Player</button>
+  <button class="toggle-rd" onclick="toggleRound()">Rd <span id="next-rd-label">2</span> View</button>
+  <button class="image-btn" onclick="saveAsImage()">📸 Save Image</button>
+  <button class="backup-btn" onclick="exportData()">📤 Export JSON</button>
+  <button class="backup-btn" onclick="importData()">📥 Import JSON</button>
+  <button class="clear-all" onclick="clearAllData()">🗑️ Reset</button>
+</div>
+
+<div id="save-toast">✓ Progress Saved</div>
+
+<div id="capture-area">
+  <h1>Emerald Tour Stableford Hcap Tournament</h1>
+  <div class="venue-container">
+    <input type="text" id="venue-name" class="venue-input" placeholder="Enter Course/Venue Name..." oninput="saveState()">
+  </div>
+  <div id="round-display" class="round-indicator">Viewing: Round 1</div>
+
+  <table id="scorecard">
+    <thead>
+      <tr>
+        <th class="action-col">X</th>
+        <th class="name-col">Player</th>
+        <th class="hcap-col">HCP</th>
+        <th class="team-col">T</th>
+        <script>for(let i=1; i<=18; i++) document.write(`<th class="hole-col">${i}</th>`);</script>
+        <th style="width: 45px;">Total</th>
+      </tr>
+      <tr id="par-row"><td colspan="4" style="text-align:right; font-weight:bold; background:#eee; font-size:0.6rem;">PAR</td></tr>
+      <tr id="si-row"><td colspan="4" style="text-align:right; font-weight:bold; background:#eee; font-size:0.6rem;">SI</td></tr>
+    </thead>
+    <tbody id="players-body"></tbody>
+  </table>
+
+  <div class="team-container">
+    <table class="team-table">
+      <thead>
+        <tr class="team-header-row"><th colspan="4"><input type="text" id="team-a-name" class="team-name-input" value="Team A" oninput="saveState()"></th></tr>
+        <tr><th style="text-align:left; padding-left:10px;">Name</th><th width="40">R1</th><th width="40">R2</th><th width="50">Total</th></tr>
+      </thead>
+      <tbody id="team-a-body"></tbody>
+      <tfoot><tr class="team-total-row"><td style="text-align:left; padding-left:10px;">Team Total</td><td id="tA-r1">0</td><td id="tA-r2">0</td><td id="tA-grand">0</td></tr></tfoot>
+    </table>
+
+    <table class="team-table">
+      <thead>
+        <tr class="team-header-row"><th colspan="4"><input type="text" id="team-b-name" class="team-name-input" value="Team B" oninput="saveState()"></th></tr>
+        <tr><th style="text-align:left; padding-left:10px;">Name</th><th width="40">R1</th><th width="40">R2</th><th width="50">Total</th></tr>
+      </thead>
+      <tbody id="team-b-body"></tbody>
+      <tfoot><tr class="team-total-row"><td style="text-align:left; padding-left:10px;">Team Total</td><td id="tB-r1">0</td><td id="tB-r2">0</td><td id="tB-grand">0</td></tr></tfoot>
+    </table>
+  </div>
+</div>
+
+// ... (keep the existing CSS and HTML structure from the previous response) ...
+
+<script>
+let players = [];
+let currentViewingRound = 1;
+const STORAGE_KEY = 'golf_compact_v4';
+const REMOTE_DATA_URL = 'data.json'; // The file in your GitHub repo
+
+window.onload = () => { 
+  initializeHeader(); 
+  loadState(); 
+};
+
+// ... (keep initializeHeader, toggleRound, addPlayer, renderPlayers) ...
+
+async function loadState() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  
+  if (saved) {
+    applyState(JSON.parse(saved));
+  } else {
+    // If no local data, try to pull from the hosted data.json
+    try {
+      const response = await fetch(REMOTE_DATA_URL);
+      if (response.ok) {
+        const remoteData = await response.json();
+        applyState(remoteData);
+        console.log("Data pulled from GitHub backup.");
+      }
+    } catch (err) {
+      console.log("No remote data.json found or server error.");
+    }
+  }
+}
+
+function applyState(state) {
+  players = state.players || [];
+  document.getElementById('venue-name').value = state.venueName || '';
+  document.getElementById('team-a-name').value = state.teamAName || 'Team A';
+  document.getElementById('team-b-name').value = state.teamBName || 'Team B';
+  
+  if(state.pars) state.pars.forEach((v, i) => { 
+    if(document.querySelectorAll('.par-input')[i]) document.querySelectorAll('.par-input')[i].value = v; 
+  });
+  if(state.sis) state.sis.forEach((v, i) => { 
+    if(document.querySelectorAll('.si-input')[i]) document.querySelectorAll('.si-input')[i].value = v; 
+  });
+  
+  renderPlayers();
+}
+
+// Add this function to allow manual syncing from the GitHub file
+async function syncFromCloud() {
+  if(confirm("Discard current changes and pull data from data.json?")) {
+    try {
+      const response = await fetch(REMOTE_DATA_URL + '?nocache=' + new Date().getTime());
+      const remoteData = await response.json();
+      applyState(remoteData);
+      saveState(); // Save to local storage
+      alert("Synced successfully!");
+    } catch (err) {
+      alert("Could not find data.json on the server.");
+    }
+  }
+}
+
+// ... (keep exportData, importData, and other helper functions) ...
+</script>
+
+// Backup Functions
+function exportData() {
+  const data = localStorage.getItem(STORAGE_KEY);
+  if(!data) return alert("No data to export");
+  const blob = new Blob([data], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `golf-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = readerEvent => {
+      try {
+        const content = readerEvent.target.result;
+        JSON.parse(content); // Validate JSON
+        localStorage.setItem(STORAGE_KEY, content);
+        location.reload();
+      } catch (err) { alert("Invalid JSON file"); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function deletePlayer(idx) { if(confirm("Delete?")) { players.splice(idx, 1); renderPlayers(); saveState(); } }
+function clearAllData() { if(confirm("Reset all tournament data?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
+
+function saveAsImage() {
+  document.querySelectorAll('.action-col').forEach(el => el.classList.add('hide-for-capture'));
+  html2canvas(document.getElementById('capture-area'), { scale: 2, backgroundColor: '#f9f9f9' }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `Tournament-Final-Score.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+    document.querySelectorAll('.action-col').forEach(el => el.classList.remove('hide-for-capture'));
+  });
+}
+</script>
+</body>
+</html>
