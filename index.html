@@ -170,7 +170,10 @@ let players = [];
 let currentViewingRound = 1;
 const STORAGE_KEY = 'golf_elite_v25';
 
-window.onload = () => { checkAdmin(); loadLocal(); };
+window.onload = () => { 
+  checkAdmin(); 
+  loadOfficialData(); 
+};
 
 function checkAdmin() {
   const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
