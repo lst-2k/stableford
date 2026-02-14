@@ -9,6 +9,8 @@
     :root {
       --emerald-primary: #2e7d32;
       --emerald-dark: #1b5e20;
+      --round2-blue: #1565c0;
+      --round2-dark: #0d47a1;
       --glass-bg: rgba(255, 255, 255, 0.9);
       --glass-border: rgba(255, 255, 255, 0.3);
       --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
@@ -17,12 +19,33 @@
     html, body { width: 100%; margin: 0; padding: 0; background: #e8ecef; background-image: linear-gradient(135deg, #e8ecef 0%, #c8e6c9 100%); background-attachment: fixed; }
     body { font-family: 'Inter', -apple-system, sans-serif; padding: 10px; box-sizing: border-box; }
     
-    h1 { color: var(--emerald-dark); text-align: center; margin: 10px 0; font-size: 1.4rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-    #mode-tag { font-size: 0.7rem; color: #555; text-align: center; margin-bottom: 10px; font-weight: 600; letter-spacing: 2px; }
+    /* Branding Improvements */
+    #mode-tag { 
+      font-size: 0.9rem; 
+      color: var(--emerald-dark); 
+      text-align: center; 
+      margin-top: 10px; 
+      font-weight: 900; 
+      letter-spacing: 4px; 
+      text-transform: uppercase;
+    }
+    
+    h1 { color: #333; text-align: center; margin: 5px 0; font-size: 1.2rem; font-weight: 400; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+
+    .venue-input { 
+      border: none; 
+      background: transparent; 
+      font-weight: 900; 
+      text-align: center; 
+      color: #000; 
+      width: 100%; 
+      font-size: 2.2rem; /* Larger Font */
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
 
     #capture-area { padding: 15px 10px; border-radius: 16px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid var(--glass-border); }
 
-    /* Scrollable wrapper for both orientations */
     .table-wrapper { 
       width: 100%; overflow-x: auto; border-radius: 12px; box-shadow: var(--shadow-soft); 
       margin-bottom: 20px; background: var(--glass-bg); border: 1px solid var(--glass-border);
@@ -31,24 +54,23 @@
     
     table { border-collapse: separate; border-spacing: 0; }
     th, td { text-align: center; vertical-align: middle; white-space: nowrap; }
-    th { background: linear-gradient(180deg, var(--emerald-primary), var(--emerald-dark)); color: white; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; padding: 12px 4px; }
+    
+    /* Dynamic Round Colors */
+    .round-1-theme th { background: linear-gradient(180deg, var(--emerald-primary), var(--emerald-dark)); }
+    .round-2-theme th { background: linear-gradient(180deg, var(--round2-blue), var(--round2-dark)); }
+    
+    th { color: white; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; padding: 12px 4px; transition: background 0.3s ease; }
     td { border-bottom: 1px solid rgba(0,0,0,0.05); border-right: 1px solid rgba(0,0,0,0.05); }
 
-    /* Column Widths - Set explicitly to prevent overlapping */
     .col-name { width: 160px; min-width: 160px; }
     .col-hcp, .col-team { width: 45px; min-width: 45px; }
     .col-hole { width: 44px; min-width: 44px; }
     .col-total { width: 65px; min-width: 65px; }
 
-    @media screen and (orientation: portrait) {
-      table { width: 1050px; }
-    }
-
-    @media screen and (orientation: landscape) {
-      /* In landscape, we still allow a bit of scroll to keep the circles perfect */
-      table { width: 1100px; } 
-      th, td { font-size: 0.8rem; padding: 6px 0; }
-      .score-input, .par-input, .si-input { width: 28px !important; height: 28px !important; }
+    @media screen and (orientation: portrait) { table { width: 1050px; } }
+    @media screen and (orientation: landscape) { 
+        table { width: 1100px; } 
+        th, td { font-size: 0.8rem; padding: 6px 0; }
     }
 
     input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -56,27 +78,30 @@
 
     .score-input, .par-input, .si-input { 
       width: 34px; height: 34px; border: 1px solid #ddd; text-align: center; border-radius: 4px; 
-      font-weight: 700; transition: all 0.2s; background: white; font-size: 0.95rem; margin: 0 auto; display: block;
+      font-weight: 700; background: white; font-size: 0.95rem; margin: 0 auto; display: block;
     }
     
     .player-name-input { font-weight: 800; border: none; background: transparent; color: #333; font-size: 0.9rem; padding-left: 5px; width: 100%; }
     
-    /* STYLE LOGIC FOR GROSS SCORE */
     .eagle { background: #ffd700 !important; color: #000 !important; border-radius: 50%; border: 1px solid #b8860b !important; }
     .birdie { background: #d32f2f !important; color: white !important; border-radius: 50%; border: none !important; }
     .par-gross { background: #2e7d32 !important; color: white !important; border-radius: 50%; border: none !important; }
     .bogey-plus { background: #333 !important; color: white !important; border-radius: 0% !important; border: none !important; }
     .blob-state { opacity: 0.35; }
 
-    .final-total-box { font-size: 1.1rem; font-weight: 900; color: white !important; background: var(--emerald-dark) !important; }
+    .final-total-box { font-size: 1.1rem; font-weight: 900; color: white !important; text-align: center; transition: background 0.3s; }
+    .round-1-theme .final-total-box { background: var(--emerald-dark) !important; }
+    .round-2-theme .final-total-box { background: var(--round2-dark) !important; }
 
     #controls { text-align: center; margin-bottom: 15px; }
     button { padding: 10px 16px; font-size: 0.8rem; margin: 4px; cursor: pointer; border: none; border-radius: 8px; color: white; font-weight: 700; text-transform: uppercase; }
-    .toggle-rd { background: linear-gradient(135deg, #1e88e5, #1565c0); }
+    .toggle-rd { background: #333; }
     .image-btn { background: linear-gradient(135deg, #8e44ad, #673ab7); }
-    .admin-only { display: none; background: linear-gradient(135deg, #43a047, #2e7d32); }
+    .admin-only { display: none; background: #444; }
 
-    .pts-label { color: var(--emerald-primary); font-weight: 800; font-size: 0.9rem; display: block; }
+    .pts-label { font-weight: 800; font-size: 0.9rem; display: block; }
+    .round-1-theme .pts-label { color: var(--emerald-primary); }
+    .round-2-theme .pts-label { color: var(--round2-blue); }
     .net-label { font-size: 0.6rem; color: #888; display: block; }
 
     .team-table { width: 100%; border-radius: 12px; overflow: hidden; background: var(--glass-bg); box-shadow: var(--shadow-soft); font-size: 0.9rem; border-collapse: collapse; margin-top: 10px;}
@@ -88,7 +113,7 @@
 <body>
 
 <div id="controls">
-  <button class="toggle-rd" onclick="toggleRound()">Round <span id="next-rd-label">2</span></button>
+  <button class="toggle-rd" onclick="toggleRound()">Switch to Round <span id="next-rd-label">2</span></button>
   <button class="image-btn" onclick="saveAsImage()">📸 Export Image</button>
   <button class="admin-only" onclick="addPlayer()">+ Add Player</button>
   <button class="admin-only" onclick="exportData()">📤 Export JSON</button>
@@ -96,18 +121,17 @@
 
 <div id="capture-area">
   <div id="mode-tag">NEW EMERALD TOUR</div>
-  <h1>Team Stableford</h1>
-  
-  <div class="venue-container" style="text-align:center; margin-bottom:10px;">
-    <input type="text" id="venue-name" class="venue-input" placeholder="ENTER VENUE NAME" style="border:none; border-bottom:2px solid var(--emerald-primary); background:transparent; font-weight:900; text-align:center; color:var(--emerald-dark); width:240px;" oninput="saveState()" readonly>
+  <div class="venue-container" style="text-align:center;">
+    <input type="text" id="venue-name" class="venue-input" placeholder="VENUE NAME" oninput="saveState()" readonly>
   </div>
+  <h1>Team Stableford Scorecard</h1>
   
   <div style="text-align: center;">
-    <div id="round-display" class="round-indicator" style="background: var(--emerald-dark); color: white; display: inline-block; padding: 4px 20px; border-radius: 30px; font-weight: 800; margin-bottom: 15px;">ROUND 1</div>
+    <div id="round-display" class="round-indicator" style="background: var(--emerald-dark); color: white; display: inline-block; padding: 6px 25px; border-radius: 30px; font-weight: 900; margin-bottom: 15px; letter-spacing: 1px; transition: all 0.3s;">ROUND 1</div>
   </div>
 
   <div class="table-wrapper">
-    <table id="scorecard">
+    <table id="scorecard" class="round-1-theme">
       <thead>
         <tr>
           <th class="col-name" style="text-align:left; padding-left:15px">Player</th>
@@ -125,14 +149,14 @@
 
   <div class="team-container">
     <table class="team-table" id="team-a-display">
-        <thead><tr style="background: var(--emerald-dark); color:white"><th colspan="4"><input type="text" id="team-a-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase" value="Team A" readonly></th></tr>
+        <thead><tr style="background: var(--emerald-dark); color:white; transition: background 0.3s;" id="team-a-head"><th colspan="4"><input type="text" id="team-a-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase" value="Team A" readonly></th></tr>
         <tr style="background:#f1f8e9; font-size: 0.7rem; color: #555;"><th>NAME</th><th>R1</th><th>R2</th><th>TOT</th></tr></thead>
         <tbody id="team-a-body"></tbody>
         <tr style="background: #eee; font-weight:900"><td>TEAM TOTAL</td><td id="tA-r1">0</td><td id="tA-r2">0</td><td id="tA-grand" style="color: var(--emerald-dark)">0</td></tr>
     </table>
     <br>
     <table class="team-table" id="team-b-display">
-        <thead><tr style="background: var(--emerald-dark); color:white"><th colspan="4"><input type="text" id="team-b-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase" value="Team B" readonly></th></tr>
+        <thead><tr style="background: var(--emerald-dark); color:white; transition: background 0.3s;" id="team-b-head"><th colspan="4"><input type="text" id="team-b-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase" value="Team B" readonly></th></tr>
         <tr style="background:#f1f8e9; font-size: 0.7rem; color: #555;"><th>NAME</th><th>R1</th><th>R2</th><th>TOT</th></tr></thead>
         <tbody id="team-b-body"></tbody>
         <tr style="background: #eee; font-weight:900"><td>TEAM TOTAL</td><td id="tB-r1">0</td><td id="tB-r2">0</td><td id="tB-grand" style="color: var(--emerald-dark)">0</td></tr>
@@ -141,10 +165,9 @@
 </div>
 
 <script>
-// ... [Remaining Javascript from v21 remains identical] ...
 let players = [];
 let currentViewingRound = 1;
-const STORAGE_KEY = 'golf_elite_v22';
+const STORAGE_KEY = 'golf_elite_v23';
 const REMOTE_DATA_URL = 'data.json';
 
 window.onload = () => { initializeHeader(); checkAdmin(); loadOfficialData(); };
@@ -154,7 +177,7 @@ function checkAdmin() {
   if (isAdmin) {
     document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'inline-block');
     document.querySelectorAll('input').forEach(el => el.readOnly = false);
-    document.getElementById('mode-tag').textContent = "ADMINISTRATOR OVERRIDE";
+    document.getElementById('mode-tag').textContent = "TOUR ADMINISTRATOR";
   }
 }
 
@@ -275,8 +298,27 @@ function saveState() {
 
 function toggleRound() {
   currentViewingRound = currentViewingRound === 1 ? 2 : 1;
-  document.getElementById('round-display').textContent = `ROUND ${currentViewingRound}`;
-  document.getElementById('next-rd-label').textContent = currentViewingRound === 1 ? 2 : 1;
+  const card = document.getElementById('scorecard');
+  const indicator = document.getElementById('round-display');
+  const btnLabel = document.getElementById('next-rd-label');
+  const teamA = document.getElementById('team-a-head');
+  const teamB = document.getElementById('team-b-head');
+
+  if (currentViewingRound === 1) {
+    card.className = 'round-1-theme';
+    indicator.style.background = 'var(--emerald-dark)';
+    indicator.textContent = 'ROUND 1';
+    btnLabel.textContent = '2';
+    teamA.style.background = 'var(--emerald-dark)';
+    teamB.style.background = 'var(--emerald-dark)';
+  } else {
+    card.className = 'round-2-theme';
+    indicator.style.background = 'var(--round2-blue)';
+    indicator.textContent = 'ROUND 2';
+    btnLabel.textContent = '1';
+    teamA.style.background = 'var(--round2-blue)';
+    teamB.style.background = 'var(--round2-blue)';
+  }
   renderPlayers();
 }
 
@@ -291,12 +333,12 @@ function addPlayer() {
 function exportData() {
   const state = localStorage.getItem(STORAGE_KEY);
   const blob = new Blob([state], {type: "application/json"});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `elite_data.json`; a.click();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `emerald_tour_export.json`; a.click();
 }
 
 function saveAsImage() {
   html2canvas(document.getElementById('capture-area'), { scale: 2, backgroundColor: '#e8ecef' }).then(canvas => {
-    const link = document.createElement('a'); link.download = `Tour_Scorecard.png`; link.href = canvas.toDataURL(); link.click();
+    const link = document.createElement('a'); link.download = `New_Emerald_Tour_Scorecard.png`; link.href = canvas.toDataURL(); link.click();
   });
 }
 </script>
