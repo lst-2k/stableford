@@ -180,18 +180,38 @@ function checkAdmin() {
   }
 }
 
-function loadLocal() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    const state = JSON.parse(saved);
-    players = state.players || [];
-    document.getElementById('venue-name').value = state.venueName || '';
-    document.getElementById('team-a-name').value = state.teamAName || 'Team A';
-    document.getElementById('team-b-name').value = state.teamBName || 'Team B';
-    if(state.pars) state.pars.forEach((v, i) => { if(document.querySelectorAll('.par-input')[i]) document.querySelectorAll('.par-input')[i].value = v; });
-    if(state.sis) state.sis.forEach((v, i) => { if(document.querySelectorAll('.si-input')[i]) document.querySelectorAll('.si-input')[i].value = v; });
+async function loadOfficialData() {
+  try {
+    // This looks for your data.json file on GitHub
+    const response = await fetch('data.json?t=' + Date.now());
+    if (response.ok) {
+      const state = await response.json();
+      console.log("GitHub Data Found:", state);
+      applyState(state);
+    } else {
+      console.log("No data.json found on server, loading local storage.");
+      loadLocal();
+    }
+  } catch (e) {
+    console.error("Fetch error:", e);
+    loadLocal();
   }
-  renderPlayers();
+}
+
+function applyState(state) {
+  if (!state) return;
+  players = state.players || [];
+  document.getElementById('venue-name').value = state.venueName || '';
+  document.getElementById('team-a-name').value = state.teamAName || 'Team A';
+  document.getElementById('team-b-name').value = state.teamBName || 'Team B';
+  
+  // Sync Pars and SIs from the JSON
+  const parInputs = document.querySelectorAll('.par-input');
+  const siInputs = document.querySelectorAll('.si-input');
+  if (state.pars) state.pars.forEach((v, i) => { if(parInputs[i]) parInputs[i].value = v; });
+  if (state.sis) state.sis.forEach((v, i) => { if(siInputs[i]) siInputs[i].value = v; });
+
+  renderPlayers(); 
 }
 
 function renderPlayers() {
