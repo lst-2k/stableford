@@ -22,54 +22,53 @@
 
     #capture-area { padding: 15px 10px; border-radius: 16px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid var(--glass-border); }
 
+    /* Scrollable wrapper for both orientations */
     .table-wrapper { 
       width: 100%; overflow-x: auto; border-radius: 12px; box-shadow: var(--shadow-soft); 
       margin-bottom: 20px; background: var(--glass-bg); border: 1px solid var(--glass-border);
+      -webkit-overflow-scrolling: touch;
     }
     
-    table { border-collapse: separate; border-spacing: 0; width: 100%; }
-    th, td { text-align: center; vertical-align: middle; }
+    table { border-collapse: separate; border-spacing: 0; }
+    th, td { text-align: center; vertical-align: middle; white-space: nowrap; }
     th { background: linear-gradient(180deg, var(--emerald-primary), var(--emerald-dark)); color: white; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; padding: 12px 4px; }
     td { border-bottom: 1px solid rgba(0,0,0,0.05); border-right: 1px solid rgba(0,0,0,0.05); }
 
+    /* Column Widths - Set explicitly to prevent overlapping */
+    .col-name { width: 160px; min-width: 160px; }
+    .col-hcp, .col-team { width: 45px; min-width: 45px; }
+    .col-hole { width: 44px; min-width: 44px; }
+    .col-total { width: 65px; min-width: 65px; }
+
     @media screen and (orientation: portrait) {
-      table { width: 1050px; table-layout: fixed; }
-      .col-name { width: 160px; }
-      .col-hcp, .col-team { width: 40px; }
-      .col-hole { width: 42px; }
-      .col-total { width: 60px; }
-      .player-name-input { width: 150px !important; text-align: left; }
+      table { width: 1050px; }
     }
 
     @media screen and (orientation: landscape) {
-      .table-wrapper { overflow-x: hidden; } 
-      table { width: 100%; table-layout: fixed; }
-      th, td { font-size: 0.75rem; padding: 4px 0; }
-      .col-name { width: 120px; }
-      .col-hcp, .col-team { width: 30px; }
-      .col-total { width: 45px; }
-      .player-name-input { width: 110px !important; text-align: left; }
-      .score-input, .par-input, .si-input { width: 24px !important; height: 24px !important; font-size: 0.8rem !important; }
+      /* In landscape, we still allow a bit of scroll to keep the circles perfect */
+      table { width: 1100px; } 
+      th, td { font-size: 0.8rem; padding: 6px 0; }
+      .score-input, .par-input, .si-input { width: 28px !important; height: 28px !important; }
     }
 
     input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; appearance: textfield; touch-action: manipulation; }
 
     .score-input, .par-input, .si-input { 
-      width: 32px; height: 32px; border: 1px solid #ddd; text-align: center; border-radius: 4px; 
+      width: 34px; height: 34px; border: 1px solid #ddd; text-align: center; border-radius: 4px; 
       font-weight: 700; transition: all 0.2s; background: white; font-size: 0.95rem; margin: 0 auto; display: block;
     }
     
-    .player-name-input { font-weight: 800; border: none; background: transparent; color: #333; font-size: 0.9rem; padding-left: 5px; }
+    .player-name-input { font-weight: 800; border: none; background: transparent; color: #333; font-size: 0.9rem; padding-left: 5px; width: 100%; }
     
     /* STYLE LOGIC FOR GROSS SCORE */
     .eagle { background: #ffd700 !important; color: #000 !important; border-radius: 50%; border: 1px solid #b8860b !important; }
     .birdie { background: #d32f2f !important; color: white !important; border-radius: 50%; border: none !important; }
     .par-gross { background: #2e7d32 !important; color: white !important; border-radius: 50%; border: none !important; }
     .bogey-plus { background: #333 !important; color: white !important; border-radius: 0% !important; border: none !important; }
-    .blob-state { opacity: 0.35; } /* Stableford blob (0 pts) visual aid */
+    .blob-state { opacity: 0.35; }
 
-    .final-total-box { font-size: 1.1rem; font-weight: 900; color: white !important; background: var(--emerald-dark) !important; text-align: center; }
+    .final-total-box { font-size: 1.1rem; font-weight: 900; color: white !important; background: var(--emerald-dark) !important; }
 
     #controls { text-align: center; margin-bottom: 15px; }
     button { padding: 10px 16px; font-size: 0.8rem; margin: 4px; cursor: pointer; border: none; border-radius: 8px; color: white; font-weight: 700; text-transform: uppercase; }
@@ -142,9 +141,10 @@
 </div>
 
 <script>
+// ... [Remaining Javascript from v21 remains identical] ...
 let players = [];
 let currentViewingRound = 1;
-const STORAGE_KEY = 'golf_elite_v21';
+const STORAGE_KEY = 'golf_elite_v22';
 const REMOTE_DATA_URL = 'data.json';
 
 window.onload = () => { initializeHeader(); checkAdmin(); loadOfficialData(); };
@@ -226,14 +226,12 @@ function updateCalculations() {
       
       const netCell = document.getElementById(`net-${pIdx}-${hIdx}`);
       if (!isNaN(grossScore) && grossScore > 0) {
-        // COLOR LOGIC (GROSS vs PAR)
         const grossDiff = grossScore - parValue;
         if (grossDiff <= -2) inp.classList.add('eagle');
         else if (grossDiff === -1) inp.classList.add('birdie');
         else if (grossDiff === 0) inp.classList.add('par-gross');
         else if (grossDiff >= 1) inp.classList.add('bogey-plus');
         
-        // STABLEFORD LOGIC (NET vs PAR)
         const strokes = Math.floor(hcap / 18) + (siValue <= (hcap % 18) ? 1 : 0);
         const netScore = grossScore - strokes;
         const netDiff = netScore - parValue;
