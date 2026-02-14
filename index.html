@@ -19,29 +19,13 @@
     html, body { width: 100%; margin: 0; padding: 0; background: #e8ecef; background-image: linear-gradient(135deg, #e8ecef 0%, #c8e6c9 100%); background-attachment: fixed; }
     body { font-family: 'Inter', -apple-system, sans-serif; padding: 10px; box-sizing: border-box; }
     
-    /* Branding Improvements */
-    #mode-tag { 
-      font-size: 0.9rem; 
-      color: var(--emerald-dark); 
-      text-align: center; 
-      margin-top: 10px; 
-      font-weight: 900; 
-      letter-spacing: 4px; 
-      text-transform: uppercase;
-    }
-    
-    h1 { color: #333; text-align: center; margin: 5px 0; font-size: 1.2rem; font-weight: 400; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
-
+    /* REFINED HEADER SECTION */
+    .header-block { text-align: center; margin-bottom: 20px; }
+    .brand-main { font-size: 1.2rem; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; color: var(--emerald-dark); margin: 0; }
+    .sub-brand { font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: #555; margin: 4px 0; }
     .venue-input { 
-      border: none; 
-      background: transparent; 
-      font-weight: 900; 
-      text-align: center; 
-      color: #000; 
-      width: 100%; 
-      font-size: 2.2rem; /* Larger Font */
-      text-transform: uppercase;
-      margin-bottom: 15px;
+      border: none; background: transparent; font-weight: 800; text-align: center; 
+      color: #000; width: 80%; font-size: 1.4rem; text-transform: uppercase; margin-top: 5px;
     }
 
     #capture-area { padding: 15px 10px; border-radius: 16px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid var(--glass-border); }
@@ -59,7 +43,7 @@
     .round-1-theme th { background: linear-gradient(180deg, var(--emerald-primary), var(--emerald-dark)); }
     .round-2-theme th { background: linear-gradient(180deg, var(--round2-blue), var(--round2-dark)); }
     
-    th { color: white; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; padding: 12px 4px; transition: background 0.3s ease; }
+    th { color: white; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; padding: 12px 4px; }
     td { border-bottom: 1px solid rgba(0,0,0,0.05); border-right: 1px solid rgba(0,0,0,0.05); }
 
     .col-name { width: 160px; min-width: 160px; }
@@ -67,14 +51,7 @@
     .col-hole { width: 44px; min-width: 44px; }
     .col-total { width: 65px; min-width: 65px; }
 
-    @media screen and (orientation: portrait) { table { width: 1050px; } }
-    @media screen and (orientation: landscape) { 
-        table { width: 1100px; } 
-        th, td { font-size: 0.8rem; padding: 6px 0; }
-    }
-
-    input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    input[type=number] { -moz-appearance: textfield; appearance: textfield; touch-action: manipulation; }
+    @media screen and (orientation: landscape) { table { width: 1100px; } }
 
     .score-input, .par-input, .si-input { 
       width: 34px; height: 34px; border: 1px solid #ddd; text-align: center; border-radius: 4px; 
@@ -83,31 +60,35 @@
     
     .player-name-input { font-weight: 800; border: none; background: transparent; color: #333; font-size: 0.9rem; padding-left: 5px; width: 100%; }
     
+    /* SHAPES */
     .eagle { background: #ffd700 !important; color: #000 !important; border-radius: 50%; border: 1px solid #b8860b !important; }
-    .birdie { background: #d32f2f !important; color: white !important; border-radius: 50%; border: none !important; }
-    .par-gross { background: #2e7d32 !important; color: white !important; border-radius: 50%; border: none !important; }
-    .bogey-plus { background: #333 !important; color: white !important; border-radius: 0% !important; border: none !important; }
+    .birdie { background: #d32f2f !important; color: white !important; border-radius: 50%; }
+    .par-gross { background: #2e7d32 !important; color: white !important; border-radius: 50%; }
+    .bogey-plus { background: #333 !important; color: white !important; border-radius: 0%; }
     .blob-state { opacity: 0.35; }
 
-    .final-total-box { font-size: 1.1rem; font-weight: 900; color: white !important; text-align: center; transition: background 0.3s; }
+    .final-total-box { font-size: 1.1rem; font-weight: 900; color: white !important; }
     .round-1-theme .final-total-box { background: var(--emerald-dark) !important; }
     .round-2-theme .final-total-box { background: var(--round2-dark) !important; }
 
+    /* TEAM TABLE IMPROVEMENTS */
+    .team-table { width: 100%; border-radius: 12px; overflow: hidden; background: white; box-shadow: var(--shadow-soft); font-size: 0.85rem; border-collapse: collapse; margin-top: 10px;}
+    .team-table thead th { padding: 10px; color: white; font-weight: 900; letter-spacing: 1px; }
+    .team-header-row { background: #444; color: #fff !important; font-size: 0.7rem; }
+    .team-header-row th { background: #444 !important; padding: 5px !important; }
+    .team-table td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #eee; }
+    .team-player-name { text-align: left !important; padding-left: 15px !important; color: #333; }
+    .team-total-row { background: #f8f9fa; font-weight: 900; font-size: 0.9rem; }
+
     #controls { text-align: center; margin-bottom: 15px; }
     button { padding: 10px 16px; font-size: 0.8rem; margin: 4px; cursor: pointer; border: none; border-radius: 8px; color: white; font-weight: 700; text-transform: uppercase; }
-    .toggle-rd { background: #333; }
-    .image-btn { background: linear-gradient(135deg, #8e44ad, #673ab7); }
-    .admin-only { display: none; background: #444; }
+    .toggle-rd { background: #222; }
+    .image-btn { background: #8e44ad; }
+    .admin-only { display: none; background: #666; }
 
     .pts-label { font-weight: 800; font-size: 0.9rem; display: block; }
     .round-1-theme .pts-label { color: var(--emerald-primary); }
     .round-2-theme .pts-label { color: var(--round2-blue); }
-    .net-label { font-size: 0.6rem; color: #888; display: block; }
-
-    .team-table { width: 100%; border-radius: 12px; overflow: hidden; background: var(--glass-bg); box-shadow: var(--shadow-soft); font-size: 0.9rem; border-collapse: collapse; margin-top: 10px;}
-    .team-table th { padding: 12px; }
-    .team-table td { padding: 10px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
-    .team-player-name { text-align: left !important; padding-left: 15px !important; }
   </style>
 </head>
 <body>
@@ -120,14 +101,14 @@
 </div>
 
 <div id="capture-area">
-  <div id="mode-tag">NEW EMERALD TOUR</div>
-  <div class="venue-container" style="text-align:center;">
-    <input type="text" id="venue-name" class="venue-input" placeholder="VENUE NAME" oninput="saveState()" readonly>
+  <div class="header-block">
+    <div class="brand-main">NEW EMERALD TOUR</div>
+    <div class="sub-brand">Team Stableford Competition</div>
+    <input type="text" id="venue-name" class="venue-input" placeholder="Enter Venue Name" oninput="saveState()" readonly>
   </div>
-  <h1>Team Stableford Scorecard</h1>
   
   <div style="text-align: center;">
-    <div id="round-display" class="round-indicator" style="background: var(--emerald-dark); color: white; display: inline-block; padding: 6px 25px; border-radius: 30px; font-weight: 900; margin-bottom: 15px; letter-spacing: 1px; transition: all 0.3s;">ROUND 1</div>
+    <div id="round-display" style="background: var(--emerald-dark); color: white; display: inline-block; padding: 6px 25px; border-radius: 30px; font-weight: 900; margin-bottom: 15px; letter-spacing: 1px; transition: 0.3s;">ROUND 1</div>
   </div>
 
   <div class="table-wrapper">
@@ -140,77 +121,61 @@
           <script>for(let i=1; i<=18; i++) document.write(`<th class="col-hole">${i}</th>`);</script>
           <th class="col-total">TOT</th>
         </tr>
-        <tr id="par-row" style="background: #fafafa;"><td colspan="3" style="text-align:right; font-weight:800; color: #777; font-size: 0.6rem; padding-right: 10px;">PAR</td></tr>
-        <tr id="si-row" style="background: #fafafa;"><td colspan="3" style="text-align:right; font-weight:800; color: #777; font-size: 0.6rem; padding-right: 10px;">S.I.</td></tr>
+        <tr style="background: #fafafa;"><td colspan="3" style="text-align:right; font-weight:800; color: #999; font-size: 0.55rem; padding-right: 10px;">PAR</td><script>for(let i=0; i<18; i++) document.write(`<td><input type="number" class="par-input" value="4" oninput="updateCalculations()"></td>`);</script><td>-</td></tr>
+        <tr style="background: #fafafa;"><td colspan="3" style="text-align:right; font-weight:800; color: #999; font-size: 0.55rem; padding-right: 10px;">S.I.</td><script>for(let i=0; i<18; i++) document.write(`<td><input type="number" class="si-input" value="${i+1}" oninput="updateCalculations()"></td>`);</script><td>-</td></tr>
       </thead>
       <tbody id="players-body"></tbody>
     </table>
   </div>
 
   <div class="team-container">
-    <table class="team-table" id="team-a-display">
-        <thead><tr style="background: var(--emerald-dark); color:white; transition: background 0.3s;" id="team-a-head"><th colspan="4"><input type="text" id="team-a-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase" value="Team A" readonly></th></tr>
-        <tr style="background:#f1f8e9; font-size: 0.7rem; color: #555;"><th>NAME</th><th>R1</th><th>R2</th><th>TOT</th></tr></thead>
+    <table class="team-table">
+        <thead>
+            <tr id="team-a-head" style="background: var(--emerald-dark);"><th colspan="4"><input type="text" id="team-a-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase" value="Team A" readonly></th></tr>
+            <tr class="team-header-row"><th>PLAYER NAME</th><th>RD 1</th><th>RD 2</th><th>TOTAL</th></tr>
+        </thead>
         <tbody id="team-a-body"></tbody>
-        <tr style="background: #eee; font-weight:900"><td>TEAM TOTAL</td><td id="tA-r1">0</td><td id="tA-r2">0</td><td id="tA-grand" style="color: var(--emerald-dark)">0</td></tr>
+        <tr class="team-total-row"><td>TEAM TOTAL</td><td id="tA-r1">0</td><td id="tA-r2">0</td><td id="tA-grand" style="color: var(--emerald-dark)">0</td></tr>
     </table>
     <br>
-    <table class="team-table" id="team-b-display">
-        <thead><tr style="background: var(--emerald-dark); color:white; transition: background 0.3s;" id="team-b-head"><th colspan="4"><input type="text" id="team-b-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase" value="Team B" readonly></th></tr>
-        <tr style="background:#f1f8e9; font-size: 0.7rem; color: #555;"><th>NAME</th><th>R1</th><th>R2</th><th>TOT</th></tr></thead>
+    <table class="team-table">
+        <thead>
+            <tr id="team-b-head" style="background: var(--emerald-dark);"><th colspan="4"><input type="text" id="team-b-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase" value="Team B" readonly></th></tr>
+            <tr class="team-header-row"><th>PLAYER NAME</th><th>RD 1</th><th>RD 2</th><th>TOTAL</th></tr>
+        </thead>
         <tbody id="team-b-body"></tbody>
-        <tr style="background: #eee; font-weight:900"><td>TEAM TOTAL</td><td id="tB-r1">0</td><td id="tB-r2">0</td><td id="tB-grand" style="color: var(--emerald-dark)">0</td></tr>
+        <tr class="team-total-row"><td>TEAM TOTAL</td><td id="tB-r1">0</td><td id="tB-r2">0</td><td id="tB-grand" style="color: var(--emerald-dark)">0</td></tr>
     </table>
   </div>
 </div>
 
 <script>
+// Logic remains robust with round colors extending to team tables
 let players = [];
 let currentViewingRound = 1;
-const STORAGE_KEY = 'golf_elite_v23';
-const REMOTE_DATA_URL = 'data.json';
+const STORAGE_KEY = 'golf_elite_v24';
 
-window.onload = () => { initializeHeader(); checkAdmin(); loadOfficialData(); };
+window.onload = () => { checkAdmin(); loadLocal(); };
 
 function checkAdmin() {
   const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
   if (isAdmin) {
     document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'inline-block');
     document.querySelectorAll('input').forEach(el => el.readOnly = false);
-    document.getElementById('mode-tag').textContent = "TOUR ADMINISTRATOR";
   }
-}
-
-function initializeHeader() {
-  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
-  const pRow = document.getElementById('par-row');
-  const sRow = document.getElementById('si-row');
-  for (let i = 1; i <= 18; i++) {
-    pRow.innerHTML += `<td><input type="number" class="par-input" value="4" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
-    sRow.innerHTML += `<td><input type="number" class="si-input" value="${i}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
-  }
-}
-
-async function loadOfficialData() {
-  try {
-    const response = await fetch(REMOTE_DATA_URL + '?t=' + Date.now());
-    if (response.ok) applyState(await response.json());
-    else loadLocal();
-  } catch (e) { loadLocal(); }
 }
 
 function loadLocal() {
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) applyState(JSON.parse(saved));
-}
-
-function applyState(state) {
-  players = state.players || [];
-  document.getElementById('venue-name').value = state.venueName || '';
-  document.getElementById('team-a-name').value = state.teamAName || 'Team A';
-  document.getElementById('team-b-name').value = state.teamBName || 'Team B';
-  if(state.pars) state.pars.forEach((v, i) => { if(document.querySelectorAll('.par-input')[i]) document.querySelectorAll('.par-input')[i].value = v; });
-  if(state.sis) state.sis.forEach((v, i) => { if(document.querySelectorAll('.si-input')[i]) document.querySelectorAll('.si-input')[i].value = v; });
+  if (saved) {
+    const state = JSON.parse(saved);
+    players = state.players || [];
+    document.getElementById('venue-name').value = state.venueName || '';
+    document.getElementById('team-a-name').value = state.teamAName || 'Team A';
+    document.getElementById('team-b-name').value = state.teamBName || 'Team B';
+    if(state.pars) state.pars.forEach((v, i) => document.querySelectorAll('.par-input')[i].value = v);
+    if(state.sis) state.sis.forEach((v, i) => document.querySelectorAll('.si-input')[i].value = v);
+  }
   renderPlayers();
 }
 
@@ -220,16 +185,15 @@ function renderPlayers() {
   const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
   players.forEach((p, pIdx) => {
     const scores = currentViewingRound === 1 ? p.r1Scores : p.r2Scores;
-    let trScore = `<tr>
-      <td style="text-align:left; padding-left:10px"><input class="player-name-input" value="${p.name}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].name=this.value; saveState();"></td>
+    let trScore = `<tr><td style="text-align:left; padding-left:10px"><input class="player-name-input" value="${p.name}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].name=this.value; saveState();"></td>
       <td><input type="number" class="score-input" value="${p.handicap}" ${isAdmin ? '' : 'readonly'} oninput="players[${pIdx}].handicap=this.value; updateCalculations();" style="background:#f9f9f9"></td>
-      <td style="font-weight:900; color:var(--emerald-dark);">${p.team}</td>`;
+      <td style="font-weight:900;">${p.team}</td>`;
     for(let i=0; i<18; i++) trScore += `<td><input type="number" class="score-input" data-p="${pIdx}" data-h="${i}" value="${scores[i] || ''}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
-    trScore += `<td class="final-total-box">0</td></tr>`;
-    let trNet = `<tr class="net-pts-row" style="background: rgba(0,0,0,0.02)"><td colspan="3" style="text-align:right; font-weight:800; color:#aaa; font-size:0.5rem; padding-right:5px">NET/PTS</td>`;
-    for(let i=0; i<18; i++) trNet += `<td id="net-${pIdx}-${i}">-</td>`;
-    trNet += `<td id="p-total-${pIdx}" style="background:#333; color:white; font-weight:bold;">0</td></tr>`;
-    tbody.innerHTML += trScore + trNet;
+    trScore += `<td class="final-total-box">0</td></tr><tr style="background: rgba(0,0,0,0.02)"><td colspan="3" style="text-align:right; font-weight:800; color:#aaa; font-size:0.5rem; padding-right:5px">NET/PTS</td>`;
+    for(let i=0; i<18; i++) trNet += `<td id="net-${pIdx}-${i}">-</td>`; // trNet is built here
+    tbody.innerHTML += trScore;
+    let trNet = ''; for(let i=0; i<18; i++) trNet += `<td id="net-${pIdx}-${i}">-</td>`;
+    tbody.innerHTML += `<tr style="background: rgba(0,0,0,0.02)"><td colspan="3" style="text-align:right; font-weight:800; color:#aaa; font-size:0.5rem; padding-right:5px">NET/PTS</td>${trNet}<td id="p-total-${pIdx}" style="background:#333; color:white; font-weight:bold;">0</td></tr>`;
   });
   updateCalculations();
 }
@@ -240,35 +204,24 @@ function updateCalculations() {
     const hcap = parseInt(p.handicap) || 0;
     const inputs = document.querySelectorAll(`.score-input[data-p="${pIdx}"]`);
     inputs.forEach((inp, hIdx) => {
-      const grossScore = parseInt(inp.value);
-      const parValue = parseInt(document.querySelectorAll('.par-input')[hIdx].value) || 4;
-      const siValue = parseInt(document.querySelectorAll('.si-input')[hIdx].value) || (hIdx + 1);
-      
+      const gross = parseInt(inp.value);
+      const par = parseInt(document.querySelectorAll('.par-input')[hIdx].value) || 4;
+      const si = parseInt(document.querySelectorAll('.si-input')[hIdx].value) || (hIdx + 1);
       inp.classList.remove('birdie', 'eagle', 'par-gross', 'bogey-plus', 'blob-state');
       if (currentViewingRound === 1) p.r1Scores[hIdx] = inp.value; else p.r2Scores[hIdx] = inp.value;
-      
       const netCell = document.getElementById(`net-${pIdx}-${hIdx}`);
-      if (!isNaN(grossScore) && grossScore > 0) {
-        const grossDiff = grossScore - parValue;
-        if (grossDiff <= -2) inp.classList.add('eagle');
-        else if (grossDiff === -1) inp.classList.add('birdie');
-        else if (grossDiff === 0) inp.classList.add('par-gross');
-        else if (grossDiff >= 1) inp.classList.add('bogey-plus');
-        
-        const strokes = Math.floor(hcap / 18) + (siValue <= (hcap % 18) ? 1 : 0);
-        const netScore = grossScore - strokes;
-        const netDiff = netScore - parValue;
-        
-        let pts = (netDiff <= -2) ? 4 : (netDiff === -1) ? 3 : (netDiff === 0) ? 2 : (netDiff === 1) ? 1 : 0;
+      if (!isNaN(gross) && gross > 0) {
+        if (gross-par <= -2) inp.classList.add('eagle'); else if (gross-par === -1) inp.classList.add('birdie'); else if (gross-par === 0) inp.classList.add('par-gross'); else inp.classList.add('bogey-plus');
+        const strokes = Math.floor(hcap / 18) + (si <= (hcap % 18) ? 1 : 0);
+        const net = gross - strokes;
+        let pts = (net-par <= -2) ? 4 : (net-par === -1) ? 3 : (net-par === 0) ? 2 : (net-par === 1) ? 1 : 0;
         if (pts === 0) inp.classList.add('blob-state');
-        
         rdTotal += pts;
-        netCell.innerHTML = `<span class="net-label">${netScore}</span><span class="pts-label">${pts}</span>`;
+        netCell.innerHTML = `<span style="font-size:0.6rem; color:#888;">${net}</span><span class="pts-label">${pts}</span>`;
       } else { netCell.textContent = '-'; }
     });
     if (currentViewingRound === 1) p.r1Total = rdTotal; else p.r2Total = rdTotal;
-    const totalCols = document.querySelectorAll('.final-total-box');
-    if(totalCols[pIdx]) totalCols[pIdx].textContent = rdTotal;
+    document.querySelectorAll('.final-total-box')[pIdx].textContent = rdTotal;
     document.getElementById(`p-total-${pIdx}`).textContent = rdTotal;
   });
   updateTeamTables();
@@ -291,8 +244,7 @@ function updateTeamTables() {
 }
 
 function saveState() {
-  if (new URLSearchParams(window.location.search).get('admin') !== 'true') return;
-  const state = { players, venueName: document.getElementById('venue-name').value, teamAName: document.getElementById('team-a-name').value, teamBName: document.getElementById('team-b-name').value, pars: Array.from(document.querySelectorAll('.par-input')).slice(0,18).map(i => i.value), sis: Array.from(document.querySelectorAll('.si-input')).slice(0,18).map(i => i.value) };
+  const state = { players, venueName: document.getElementById('venue-name').value, teamAName: document.getElementById('team-a-name').value, teamBName: document.getElementById('team-b-name').value, pars: Array.from(document.querySelectorAll('.par-input')).map(i => i.value), sis: Array.from(document.querySelectorAll('.si-input')).map(i => i.value) };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
@@ -300,25 +252,13 @@ function toggleRound() {
   currentViewingRound = currentViewingRound === 1 ? 2 : 1;
   const card = document.getElementById('scorecard');
   const indicator = document.getElementById('round-display');
-  const btnLabel = document.getElementById('next-rd-label');
-  const teamA = document.getElementById('team-a-head');
-  const teamB = document.getElementById('team-b-head');
-
-  if (currentViewingRound === 1) {
-    card.className = 'round-1-theme';
-    indicator.style.background = 'var(--emerald-dark)';
-    indicator.textContent = 'ROUND 1';
-    btnLabel.textContent = '2';
-    teamA.style.background = 'var(--emerald-dark)';
-    teamB.style.background = 'var(--emerald-dark)';
-  } else {
-    card.className = 'round-2-theme';
-    indicator.style.background = 'var(--round2-blue)';
-    indicator.textContent = 'ROUND 2';
-    btnLabel.textContent = '1';
-    teamA.style.background = 'var(--round2-blue)';
-    teamB.style.background = 'var(--round2-blue)';
-  }
+  const themeColor = currentViewingRound === 1 ? 'var(--emerald-dark)' : 'var(--round2-blue)';
+  card.className = currentViewingRound === 1 ? 'round-1-theme' : 'round-2-theme';
+  indicator.style.background = themeColor;
+  indicator.textContent = `ROUND ${currentViewingRound}`;
+  document.getElementById('next-rd-label').textContent = currentViewingRound === 1 ? 2 : 1;
+  document.getElementById('team-a-head').style.background = themeColor;
+  document.getElementById('team-b-head').style.background = themeColor;
   renderPlayers();
 }
 
@@ -333,12 +273,12 @@ function addPlayer() {
 function exportData() {
   const state = localStorage.getItem(STORAGE_KEY);
   const blob = new Blob([state], {type: "application/json"});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `emerald_tour_export.json`; a.click();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `emerald_tour.json`; a.click();
 }
 
 function saveAsImage() {
   html2canvas(document.getElementById('capture-area'), { scale: 2, backgroundColor: '#e8ecef' }).then(canvas => {
-    const link = document.createElement('a'); link.download = `New_Emerald_Tour_Scorecard.png`; link.href = canvas.toDataURL(); link.click();
+    const link = document.createElement('a'); link.download = `Emerald_Tour_Scorecard.png`; link.href = canvas.toDataURL(); link.click();
   });
 }
 </script>
