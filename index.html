@@ -19,13 +19,23 @@
     html, body { width: 100%; margin: 0; padding: 0; background: #e8ecef; background-image: linear-gradient(135deg, #e8ecef 0%, #c8e6c9 100%); background-attachment: fixed; }
     body { font-family: 'Inter', -apple-system, sans-serif; padding: 10px; box-sizing: border-box; }
     
-    /* REFINED HEADER SECTION */
+    /* --- KILL THE SPINNERS --- */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield; /* Firefox */
+      appearance: textfield;
+    }
+
     .header-block { text-align: center; margin-bottom: 20px; }
-    .brand-main { font-size: 1.2rem; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; color: var(--emerald-dark); margin: 0; }
+    .brand-main { font-size: 1.25rem; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; color: var(--emerald-dark); margin: 0; }
     .sub-brand { font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: #555; margin: 4px 0; }
     .venue-input { 
       border: none; background: transparent; font-weight: 800; text-align: center; 
-      color: #000; width: 80%; font-size: 1.4rem; text-transform: uppercase; margin-top: 5px;
+      color: #000; width: 85%; font-size: 1.4rem; text-transform: uppercase; margin-top: 5px; outline: none;
     }
 
     #capture-area { padding: 15px 10px; border-radius: 16px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid var(--glass-border); }
@@ -39,7 +49,6 @@
     table { border-collapse: separate; border-spacing: 0; }
     th, td { text-align: center; vertical-align: middle; white-space: nowrap; }
     
-    /* Dynamic Round Colors */
     .round-1-theme th { background: linear-gradient(180deg, var(--emerald-primary), var(--emerald-dark)); }
     .round-2-theme th { background: linear-gradient(180deg, var(--round2-blue), var(--round2-dark)); }
     
@@ -53,14 +62,14 @@
 
     @media screen and (orientation: landscape) { table { width: 1100px; } }
 
+    /* CLEAN INPUTS */
     .score-input, .par-input, .si-input { 
       width: 34px; height: 34px; border: 1px solid #ddd; text-align: center; border-radius: 4px; 
-      font-weight: 700; background: white; font-size: 0.95rem; margin: 0 auto; display: block;
+      font-weight: 700; background: white; font-size: 0.95rem; margin: 0 auto; display: block; outline: none;
     }
+    .player-name-input { font-weight: 800; border: none; background: transparent; color: #333; font-size: 0.9rem; padding-left: 5px; width: 100%; outline: none; }
     
-    .player-name-input { font-weight: 800; border: none; background: transparent; color: #333; font-size: 0.9rem; padding-left: 5px; width: 100%; }
-    
-    /* SHAPES */
+    /* BROADCAST SHAPES */
     .eagle { background: #ffd700 !important; color: #000 !important; border-radius: 50%; border: 1px solid #b8860b !important; }
     .birdie { background: #d32f2f !important; color: white !important; border-radius: 50%; }
     .par-gross { background: #2e7d32 !important; color: white !important; border-radius: 50%; }
@@ -71,22 +80,21 @@
     .round-1-theme .final-total-box { background: var(--emerald-dark) !important; }
     .round-2-theme .final-total-box { background: var(--round2-dark) !important; }
 
-    /* TEAM TABLE IMPROVEMENTS */
+    /* TEAM TABLES */
     .team-table { width: 100%; border-radius: 12px; overflow: hidden; background: white; box-shadow: var(--shadow-soft); font-size: 0.85rem; border-collapse: collapse; margin-top: 10px;}
-    .team-table thead th { padding: 10px; color: white; font-weight: 900; letter-spacing: 1px; }
-    .team-header-row { background: #444; color: #fff !important; font-size: 0.7rem; }
-    .team-header-row th { background: #444 !important; padding: 5px !important; }
+    .team-table thead th { padding: 12px; color: white; font-weight: 900; }
+    .team-header-row th { background: #f1f3f5 !important; color: #666 !important; font-size: 0.65rem !important; padding: 6px !important; border-bottom: 1px solid #eee; }
     .team-table td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #eee; }
-    .team-player-name { text-align: left !important; padding-left: 15px !important; color: #333; }
-    .team-total-row { background: #f8f9fa; font-weight: 900; font-size: 0.9rem; }
+    .team-player-name { text-align: left !important; padding-left: 15px !important; color: #333; font-weight: 700; }
+    .team-total-row { background: #f8f9fa; font-weight: 900; font-size: 0.95rem; }
 
     #controls { text-align: center; margin-bottom: 15px; }
-    button { padding: 10px 16px; font-size: 0.8rem; margin: 4px; cursor: pointer; border: none; border-radius: 8px; color: white; font-weight: 700; text-transform: uppercase; }
+    button { padding: 10px 18px; font-size: 0.8rem; margin: 4px; cursor: pointer; border: none; border-radius: 8px; color: white; font-weight: 700; text-transform: uppercase; }
     .toggle-rd { background: #222; }
     .image-btn { background: #8e44ad; }
     .admin-only { display: none; background: #666; }
 
-    .pts-label { font-weight: 800; font-size: 0.9rem; display: block; }
+    .pts-label { font-weight: 800; font-size: 0.95rem; display: block; }
     .round-1-theme .pts-label { color: var(--emerald-primary); }
     .round-2-theme .pts-label { color: var(--round2-blue); }
   </style>
@@ -104,11 +112,11 @@
   <div class="header-block">
     <div class="brand-main">NEW EMERALD TOUR</div>
     <div class="sub-brand">Team Stableford Competition</div>
-    <input type="text" id="venue-name" class="venue-input" placeholder="Enter Venue Name" oninput="saveState()" readonly>
+    <input type="text" id="venue-name" class="venue-input" placeholder="ENTER VENUE NAME" oninput="saveState()" readonly>
   </div>
   
   <div style="text-align: center;">
-    <div id="round-display" style="background: var(--emerald-dark); color: white; display: inline-block; padding: 6px 25px; border-radius: 30px; font-weight: 900; margin-bottom: 15px; letter-spacing: 1px; transition: 0.3s;">ROUND 1</div>
+    <div id="round-display" style="background: var(--emerald-dark); color: white; display: inline-block; padding: 8px 30px; border-radius: 30px; font-weight: 900; margin-bottom: 20px; letter-spacing: 1px; transition: 0.3s;">ROUND 1</div>
   </div>
 
   <div class="table-wrapper">
@@ -121,8 +129,16 @@
           <script>for(let i=1; i<=18; i++) document.write(`<th class="col-hole">${i}</th>`);</script>
           <th class="col-total">TOT</th>
         </tr>
-        <tr style="background: #fafafa;"><td colspan="3" style="text-align:right; font-weight:800; color: #999; font-size: 0.55rem; padding-right: 10px;">PAR</td><script>for(let i=0; i<18; i++) document.write(`<td><input type="number" class="par-input" value="4" oninput="updateCalculations()"></td>`);</script><td>-</td></tr>
-        <tr style="background: #fafafa;"><td colspan="3" style="text-align:right; font-weight:800; color: #999; font-size: 0.55rem; padding-right: 10px;">S.I.</td><script>for(let i=0; i<18; i++) document.write(`<td><input type="number" class="si-input" value="${i+1}" oninput="updateCalculations()"></td>`);</script><td>-</td></tr>
+        <tr style="background: #fafafa;" id="par-row-container">
+            <td colspan="3" style="text-align:right; font-weight:800; color: #999; font-size: 0.6rem; padding-right: 10px;">PAR</td>
+            <script>for(let i=0; i<18; i++) document.write(`<td><input type="number" class="par-input" value="4" oninput="updateCalculations()"></td>`);</script>
+            <td>-</td>
+        </tr>
+        <tr style="background: #fafafa;" id="si-row-container">
+            <td colspan="3" style="text-align:right; font-weight:800; color: #999; font-size: 0.6rem; padding-right: 10px;">S.I.</td>
+            <script>for(let i=0; i<18; i++) document.write(`<td><input type="number" class="si-input" value="${i+1}" oninput="updateCalculations()"></td>`);</script>
+            <td>-</td>
+        </tr>
       </thead>
       <tbody id="players-body"></tbody>
     </table>
@@ -131,7 +147,7 @@
   <div class="team-container">
     <table class="team-table">
         <thead>
-            <tr id="team-a-head" style="background: var(--emerald-dark);"><th colspan="4"><input type="text" id="team-a-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase" value="Team A" readonly></th></tr>
+            <tr id="team-a-head" style="background: var(--emerald-dark);"><th colspan="4"><input type="text" id="team-a-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase; outline:none;" value="Team A" readonly></th></tr>
             <tr class="team-header-row"><th>PLAYER NAME</th><th>RD 1</th><th>RD 2</th><th>TOTAL</th></tr>
         </thead>
         <tbody id="team-a-body"></tbody>
@@ -140,7 +156,7 @@
     <br>
     <table class="team-table">
         <thead>
-            <tr id="team-b-head" style="background: var(--emerald-dark);"><th colspan="4"><input type="text" id="team-b-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase" value="Team B" readonly></th></tr>
+            <tr id="team-b-head" style="background: var(--emerald-dark);"><th colspan="4"><input type="text" id="team-b-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase; outline:none;" value="Team B" readonly></th></tr>
             <tr class="team-header-row"><th>PLAYER NAME</th><th>RD 1</th><th>RD 2</th><th>TOTAL</th></tr>
         </thead>
         <tbody id="team-b-body"></tbody>
@@ -150,10 +166,9 @@
 </div>
 
 <script>
-// Logic remains robust with round colors extending to team tables
 let players = [];
 let currentViewingRound = 1;
-const STORAGE_KEY = 'golf_elite_v24';
+const STORAGE_KEY = 'golf_elite_v25';
 
 window.onload = () => { checkAdmin(); loadLocal(); };
 
@@ -173,8 +188,8 @@ function loadLocal() {
     document.getElementById('venue-name').value = state.venueName || '';
     document.getElementById('team-a-name').value = state.teamAName || 'Team A';
     document.getElementById('team-b-name').value = state.teamBName || 'Team B';
-    if(state.pars) state.pars.forEach((v, i) => document.querySelectorAll('.par-input')[i].value = v);
-    if(state.sis) state.sis.forEach((v, i) => document.querySelectorAll('.si-input')[i].value = v);
+    if(state.pars) state.pars.forEach((v, i) => { if(document.querySelectorAll('.par-input')[i]) document.querySelectorAll('.par-input')[i].value = v; });
+    if(state.sis) state.sis.forEach((v, i) => { if(document.querySelectorAll('.si-input')[i]) document.querySelectorAll('.si-input')[i].value = v; });
   }
   renderPlayers();
 }
@@ -189,11 +204,10 @@ function renderPlayers() {
       <td><input type="number" class="score-input" value="${p.handicap}" ${isAdmin ? '' : 'readonly'} oninput="players[${pIdx}].handicap=this.value; updateCalculations();" style="background:#f9f9f9"></td>
       <td style="font-weight:900;">${p.team}</td>`;
     for(let i=0; i<18; i++) trScore += `<td><input type="number" class="score-input" data-p="${pIdx}" data-h="${i}" value="${scores[i] || ''}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
-    trScore += `<td class="final-total-box">0</td></tr><tr style="background: rgba(0,0,0,0.02)"><td colspan="3" style="text-align:right; font-weight:800; color:#aaa; font-size:0.5rem; padding-right:5px">NET/PTS</td>`;
-    for(let i=0; i<18; i++) trNet += `<td id="net-${pIdx}-${i}">-</td>`; // trNet is built here
-    tbody.innerHTML += trScore;
+    trScore += `<td class="final-total-box">0</td></tr>`;
+    
     let trNet = ''; for(let i=0; i<18; i++) trNet += `<td id="net-${pIdx}-${i}">-</td>`;
-    tbody.innerHTML += `<tr style="background: rgba(0,0,0,0.02)"><td colspan="3" style="text-align:right; font-weight:800; color:#aaa; font-size:0.5rem; padding-right:5px">NET/PTS</td>${trNet}<td id="p-total-${pIdx}" style="background:#333; color:white; font-weight:bold;">0</td></tr>`;
+    tbody.innerHTML += trScore + `<tr style="background: rgba(0,0,0,0.02)"><td colspan="3" style="text-align:right; font-weight:800; color:#aaa; font-size:0.5rem; padding-right:5px">NET/PTS</td>${trNet}<td id="p-total-${pIdx}" style="background:#333; color:white; font-weight:bold;">0</td></tr>`;
   });
   updateCalculations();
 }
@@ -221,8 +235,10 @@ function updateCalculations() {
       } else { netCell.textContent = '-'; }
     });
     if (currentViewingRound === 1) p.r1Total = rdTotal; else p.r2Total = rdTotal;
-    document.querySelectorAll('.final-total-box')[pIdx].textContent = rdTotal;
-    document.getElementById(`p-total-${pIdx}`).textContent = rdTotal;
+    const totals = document.querySelectorAll('.final-total-box');
+    if(totals[pIdx]) totals[pIdx].textContent = rdTotal;
+    const pTot = document.getElementById(`p-total-${pIdx}`);
+    if(pTot) pTot.textContent = rdTotal;
   });
   updateTeamTables();
   saveState();
@@ -233,7 +249,7 @@ function updateTeamTables() {
   const totals = { A: {r1:0, r2:0}, B: {r1:0, r2:0} };
   bodies.A.innerHTML = ''; bodies.B.innerHTML = '';
   players.forEach(p => {
-    bodies[p.team].innerHTML += `<tr><td class="team-player-name" style="font-weight:700">${p.name}</td><td>${p.r1Total}</td><td>${p.r2Total}</td><td style="font-weight:900">${p.r1Total+p.r2Total}</td></tr>`;
+    bodies[p.team].innerHTML += `<tr><td class="team-player-name">${p.name}</td><td>${p.r1Total}</td><td>${p.r2Total}</td><td style="font-weight:900">${p.r1Total+p.r2Total}</td></tr>`;
     totals[p.team].r1 += p.r1Total; totals[p.team].r2 += p.r2Total;
   });
   ['A', 'B'].forEach(t => {
@@ -250,10 +266,9 @@ function saveState() {
 
 function toggleRound() {
   currentViewingRound = currentViewingRound === 1 ? 2 : 1;
-  const card = document.getElementById('scorecard');
-  const indicator = document.getElementById('round-display');
   const themeColor = currentViewingRound === 1 ? 'var(--emerald-dark)' : 'var(--round2-blue)';
-  card.className = currentViewingRound === 1 ? 'round-1-theme' : 'round-2-theme';
+  document.getElementById('scorecard').className = currentViewingRound === 1 ? 'round-1-theme' : 'round-2-theme';
+  const indicator = document.getElementById('round-display');
   indicator.style.background = themeColor;
   indicator.textContent = `ROUND ${currentViewingRound}`;
   document.getElementById('next-rd-label').textContent = currentViewingRound === 1 ? 2 : 1;
@@ -273,12 +288,12 @@ function addPlayer() {
 function exportData() {
   const state = localStorage.getItem(STORAGE_KEY);
   const blob = new Blob([state], {type: "application/json"});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `emerald_tour.json`; a.click();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `emerald_tour_v25.json`; a.click();
 }
 
 function saveAsImage() {
   html2canvas(document.getElementById('capture-area'), { scale: 2, backgroundColor: '#e8ecef' }).then(canvas => {
-    const link = document.createElement('a'); link.download = `Emerald_Tour_Scorecard.png`; link.href = canvas.toDataURL(); link.click();
+    const link = document.createElement('a'); link.download = `Emerald_Tour_Final.png`; link.href = canvas.toDataURL(); link.click();
   });
 }
 </script>
