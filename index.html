@@ -2,122 +2,123 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"/>
-  <title>New Emerald Tour - Scoreboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>New Emerald Tour - Elite Scoreboard</title>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
-    html, body { width: 100%; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 5px; background: #f0f2f5; box-sizing: border-box; }
+    :root {
+      --emerald-primary: #2e7d32;
+      --emerald-dark: #1b5e20;
+      --glass-bg: rgba(255, 255, 255, 0.9);
+      --glass-border: rgba(255, 255, 255, 0.3);
+      --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    }
+
+    html, body { width: 100%; margin: 0; padding: 0; background: #e8ecef; background-image: linear-gradient(135deg, #e8ecef 0%, #c8e6c9 100%); background-attachment: fixed; }
+    body { font-family: 'Inter', -apple-system, sans-serif; padding: 10px; box-sizing: border-box; }
     
-    h1 { color: #1b5e20; text-align: center; margin: 5px 0 2px 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px; }
-    
-    #mode-tag { font-size: 0.6rem; color: #777; text-align: center; margin-bottom: 5px; font-style: italic; }
-    .venue-container { text-align: center; margin-bottom: 5px; }
-    .venue-input { border: none; border-bottom: 1px solid #2e7d32; background: transparent; font-size: 1rem; text-align: center; width: 60%; color: #333; font-weight: bold; }
-    .round-indicator { text-align: center; font-size: 0.9rem; font-weight: bold; color: #1565c0; margin-bottom: 8px; background: white; display: inline-block; padding: 2px 12px; border-radius: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-left: 50%; transform: translateX(-50%); }
-    
-    #capture-area { padding: 5px; background: #f0f2f5; width: 100%; box-sizing: border-box; }
+    h1 { color: var(--emerald-dark); text-align: center; margin: 10px 0; font-size: 1.4rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+    #mode-tag { font-size: 0.7rem; color: #555; text-align: center; margin-bottom: 10px; font-weight: 600; letter-spacing: 2px; }
+
+    #capture-area { padding: 15px 10px; border-radius: 16px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid var(--glass-border); }
 
     .table-wrapper { 
-      width: 100%; 
-      overflow-x: auto; 
-      border-radius: 8px; 
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
-      margin-bottom: 15px;
-      background: white;
-      -webkit-overflow-scrolling: touch;
+      width: 100%; overflow-x: auto; border-radius: 12px; box-shadow: var(--shadow-soft); 
+      margin-bottom: 20px; background: var(--glass-bg); border: 1px solid var(--glass-border);
     }
     
-    table { border-collapse: separate; border-spacing: 0; background: white; }
+    table { border-collapse: separate; border-spacing: 0; width: 100%; }
+    th, td { text-align: center; vertical-align: middle; }
+    th { background: linear-gradient(180deg, var(--emerald-primary), var(--emerald-dark)); color: white; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; padding: 12px 4px; }
+    td { border-bottom: 1px solid rgba(0,0,0,0.05); border-right: 1px solid rgba(0,0,0,0.05); }
 
-    /* PORTRAIT: Increased name column width to 140px */
     @media screen and (orientation: portrait) {
-      table { width: 950px; table-layout: fixed; }
-      .col-name { width: 140px; } 
-      .col-hcp { width: 35px; }
-      .col-team { width: 25px; }
-      .col-hole { width: 38px; }
-      .col-total { width: 45px; }
-      th, td { font-size: 0.85rem; padding: 6px 2px; }
-      .player-name-input { width: 130px !important; }
+      table { width: 1050px; table-layout: fixed; }
+      .col-name { width: 160px; }
+      .col-hcp, .col-team { width: 40px; }
+      .col-hole { width: 42px; }
+      .col-total { width: 60px; }
+      .player-name-input { width: 150px !important; text-align: left; }
     }
 
-    /* LANDSCAPE: Increased name column width to 100px */
     @media screen and (orientation: landscape) {
       .table-wrapper { overflow-x: hidden; } 
       table { width: 100%; table-layout: fixed; }
-      th, td { font-size: 0.7rem; padding: 2px 0; }
-      .player-name-input { width: 95px !important; font-size: 0.75rem !important; }
-      .score-input, .par-input, .si-input { width: 22px !important; height: 22px !important; font-size: 0.8rem !important; }
-      .col-name { width: 100px; }
-      .col-hcp { width: 28px; }
-      .col-team { width: 22px; }
-      .col-hole { width: auto; } 
-      .col-total { width: 35px; }
+      th, td { font-size: 0.75rem; padding: 4px 0; }
+      .col-name { width: 120px; }
+      .col-hcp, .col-team { width: 30px; }
+      .col-total { width: 45px; }
+      .player-name-input { width: 110px !important; text-align: left; }
+      .score-input, .par-input, .si-input { width: 24px !important; height: 24px !important; font-size: 0.8rem !important; }
     }
 
-    th, td { border: 0.5px solid #ddd; text-align: center; }
-    th { background: #2e7d32; color: white; }
+    input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; appearance: textfield; touch-action: manipulation; }
 
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    input[type=number] { -moz-appearance: textfield; }
-
-    .score-input, .par-input, .si-input { width: 28px; height: 28px; border: 1px solid #ccc; text-align: center; border-radius: 3px; font-size: 0.9rem; }
-    .par-input, .si-input { background: #fff8e1; font-weight: bold; border-color: #ffd54f; }
-    
-    .player-name-input { font-weight: bold; border: none; background: transparent; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .final-total-box { font-size: 1rem; font-weight: bold; color: #1b5e20; background: #c8e6c9 !important; }
-
-    #controls { text-align: center; margin-bottom: 10px; background: #fff; padding: 5px; border-radius: 8px; }
-    button { padding: 6px 10px; font-size: 0.75rem; margin: 2px; cursor: pointer; border: none; border-radius: 4px; color: white; font-weight: 800; }
-    .toggle-rd { background: #1565c0; }
-    .image-btn { background: #673ab7; }
-    .admin-only { display: none; background: #4caf50; }
-
-    .net-pts-row { background: #f1f8e9; line-height: 1.1; }
-    .net-label { font-size: 0.55rem; color: #777; display: block; }
-    .pts-label { font-size: 0.75rem; color: #2e7d32; font-weight: bold; }
-
-    .team-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; width: 100%; }
-    .team-table { width: 100%; border-radius: 8px; overflow: hidden; background: white; font-size: 0.85rem; border-collapse: collapse; }
-    .team-table th, .team-table td { padding: 8px 4px; border: 0.5px solid #ddd; }
-    
-    @media (min-width: 768px) { 
-      .team-container { flex-direction: row; justify-content: space-between; } 
-      .team-table { width: 48%; } 
+    .score-input, .par-input, .si-input { 
+      width: 32px; height: 32px; border: 1px solid #ddd; text-align: center; border-radius: 4px; 
+      font-weight: 700; transition: all 0.2s; background: white; font-size: 0.95rem; margin: 0 auto; display: block;
     }
+    
+    .player-name-input { font-weight: 800; border: none; background: transparent; color: #333; font-size: 0.9rem; padding-left: 5px; }
+    
+    /* STYLE LOGIC FOR GROSS SCORE */
+    .eagle { background: #ffd700 !important; color: #000 !important; border-radius: 50%; border: 1px solid #b8860b !important; }
+    .birdie { background: #d32f2f !important; color: white !important; border-radius: 50%; border: none !important; }
+    .par-gross { background: #2e7d32 !important; color: white !important; border-radius: 50%; border: none !important; }
+    .bogey-plus { background: #333 !important; color: white !important; border-radius: 0% !important; border: none !important; }
+    .blob-state { opacity: 0.35; } /* Stableford blob (0 pts) visual aid */
+
+    .final-total-box { font-size: 1.1rem; font-weight: 900; color: white !important; background: var(--emerald-dark) !important; text-align: center; }
+
+    #controls { text-align: center; margin-bottom: 15px; }
+    button { padding: 10px 16px; font-size: 0.8rem; margin: 4px; cursor: pointer; border: none; border-radius: 8px; color: white; font-weight: 700; text-transform: uppercase; }
+    .toggle-rd { background: linear-gradient(135deg, #1e88e5, #1565c0); }
+    .image-btn { background: linear-gradient(135deg, #8e44ad, #673ab7); }
+    .admin-only { display: none; background: linear-gradient(135deg, #43a047, #2e7d32); }
+
+    .pts-label { color: var(--emerald-primary); font-weight: 800; font-size: 0.9rem; display: block; }
+    .net-label { font-size: 0.6rem; color: #888; display: block; }
+
+    .team-table { width: 100%; border-radius: 12px; overflow: hidden; background: var(--glass-bg); box-shadow: var(--shadow-soft); font-size: 0.9rem; border-collapse: collapse; margin-top: 10px;}
+    .team-table th { padding: 12px; }
+    .team-table td { padding: 10px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .team-player-name { text-align: left !important; padding-left: 15px !important; }
   </style>
 </head>
 <body>
 
 <div id="controls">
-  <button class="toggle-rd" onclick="toggleRound()">Rd <span id="next-rd-label">2</span></button>
-  <button class="image-btn" onclick="saveAsImage()">📸 Capture</button>
-  <button class="admin-only" onclick="addPlayer()">+ Player</button>
-  <button class="admin-only" onclick="exportData()">📤 Export</button>
+  <button class="toggle-rd" onclick="toggleRound()">Round <span id="next-rd-label">2</span></button>
+  <button class="image-btn" onclick="saveAsImage()">📸 Export Image</button>
+  <button class="admin-only" onclick="addPlayer()">+ Add Player</button>
+  <button class="admin-only" onclick="exportData()">📤 Export JSON</button>
 </div>
 
 <div id="capture-area">
-  <h1>New Emerald Tour - Team Stableford Scorecard</h1>
-  <div id="mode-tag">Member View</div>
-  <div class="venue-container">
-    <input type="text" id="venue-name" class="venue-input" placeholder="Venue Name" oninput="saveState()" readonly>
+  <div id="mode-tag">NEW EMERALD TOUR</div>
+  <h1>Team Stableford</h1>
+  
+  <div class="venue-container" style="text-align:center; margin-bottom:10px;">
+    <input type="text" id="venue-name" class="venue-input" placeholder="ENTER VENUE NAME" style="border:none; border-bottom:2px solid var(--emerald-primary); background:transparent; font-weight:900; text-align:center; color:var(--emerald-dark); width:240px;" oninput="saveState()" readonly>
   </div>
-  <div id="round-display" class="round-indicator">Round 1</div>
+  
+  <div style="text-align: center;">
+    <div id="round-display" class="round-indicator" style="background: var(--emerald-dark); color: white; display: inline-block; padding: 4px 20px; border-radius: 30px; font-weight: 800; margin-bottom: 15px;">ROUND 1</div>
+  </div>
 
   <div class="table-wrapper">
     <table id="scorecard">
       <thead>
         <tr>
-          <th class="col-name">Player</th>
-          <th class="col-hcp">H</th>
+          <th class="col-name" style="text-align:left; padding-left:15px">Player</th>
+          <th class="col-hcp">Hcp</th>
           <th class="col-team">T</th>
           <script>for(let i=1; i<=18; i++) document.write(`<th class="col-hole">${i}</th>`);</script>
-          <th class="col-total">Tot</th>
+          <th class="col-total">TOT</th>
         </tr>
-        <tr id="par-row"><td colspan="3" style="text-align:right; font-weight:bold; background:#eee;">PAR</td></tr>
-        <tr id="si-row"><td colspan="3" style="text-align:right; font-weight:bold; background:#eee;">SI</td></tr>
+        <tr id="par-row" style="background: #fafafa;"><td colspan="3" style="text-align:right; font-weight:800; color: #777; font-size: 0.6rem; padding-right: 10px;">PAR</td></tr>
+        <tr id="si-row" style="background: #fafafa;"><td colspan="3" style="text-align:right; font-weight:800; color: #777; font-size: 0.6rem; padding-right: 10px;">S.I.</td></tr>
       </thead>
       <tbody id="players-body"></tbody>
     </table>
@@ -125,16 +126,17 @@
 
   <div class="team-container">
     <table class="team-table" id="team-a-display">
-        <thead><tr style="background:#1b5e20; color:white"><th colspan="4"><input type="text" id="team-a-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:bold; width:100%" value="Team A" readonly></th></tr>
-        <tr style="background:#f1f8e9"><th>Name</th><th>R1</th><th>R2</th><th>Tot</th></tr></thead>
+        <thead><tr style="background: var(--emerald-dark); color:white"><th colspan="4"><input type="text" id="team-a-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase" value="Team A" readonly></th></tr>
+        <tr style="background:#f1f8e9; font-size: 0.7rem; color: #555;"><th>NAME</th><th>R1</th><th>R2</th><th>TOT</th></tr></thead>
         <tbody id="team-a-body"></tbody>
-        <tr style="background:#e8f5e9; font-weight:bold"><td>Total</td><td id="tA-r1">0</td><td id="tA-r2">0</td><td id="tA-grand">0</td></tr>
+        <tr style="background: #eee; font-weight:900"><td>TEAM TOTAL</td><td id="tA-r1">0</td><td id="tA-r2">0</td><td id="tA-grand" style="color: var(--emerald-dark)">0</td></tr>
     </table>
+    <br>
     <table class="team-table" id="team-b-display">
-        <thead><tr style="background:#1b5e20; color:white"><th colspan="4"><input type="text" id="team-b-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:bold; width:100%" value="Team B" readonly></th></tr>
-        <tr style="background:#f1f8e9"><th>Name</th><th>R1</th><th>R2</th><th>Tot</th></tr></thead>
+        <thead><tr style="background: var(--emerald-dark); color:white"><th colspan="4"><input type="text" id="team-b-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase" value="Team B" readonly></th></tr>
+        <tr style="background:#f1f8e9; font-size: 0.7rem; color: #555;"><th>NAME</th><th>R1</th><th>R2</th><th>TOT</th></tr></thead>
         <tbody id="team-b-body"></tbody>
-        <tr style="background:#e8f5e9; font-weight:bold"><td>Total</td><td id="tB-r1">0</td><td id="tB-r2">0</td><td id="tB-grand">0</td></tr>
+        <tr style="background: #eee; font-weight:900"><td>TEAM TOTAL</td><td id="tB-r1">0</td><td id="tB-r2">0</td><td id="tB-grand" style="color: var(--emerald-dark)">0</td></tr>
     </table>
   </div>
 </div>
@@ -142,21 +144,17 @@
 <script>
 let players = [];
 let currentViewingRound = 1;
-const STORAGE_KEY = 'golf_compact_v5';
+const STORAGE_KEY = 'golf_elite_v21';
 const REMOTE_DATA_URL = 'data.json';
 
-window.onload = () => {
-  initializeHeader(); 
-  checkAdmin();      
-  loadOfficialData();
-};
+window.onload = () => { initializeHeader(); checkAdmin(); loadOfficialData(); };
 
 function checkAdmin() {
   const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
   if (isAdmin) {
     document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'inline-block');
     document.querySelectorAll('input').forEach(el => el.readOnly = false);
-    document.getElementById('mode-tag').textContent = "ADMIN MODE";
+    document.getElementById('mode-tag').textContent = "ADMINISTRATOR OVERRIDE";
   }
 }
 
@@ -164,8 +162,6 @@ function initializeHeader() {
   const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
   const pRow = document.getElementById('par-row');
   const sRow = document.getElementById('si-row');
-  while(pRow.cells.length > 1) pRow.deleteCell(1);
-  while(sRow.cells.length > 1) sRow.deleteCell(1);
   for (let i = 1; i <= 18; i++) {
     pRow.innerHTML += `<td><input type="number" class="par-input" value="4" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
     sRow.innerHTML += `<td><input type="number" class="si-input" value="${i}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
@@ -202,14 +198,14 @@ function renderPlayers() {
   players.forEach((p, pIdx) => {
     const scores = currentViewingRound === 1 ? p.r1Scores : p.r2Scores;
     let trScore = `<tr>
-      <td style="text-align:left; padding-left:4px"><input class="player-name-input" value="${p.name}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].name=this.value; saveState();"></td>
-      <td><input type="number" class="score-input" value="${p.handicap}" ${isAdmin ? '' : 'readonly'} oninput="players[${pIdx}].handicap=this.value; updateCalculations();"></td>
-      <td style="font-weight:bold">${p.team}</td>`;
+      <td style="text-align:left; padding-left:10px"><input class="player-name-input" value="${p.name}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].name=this.value; saveState();"></td>
+      <td><input type="number" class="score-input" value="${p.handicap}" ${isAdmin ? '' : 'readonly'} oninput="players[${pIdx}].handicap=this.value; updateCalculations();" style="background:#f9f9f9"></td>
+      <td style="font-weight:900; color:var(--emerald-dark);">${p.team}</td>`;
     for(let i=0; i<18; i++) trScore += `<td><input type="number" class="score-input" data-p="${pIdx}" data-h="${i}" value="${scores[i] || ''}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
-    trScore += `<td style="background:#eee;"></td></tr>`;
-    let trNet = `<tr class="net-pts-row"><td colspan="3" style="text-align:right; font-size:0.5rem; color:#777;">N/P</td>`;
+    trScore += `<td class="final-total-box">0</td></tr>`;
+    let trNet = `<tr class="net-pts-row" style="background: rgba(0,0,0,0.02)"><td colspan="3" style="text-align:right; font-weight:800; color:#aaa; font-size:0.5rem; padding-right:5px">NET/PTS</td>`;
     for(let i=0; i<18; i++) trNet += `<td id="net-${pIdx}-${i}">-</td>`;
-    trNet += `<td id="p-total-${pIdx}" class="final-total-box">0</td></tr>`;
+    trNet += `<td id="p-total-${pIdx}" style="background:#333; color:white; font-weight:bold;">0</td></tr>`;
     tbody.innerHTML += trScore + trNet;
   });
   updateCalculations();
@@ -221,21 +217,37 @@ function updateCalculations() {
     const hcap = parseInt(p.handicap) || 0;
     const inputs = document.querySelectorAll(`.score-input[data-p="${pIdx}"]`);
     inputs.forEach((inp, hIdx) => {
-      const score = parseInt(inp.value);
-      const par = parseInt(document.querySelectorAll('.par-input')[hIdx].value) || 4;
-      const si = parseInt(document.querySelectorAll('.si-input')[hIdx].value) || (hIdx + 1);
+      const grossScore = parseInt(inp.value);
+      const parValue = parseInt(document.querySelectorAll('.par-input')[hIdx].value) || 4;
+      const siValue = parseInt(document.querySelectorAll('.si-input')[hIdx].value) || (hIdx + 1);
+      
+      inp.classList.remove('birdie', 'eagle', 'par-gross', 'bogey-plus', 'blob-state');
       if (currentViewingRound === 1) p.r1Scores[hIdx] = inp.value; else p.r2Scores[hIdx] = inp.value;
+      
       const netCell = document.getElementById(`net-${pIdx}-${hIdx}`);
-      if (!isNaN(score) && score > 0) {
-        const strokes = Math.floor(hcap / 18) + (si <= (hcap % 18) ? 1 : 0);
-        const net = score - strokes;
-        const diff = net - par;
-        let pts = (diff <= -2) ? 4 : (diff === -1) ? 3 : (diff === 0) ? 2 : (diff === 1) ? 1 : 0;
+      if (!isNaN(grossScore) && grossScore > 0) {
+        // COLOR LOGIC (GROSS vs PAR)
+        const grossDiff = grossScore - parValue;
+        if (grossDiff <= -2) inp.classList.add('eagle');
+        else if (grossDiff === -1) inp.classList.add('birdie');
+        else if (grossDiff === 0) inp.classList.add('par-gross');
+        else if (grossDiff >= 1) inp.classList.add('bogey-plus');
+        
+        // STABLEFORD LOGIC (NET vs PAR)
+        const strokes = Math.floor(hcap / 18) + (siValue <= (hcap % 18) ? 1 : 0);
+        const netScore = grossScore - strokes;
+        const netDiff = netScore - parValue;
+        
+        let pts = (netDiff <= -2) ? 4 : (netDiff === -1) ? 3 : (netDiff === 0) ? 2 : (netDiff === 1) ? 1 : 0;
+        if (pts === 0) inp.classList.add('blob-state');
+        
         rdTotal += pts;
-        netCell.innerHTML = `<span class="net-label">${net}</span><span class="pts-label">${pts}</span>`;
+        netCell.innerHTML = `<span class="net-label">${netScore}</span><span class="pts-label">${pts}</span>`;
       } else { netCell.textContent = '-'; }
     });
     if (currentViewingRound === 1) p.r1Total = rdTotal; else p.r2Total = rdTotal;
+    const totalCols = document.querySelectorAll('.final-total-box');
+    if(totalCols[pIdx]) totalCols[pIdx].textContent = rdTotal;
     document.getElementById(`p-total-${pIdx}`).textContent = rdTotal;
   });
   updateTeamTables();
@@ -247,7 +259,7 @@ function updateTeamTables() {
   const totals = { A: {r1:0, r2:0}, B: {r1:0, r2:0} };
   bodies.A.innerHTML = ''; bodies.B.innerHTML = '';
   players.forEach(p => {
-    bodies[p.team].innerHTML += `<tr><td>${p.name}</td><td>${p.r1Total}</td><td>${p.r2Total}</td><td>${p.r1Total+p.r2Total}</td></tr>`;
+    bodies[p.team].innerHTML += `<tr><td class="team-player-name" style="font-weight:700">${p.name}</td><td>${p.r1Total}</td><td>${p.r2Total}</td><td style="font-weight:900">${p.r1Total+p.r2Total}</td></tr>`;
     totals[p.team].r1 += p.r1Total; totals[p.team].r2 += p.r2Total;
   });
   ['A', 'B'].forEach(t => {
@@ -265,7 +277,7 @@ function saveState() {
 
 function toggleRound() {
   currentViewingRound = currentViewingRound === 1 ? 2 : 1;
-  document.getElementById('round-display').textContent = `Round ${currentViewingRound}`;
+  document.getElementById('round-display').textContent = `ROUND ${currentViewingRound}`;
   document.getElementById('next-rd-label').textContent = currentViewingRound === 1 ? 2 : 1;
   renderPlayers();
 }
@@ -281,12 +293,12 @@ function addPlayer() {
 function exportData() {
   const state = localStorage.getItem(STORAGE_KEY);
   const blob = new Blob([state], {type: "application/json"});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `data.json`; a.click();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `elite_data.json`; a.click();
 }
 
 function saveAsImage() {
-  html2canvas(document.getElementById('capture-area'), { scale: 2 }).then(canvas => {
-    const link = document.createElement('a'); link.download = `Scores.png`; link.href = canvas.toDataURL(); link.click();
+  html2canvas(document.getElementById('capture-area'), { scale: 2, backgroundColor: '#e8ecef' }).then(canvas => {
+    const link = document.createElement('a'); link.download = `Tour_Scorecard.png`; link.href = canvas.toDataURL(); link.click();
   });
 }
 </script>
