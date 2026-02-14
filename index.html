@@ -235,33 +235,93 @@ function renderPlayers() {
   updateCalculations();
 }
 
+function renderPlayers() {
+  const tbody = document.getElementById('players-body');
+  tbody.innerHTML = '';
+  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
+  
+  players.forEach((p, pIdx) => {
+    const scores = currentViewingRound === 1 ? p.r1Scores : p.r2Scores;
+    
+    // 1. Build Gross Score Row
+    let trScore = `<tr>
+      <td style="text-align:left; padding-left:10px"><input class="player-name-input" value="${p.name}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].name=this.value; saveState();"></td>
+      <td><input type="number" class="score-input" value="${p.handicap}" ${isAdmin ? '' : 'readonly'} oninput="players[${pIdx}].handicap=this.value; updateCalculations();" style="background:#f9f9f9"></td>
+      <td style="font-weight:900;">${p.team}</td>`;
+    
+    for(let i=0; i<18; i++) {
+      trScore += `<td><input type="number" class="score-input" data-p="${pIdx}" data-h="${i}" value="${scores[i] || ''}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
+    }
+    // Updated TOT cell to handle two lines
+    trScore += `<td class="final-total-box" id="tot-gross-${pIdx}" style="line-height:1.2; padding: 5px 0;">
+                  <div style="font-size: 1.1rem; font-weight: 900;">0</div>
+                  <div style="font-size: 0.6rem; opacity: 0.8; font-weight: 400;">SHOTS</div>
+                </td></tr>`;
+    
+    // 2. Build Net/Pts Row
+    let trNetCells = ''; 
+    for(let i=0; i<18; i++) {
+      trNetCells += `<td id="net-${pIdx}-${i}">-</td>`;
+    }
+    
+    tbody.innerHTML += trScore + `<tr style="background: rgba(0,0,0,0.02)">
+      <td colspan="3" style="text-align:right; font-weight:800; color:#aaa; font-size:0.5rem; padding-right:5px">NET/PTS</td>
+      ${trNetCells}
+      <td id="p-total-${pIdx}" style="background:#333; color:white; font-weight:bold; line-height:1.2; padding: 5px 0;">
+        <div class="pts-val">0</div>
+        <div style="font-size: 0.5rem; font-weight: 400;">PTS</div>
+      </td>
+    </tr>`;
+  });
+  updateCalculations();
+}
+
 function updateCalculations() {
   players.forEach((p, pIdx) => {
-    let rdTotal = 0;
+    let rdStablefordTotal = 0;
+    let rdGrossTotal = 0;
     const hcap = parseInt(p.handicap) || 0;
     const inputs = document.querySelectorAll(`.score-input[data-p="${pIdx}"]`);
+    
     inputs.forEach((inp, hIdx) => {
       const gross = parseInt(inp.value);
       const par = parseInt(document.querySelectorAll('.par-input')[hIdx].value) || 4;
       const si = parseInt(document.querySelectorAll('.si-input')[hIdx].value) || (hIdx + 1);
+      
       inp.classList.remove('birdie', 'eagle', 'par-gross', 'bogey-plus', 'blob-state');
       if (currentViewingRound === 1) p.r1Scores[hIdx] = inp.value; else p.r2Scores[hIdx] = inp.value;
+      
       const netCell = document.getElementById(`net-${pIdx}-${hIdx}`);
       if (!isNaN(gross) && gross > 0) {
-        if (gross-par <= -2) inp.classList.add('eagle'); else if (gross-par === -1) inp.classList.add('birdie'); else if (gross-par === 0) inp.classList.add('par-gross'); else inp.classList.add('bogey-plus');
+        rdGrossTotal += gross;
+        
+        // Style the Gross Score
+        if (gross - par <= -2) inp.classList.add('eagle'); 
+        else if (gross - par === -1) inp.classList.add('birdie'); 
+        else if (gross - par === 0) inp.classList.add('par-gross'); 
+        else inp.classList.add('bogey-plus');
+        
         const strokes = Math.floor(hcap / 18) + (si <= (hcap % 18) ? 1 : 0);
         const net = gross - strokes;
-        let pts = (net-par <= -2) ? 4 : (net-par === -1) ? 3 : (net-par === 0) ? 2 : (net-par === 1) ? 1 : 0;
+        let pts = (net - par <= -2) ? 4 : (net - par === -1) ? 3 : (net - par === 0) ? 2 : (net - par === 1) ? 1 : 0;
+        
         if (pts === 0) inp.classList.add('blob-state');
-        rdTotal += pts;
+        rdStablefordTotal += pts;
         netCell.innerHTML = `<span style="font-size:0.6rem; color:#888;">${net}</span><span class="pts-label">${pts}</span>`;
-      } else { netCell.textContent = '-'; }
+      } else { 
+        netCell.textContent = '-'; 
+      }
     });
-    if (currentViewingRound === 1) p.r1Total = rdTotal; else p.r2Total = rdTotal;
-    const totals = document.querySelectorAll('.final-total-box');
-    if(totals[pIdx]) totals[pIdx].textContent = rdTotal;
-    const pTot = document.getElementById(`p-total-${pIdx}`);
-    if(pTot) pTot.textContent = rdTotal;
+
+    if (currentViewingRound === 1) p.r1Total = rdStablefordTotal; else p.r2Total = rdStablefordTotal;
+    
+    // Update the Gross Total (Top Row)
+    const grossBox = document.getElementById(`tot-gross-${pIdx}`);
+    if(grossBox) grossBox.querySelector('div').textContent = rdGrossTotal;
+    
+    // Update the Stableford Total (Bottom Row)
+    const ptsBox = document.getElementById(`p-total-${pIdx}`);
+    if(ptsBox) ptsBox.querySelector('.pts-val').textContent = rdStablefordTotal;
   });
   updateTeamTables();
   saveState();
