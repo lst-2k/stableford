@@ -243,7 +243,7 @@ function renderPlayers() {
   players.forEach((p, pIdx) => {
     const scores = currentViewingRound === 1 ? p.r1Scores : p.r2Scores;
     
-    // 1. Build Gross Score Row
+    // 1. Gross Row
     let trScore = `<tr>
       <td style="text-align:left; padding-left:10px"><input class="player-name-input" value="${p.name}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].name=this.value; saveState();"></td>
       <td><input type="number" class="score-input" value="${p.handicap}" ${isAdmin ? '' : 'readonly'} oninput="players[${pIdx}].handicap=this.value; updateCalculations();" style="background:#f9f9f9"></td>
@@ -252,13 +252,10 @@ function renderPlayers() {
     for(let i=0; i<18; i++) {
       trScore += `<td><input type="number" class="score-input" data-p="${pIdx}" data-h="${i}" value="${scores[i] || ''}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
     }
-    // Updated TOT cell to handle two lines
-    trScore += `<td class="final-total-box" id="tot-gross-${pIdx}" style="line-height:1.2; padding: 5px 0;">
-                  <div style="font-size: 1.1rem; font-weight: 900;">0</div>
-                  <div style="font-size: 0.6rem; opacity: 0.8; font-weight: 400;">SHOTS</div>
-                </td></tr>`;
+    // Clean TOT Column: Just the Gross Score
+    trScore += `<td class="final-total-box" id="tot-gross-${pIdx}" style="font-size: 1.2rem; font-weight: 900;">0</td></tr>`;
     
-    // 2. Build Net/Pts Row
+    // 2. Net/Pts Row
     let trNetCells = ''; 
     for(let i=0; i<18; i++) {
       trNetCells += `<td id="net-${pIdx}-${i}">-</td>`;
@@ -267,10 +264,7 @@ function renderPlayers() {
     tbody.innerHTML += trScore + `<tr style="background: rgba(0,0,0,0.02)">
       <td colspan="3" style="text-align:right; font-weight:800; color:#aaa; font-size:0.5rem; padding-right:5px">NET/PTS</td>
       ${trNetCells}
-      <td id="p-total-${pIdx}" style="background:#333; color:white; font-weight:bold; line-height:1.2; padding: 5px 0;">
-        <div class="pts-val">0</div>
-        <div style="font-size: 0.5rem; font-weight: 400;">PTS</div>
-      </td>
+      <td id="p-total-${pIdx}" style="background:#333; color:white; font-weight:bold; font-size: 0.9rem;">0</td>
     </tr>`;
   });
   updateCalculations();
@@ -294,8 +288,6 @@ function updateCalculations() {
       const netCell = document.getElementById(`net-${pIdx}-${hIdx}`);
       if (!isNaN(gross) && gross > 0) {
         rdGrossTotal += gross;
-        
-        // Style the Gross Score
         if (gross - par <= -2) inp.classList.add('eagle'); 
         else if (gross - par === -1) inp.classList.add('birdie'); 
         else if (gross - par === 0) inp.classList.add('par-gross'); 
@@ -304,7 +296,6 @@ function updateCalculations() {
         const strokes = Math.floor(hcap / 18) + (si <= (hcap % 18) ? 1 : 0);
         const net = gross - strokes;
         let pts = (net - par <= -2) ? 4 : (net - par === -1) ? 3 : (net - par === 0) ? 2 : (net - par === 1) ? 1 : 0;
-        
         if (pts === 0) inp.classList.add('blob-state');
         rdStablefordTotal += pts;
         netCell.innerHTML = `<span style="font-size:0.6rem; color:#888;">${net}</span><span class="pts-label">${pts}</span>`;
@@ -315,13 +306,12 @@ function updateCalculations() {
 
     if (currentViewingRound === 1) p.r1Total = rdStablefordTotal; else p.r2Total = rdStablefordTotal;
     
-    // Update the Gross Total (Top Row)
-    const grossBox = document.getElementById(`tot-gross-${pIdx}`);
-    if(grossBox) grossBox.querySelector('div').textContent = rdGrossTotal;
+    // Update display values
+    const grossDisplay = document.getElementById(`tot-gross-${pIdx}`);
+    if(grossDisplay) grossDisplay.textContent = rdGrossTotal;
     
-    // Update the Stableford Total (Bottom Row)
-    const ptsBox = document.getElementById(`p-total-${pIdx}`);
-    if(ptsBox) ptsBox.querySelector('.pts-val').textContent = rdStablefordTotal;
+    const ptsDisplay = document.getElementById(`p-total-${pIdx}`);
+    if(ptsDisplay) ptsDisplay.textContent = rdStablefordTotal;
   });
   updateTeamTables();
   saveState();
@@ -331,14 +321,34 @@ function updateTeamTables() {
   const bodies = { A: document.getElementById('team-a-body'), B: document.getElementById('team-b-body') };
   const totals = { A: {r1:0, r2:0}, B: {r1:0, r2:0} };
   bodies.A.innerHTML = ''; bodies.B.innerHTML = '';
+  
+  // Highlight class based on active round
+  const h1 = currentViewingRound === 1 ? 'style="background: rgba(46, 125, 50, 0.1); font-weight: 800; color: var(--emerald-dark);"' : '';
+  const h2 = currentViewingRound === 2 ? 'style="background: rgba(21, 101, 192, 0.1); font-weight: 800; color: var(--round2-blue);"' : '';
+
   players.forEach(p => {
-    bodies[p.team].innerHTML += `<tr><td class="team-player-name">${p.name}</td><td>${p.r1Total}</td><td>${p.r2Total}</td><td style="font-weight:900">${p.r1Total+p.r2Total}</td></tr>`;
+    bodies[p.team].innerHTML += `<tr>
+      <td class="team-player-name">${p.name}</td>
+      <td ${h1}>${p.r1Total}</td>
+      <td ${h2}>${p.r2Total}</td>
+      <td style="font-weight:900; background: #fcfcfc;">${p.r1Total+p.r2Total}</td>
+    </tr>`;
     totals[p.team].r1 += p.r1Total; totals[p.team].r2 += p.r2Total;
   });
+  
   ['A', 'B'].forEach(t => {
-    document.getElementById(`t${t}-r1`).textContent = totals[t].r1;
-    document.getElementById(`t${t}-r2`).textContent = totals[t].r2;
-    document.getElementById(`t${t}-grand`).textContent = totals[t].r1 + totals[t].r2;
+    const r1 = totals[t].r1;
+    const r2 = totals[t].r2;
+    const grand = r1 + r2;
+    const tableId = t === 'A' ? 'team-a-body' : 'team-b-body';
+    const accentColor = currentViewingRound === 1 ? 'var(--emerald-dark)' : 'var(--round2-blue)';
+    
+    document.getElementById(tableId).parentElement.querySelector('.team-total-row').innerHTML = `
+      <td style="text-align: left; padding-left: 15px; font-weight: 900; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Team Total</td>
+      <td ${h1}>${r1}</td>
+      <td ${h2}>${r2}</td>
+      <td style="color: ${accentColor}; font-weight:900; font-size: 1rem; background: #f0f0f0;">${grand}</td>
+    `;
   });
 }
 
@@ -350,14 +360,24 @@ function saveState() {
 function toggleRound() {
   currentViewingRound = currentViewingRound === 1 ? 2 : 1;
   const themeColor = currentViewingRound === 1 ? 'var(--emerald-dark)' : 'var(--round2-blue)';
+  
+  // Update Main Card Theme
   document.getElementById('scorecard').className = currentViewingRound === 1 ? 'round-1-theme' : 'round-2-theme';
+  
+  // Update Round Indicator
   const indicator = document.getElementById('round-display');
   indicator.style.background = themeColor;
   indicator.textContent = `ROUND ${currentViewingRound}`;
+  
+  // Update Button Label
   document.getElementById('next-rd-label').textContent = currentViewingRound === 1 ? 2 : 1;
+  
+  // Update Team Header Colors
   document.getElementById('team-a-head').style.background = themeColor;
   document.getElementById('team-b-head').style.background = themeColor;
-  renderPlayers();
+  
+  // Re-render to apply highlighting
+  renderPlayers(); 
 }
 
 function addPlayer() {
