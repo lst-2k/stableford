@@ -85,6 +85,7 @@
   <button class="image-btn" onclick="saveAsImage()">📸 Export</button>
   <button class="admin-only" onclick="addPlayer()">+ Player</button>
   <button class="admin-only" onclick="exportData()">📤 JSON</button>
+  <button class="admin-only" onclick="resetScores()" style="background: #c0392b;">🔄 Reset Scores</button>
 </div>
 
 <div id="capture-area">
@@ -277,6 +278,25 @@ function saveAsImage() {
   html2canvas(document.getElementById('capture-area'), { scale: 2, backgroundColor: '#e8ecef' }).then(canvas => {
     const link = document.createElement('a'); link.download = `Emerald_Tour_Scorecard.png`; link.href = canvas.toDataURL(); link.click();
   });
+}
+function resetScores() {
+  if (confirm("Are you sure you want to clear the venue and all scores? Player names and teams will be kept.")) {
+    // 1. Clear Venue Name
+    document.getElementById('venue-name').value = '';
+
+    // 2. Clear scores for every player
+    players.forEach(p => {
+      p.r1Scores = Array(18).fill('');
+      p.r2Scores = Array(18).fill('');
+      p.r1Total = 0;
+      p.r2Total = 0;
+    });
+
+    // 3. Re-render the UI and save the empty state
+    renderPlayers();
+    saveState();
+    alert("Scores and venue cleared.");
+  }
 }
 </script>
 </body>
