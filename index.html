@@ -280,11 +280,15 @@ function saveAsImage() {
   });
 }
 function resetScores() {
-  if (confirm("Are you sure you want to clear the venue and all scores? Player names and teams will be kept.")) {
+  if (confirm("Are you sure? This will clear Venue, Pars, S.I., and all Scores. Names will be kept.")) {
     // 1. Clear Venue Name
     document.getElementById('venue-name').value = '';
 
-    // 2. Clear scores for every player
+    // 2. Clear Par and S.I. Inputs
+    document.querySelectorAll('.par-input').forEach(input => input.value = '-');
+    document.querySelectorAll('.si-input').forEach(input => input.value = '-');
+
+    // 3. Clear scores for every player
     players.forEach(p => {
       p.r1Scores = Array(18).fill('');
       p.r2Scores = Array(18).fill('');
@@ -292,10 +296,9 @@ function resetScores() {
       p.r2Total = 0;
     });
 
-    // 3. Re-render the UI and save the empty state
+    // 4. Re-render the UI and save the empty state
     renderPlayers();
     saveState();
-    alert("Scores and venue cleared.");
   }
 }
 </script>
