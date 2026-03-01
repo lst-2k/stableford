@@ -31,7 +31,7 @@
 
     #capture-area { padding: 10px; border-radius: 16px; border: 1px solid var(--glass-border); }
 
-    /* REDUCED TABLE DIMENSIONS (~20%) */
+    /* MAIN SCORECARD TABLE */
     .table-wrapper { 
       width: 100%; overflow-x: auto; border-radius: 10px; box-shadow: var(--shadow-soft); 
       margin-bottom: 15px; background: var(--glass-bg); border: 1px solid var(--glass-border);
@@ -63,12 +63,34 @@
     .round-2-theme .final-total-box { background: var(--round2-dark) !important; }
     .pts-label { font-weight: 800; font-size: 0.8rem; display: block; }
 
-    /* TEAM TABLES */
-    .team-table { width: 100%; border-radius: 10px; overflow: hidden; background: white; box-shadow: var(--shadow-soft); font-size: 0.8rem; border-collapse: collapse; }
-    .team-table thead th { padding: 10px; color: white; font-weight: 900; }
+    /* TEAM TABLES ALIGNMENT FIX */
+    .team-container { 
+      display: flex; 
+      gap: 15px; 
+      justify-content: space-between; 
+      margin-top: 10px;
+    }
+    .team-table-wrapper { flex: 1; min-width: 0; }
+    .team-table { 
+      width: 100%; 
+      table-layout: fixed; /* Forces consistent columns */
+      border-radius: 10px; 
+      overflow: hidden; 
+      background: white; 
+      box-shadow: var(--shadow-soft); 
+      font-size: 0.8rem; 
+      border-collapse: collapse; 
+    }
+    /* Specific Column Widths for alignment */
+    .team-table th:nth-child(1), .team-table td:nth-child(1) { width: 45%; }
+    .team-table th:nth-child(2), .team-table td:nth-child(2) { width: 18.33%; }
+    .team-table th:nth-child(3), .team-table td:nth-child(3) { width: 18.33%; }
+    .team-table th:nth-child(4), .team-table td:nth-child(4) { width: 18.33%; }
+
+    .team-table thead th { padding: 8px 4px; color: white; font-weight: 900; }
     .team-header-row th { background: #f1f3f5 !important; color: #666 !important; font-size: 0.6rem !important; padding: 4px !important; }
-    .team-table td { padding: 8px 6px; text-align: center; border-bottom: 1px solid #eee; }
-    .team-player-name { text-align: left !important; padding-left: 15px !important; color: #333; font-weight: 700; }
+    .team-table td { padding: 8px 4px; text-align: center; border-bottom: 1px solid #eee; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .team-player-name { text-align: left !important; padding-left: 10px !important; color: #333; font-weight: 700; }
     .team-total-row { background: #f8f9fa; font-weight: 900; }
 
     #controls { text-align: center; margin-bottom: 10px; }
@@ -76,6 +98,10 @@
     .toggle-rd { background: #222; }
     .image-btn { background: #8e44ad; }
     .admin-only { display: none; background: #666; }
+
+    @media (max-width: 600px) {
+      .team-container { flex-direction: column; }
+    }
   </style>
 </head>
 <body>
@@ -84,8 +110,8 @@
   <button class="toggle-rd" onclick="toggleRound()">Round <span id="next-rd-label">2</span></button>
   <button class="image-btn" onclick="saveAsImage()">📸 Export</button>
   <button class="admin-only" onclick="addPlayer()">+ Player</button>
-  <button class="admin-only" onclick="exportData()">📤 JSON</button>
-  <button class="admin-only" onclick="resetScores()" style="background: #c0392b;">🔄 Reset Scores</button>
+  <button class="admin-only" onclick="exportData()">💾 JSON</button>
+  <button class="admin-only" onclick="resetScores()" style="background: #c0392b;">🗑️ Reset Scores</button>
 </div>
 
 <div id="capture-area">
@@ -125,23 +151,26 @@
   </div>
 
   <div class="team-container">
-    <table class="team-table">
-        <thead>
-            <tr id="team-a-head" style="background: var(--emerald-dark);"><th colspan="4"><input type="text" id="team-a-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase; outline:none;" value="Team A" readonly></th></tr>
-            <tr class="team-header-row"><th>PLAYER NAME</th><th>RD 1</th><th>RD 2</th><th>TOTAL</th></tr>
-        </thead>
-        <tbody id="team-a-body"></tbody>
-        <tr class="team-total-row"></tr>
-    </table>
-    <br>
-    <table class="team-table">
-        <thead>
-            <tr id="team-b-head" style="background: var(--emerald-dark);"><th colspan="4"><input type="text" id="team-b-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase; outline:none;" value="Team B" readonly></th></tr>
-            <tr class="team-header-row"><th>PLAYER NAME</th><th>RD 1</th><th>RD 2</th><th>TOTAL</th></tr>
-        </thead>
-        <tbody id="team-b-body"></tbody>
-        <tr class="team-total-row"></tr>
-    </table>
+    <div class="team-table-wrapper">
+        <table class="team-table">
+            <thead>
+                <tr id="team-a-head" style="background: var(--emerald-dark);"><th colspan="4"><input type="text" id="team-a-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase; outline:none;" value="Team A" readonly></th></tr>
+                <tr class="team-header-row"><th style="text-align:left; padding-left:10px;">PLAYER</th><th>R1</th><th>R2</th><th>TOT</th></tr>
+            </thead>
+            <tbody id="team-a-body"></tbody>
+            <tr class="team-total-row" id="team-a-footer"></tr>
+        </table>
+    </div>
+    <div class="team-table-wrapper">
+        <table class="team-table">
+            <thead>
+                <tr id="team-b-head" style="background: var(--emerald-dark);"><th colspan="4"><input type="text" id="team-b-name" style="background:transparent; color:white; border:none; text-align:center; font-weight:900; width:100%; text-transform:uppercase; outline:none;" value="Team B" readonly></th></tr>
+                <tr class="team-header-row"><th style="text-align:left; padding-left:10px;">PLAYER</th><th>R1</th><th>R2</th><th>TOT</th></tr>
+            </thead>
+            <tbody id="team-b-body"></tbody>
+            <tr class="team-total-row" id="team-b-footer"></tr>
+        </table>
+    </div>
   </div>
 </div>
 
@@ -236,13 +265,15 @@ function updateTeamTables() {
   bodies.A.innerHTML = ''; bodies.B.innerHTML = '';
   const h1 = currentViewingRound === 1 ? 'style="background:rgba(46,125,50,0.1); font-weight:800; color:var(--emerald-dark)"' : '';
   const h2 = currentViewingRound === 2 ? 'style="background:rgba(21,101,192,0.1); font-weight:800; color:var(--round2-blue)"' : '';
+  
   players.forEach(p => {
     bodies[p.team].innerHTML += `<tr><td class="team-player-name">${p.name}</td><td ${h1}>${p.r1Total}</td><td ${h2}>${p.r2Total}</td><td style="font-weight:900; background:#fcfcfc">${p.r1Total+p.r2Total}</td></tr>`;
     totals[p.team].r1 += p.r1Total; totals[p.team].r2 += p.r2Total;
   });
+  
   ['A', 'B'].forEach(t => {
-    const tableId = t === 'A' ? 'team-a-body' : 'team-b-body';
-    document.getElementById(tableId).parentElement.querySelector('.team-total-row').innerHTML = `<td style="text-align:left; padding-left:15px; font-weight:900; text-transform:uppercase; font-size:0.7rem;">Team Total</td><td ${h1}>${totals[t].r1}</td><td ${h2}>${totals[t].r2}</td><td style="color:${currentViewingRound==1?'var(--emerald-dark)':'var(--round2-blue)'}; font-weight:900; font-size:0.9rem; background:#f0f0f0;">${totals[t].r1+totals[t].r2}</td>`;
+    const footerId = t === 'A' ? 'team-a-footer' : 'team-b-footer';
+    document.getElementById(footerId).innerHTML = `<td style="text-align:left; padding-left:10px; font-weight:900; text-transform:uppercase; font-size:0.6rem;">Team Total</td><td ${h1}>${totals[t].r1}</td><td ${h2}>${totals[t].r2}</td><td style="color:${currentViewingRound==1?'var(--emerald-dark)':'var(--round2-blue)'}; font-weight:900; font-size:0.9rem; background:#f0f0f0;">${totals[t].r1+totals[t].r2}</td>`;
   });
 }
 
@@ -279,24 +310,18 @@ function saveAsImage() {
     const link = document.createElement('a'); link.download = `Emerald_Tour_Scorecard.png`; link.href = canvas.toDataURL(); link.click();
   });
 }
+
 function resetScores() {
   if (confirm("Are you sure? This will clear Venue, Pars, S.I., and all Scores. Names will be kept.")) {
-    // 1. Clear Venue Name
     document.getElementById('venue-name').value = '';
-
-    // 2. Clear Par and S.I. Inputs
-    document.querySelectorAll('.par-input').forEach(input => input.value = '-');
-    document.querySelectorAll('.si-input').forEach(input => input.value = '-');
-
-    // 3. Clear scores for every player
+    document.querySelectorAll('.par-input').forEach(input => input.value = '4');
+    document.querySelectorAll('.si-input').forEach((input, i) => input.value = i + 1);
     players.forEach(p => {
       p.r1Scores = Array(18).fill('');
       p.r2Scores = Array(18).fill('');
       p.r1Total = 0;
       p.r2Total = 0;
     });
-
-    // 4. Re-render the UI and save the empty state
     renderPlayers();
     saveState();
   }
