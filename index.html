@@ -74,6 +74,8 @@
       table-layout: fixed; /* ESSENTIAL FOR WIDTHS */
       border-radius: 10px; 
       overflow: hidden; 
+	  text-overflow: ellipsis;
+		white-space: nowrap;
       background: white; 
       box-shadow: var(--shadow-soft); 
       font-size: 0.8rem; 
@@ -81,10 +83,10 @@
     }
 
     /* SPECIFIC TEAM COLUMN WIDTHS - Name gets 50%, scores get ~16% each */
-    .team-table th:nth-child(1), .team-table td:nth-child(1) { width: 50%; }
-    .team-table th:nth-child(2), .team-table td:nth-child(2) { width: 16%; }
-    .team-table th:nth-child(3), .team-table td:nth-child(3) { width: 16%; }
-    .team-table th:nth-child(4), .team-table td:nth-child(4) { width: 18%; }
+    .team-header-row th:nth-child(1) { width: 55%; } /* PLAYER */
+	.team-header-row th:nth-child(2) { width: 15%; } /* R1 */
+	.team-header-row th:nth-child(3) { width: 15%; } /* R2 */
+	.team-header-row th:nth-child(4) { width: 15%; } /* TOT */
 
     .team-table thead th { padding: 8px 4px; color: white; font-weight: 900; }
     .team-header-row th { background: #f1f3f5 !important; color: #666 !important; font-size: 0.6rem !important; padding: 4px !important; }
