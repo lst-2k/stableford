@@ -16,14 +16,14 @@
       --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
     }
 
+    * { box-sizing: border-box; } /* Ensures padding doesn't push widths out */
+
     html, body { width: 100%; margin: 0; padding: 0; background: #e8ecef; background-image: linear-gradient(135deg, #e8ecef 0%, #c8e6c9 100%); background-attachment: fixed; }
-    body { font-family: 'Inter', -apple-system, sans-serif; padding: 10px; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; padding: 10px; }
     
-    /* KILL SPINNERS */
     input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
-    /* HEADER */
     .header-block { text-align: center; margin-bottom: 15px; }
     .brand-main { font-size: 1.1rem; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; color: var(--emerald-dark); margin: 0; }
     .sub-brand { font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: #555; margin: 2px 0; }
@@ -31,12 +31,11 @@
 
     #capture-area { padding: 10px; border-radius: 16px; border: 1px solid var(--glass-border); }
 
-    /* MAIN SCORECARD */
     .table-wrapper { 
       width: 100%; overflow-x: auto; border-radius: 10px; box-shadow: var(--shadow-soft); 
       margin-bottom: 15px; background: var(--glass-bg); border: 1px solid var(--glass-border);
     }
-    table { border-collapse: separate; border-spacing: 0; }
+    table { border-collapse: separate; border-spacing: 0; width: 100%; }
     th { color: white; text-transform: uppercase; font-size: 0.6rem; letter-spacing: 1px; padding: 6px 2px; }
     td { border-bottom: 1px solid rgba(0,0,0,0.05); padding: 2px; text-align: center; }
     
@@ -48,11 +47,9 @@
     .col-hole { width: 32px; min-width: 32px; }
     .col-total { width: 50px; min-width: 50px; }
 
-    /* INPUTS */
     .score-input, .par-input, .si-input { width: 28px; height: 28px; border: 1px solid #ddd; text-align: center; border-radius: 4px; font-weight: 700; background: white; font-size: 0.8rem; outline: none; margin: 0 auto; display: block; }
     .player-name-input { font-weight: 800; border: none; background: transparent; color: #333; font-size: 0.8rem; padding-left: 5px; width: 100%; outline: none; }
     
-    /* SCORING VISUALS */
     .eagle { border: 2px solid #b8860b !important; border-radius: 50%; width: 24px; height: 24px; line-height: 22px; margin: 0 auto; background: #ffd700 !important; color: #000 !important; }
     .birdie { background: #d32f2f !important; color: white !important; border-radius: 50%; width: 24px; height: 24px; line-height: 24px; margin: 0 auto; }
     .par-gross { background: #2e7d32 !important; color: white !important; border-radius: 50%; width: 24px; height: 24px; line-height: 24px; margin: 0 auto; }
@@ -64,7 +61,7 @@
     .round-2-theme .final-total-box { background: var(--round2-dark) !important; }
     .pts-label { font-weight: 800; font-size: 0.8rem; display: block; }
 
-    /* TEAM TABLES ALIGNMENT & WIDTH ADJUSTMENTS */
+    /* TEAM TABLES ALIGNMENT */
     .team-container { 
       display: flex; 
       gap: 15px; 
@@ -74,7 +71,7 @@
     .team-table-wrapper { flex: 1; min-width: 0; }
     .team-table { 
       width: 100%; 
-      table-layout: fixed; 
+      table-layout: fixed; /* ESSENTIAL FOR WIDTHS */
       border-radius: 10px; 
       overflow: hidden; 
       background: white; 
@@ -83,17 +80,16 @@
       border-collapse: collapse; 
     }
 
-    /* UPDATED COLUMN WIDTH RATIOS */
-    /* Widened Name (55%) and narrowed score columns (15% each) */
-    .team-table th:nth-child(1), .team-table td:nth-child(1) { width: 55%; }
-    .team-table th:nth-child(2), .team-table td:nth-child(2) { width: 15%; }
-    .team-table th:nth-child(3), .team-table td:nth-child(3) { width: 15%; }
-    .team-table th:nth-child(4), .team-table td:nth-child(4) { width: 15%; }
+    /* SPECIFIC TEAM COLUMN WIDTHS - Name gets 50%, scores get ~16% each */
+    .team-table th:nth-child(1), .team-table td:nth-child(1) { width: 50%; }
+    .team-table th:nth-child(2), .team-table td:nth-child(2) { width: 16%; }
+    .team-table th:nth-child(3), .team-table td:nth-child(3) { width: 16%; }
+    .team-table th:nth-child(4), .team-table td:nth-child(4) { width: 18%; }
 
     .team-table thead th { padding: 8px 4px; color: white; font-weight: 900; }
     .team-header-row th { background: #f1f3f5 !important; color: #666 !important; font-size: 0.6rem !important; padding: 4px !important; }
     .team-table td { padding: 8px 4px; text-align: center; border-bottom: 1px solid #eee; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .team-player-name { text-align: left !important; padding-left: 12px !important; color: #333; font-weight: 700; }
+    .team-player-name { text-align: left !important; padding-left: 12px !important; color: #333; font-weight: 700; font-size: 0.75rem; }
     .team-total-row { background: #f8f9fa; font-weight: 900; }
 
     #controls { text-align: center; margin-bottom: 10px; }
@@ -276,7 +272,7 @@ function updateTeamTables() {
   
   ['A', 'B'].forEach(t => {
     const footerId = t === 'A' ? 'team-a-footer' : 'team-b-footer';
-    document.getElementById(footerId).innerHTML = `<td style="text-align:left; padding-left:12px; font-weight:900; text-transform:uppercase; font-size:0.55rem; color:#555;">Team Total</td><td ${h1}>${totals[t].r1}</td><td ${h2}>${totals[t].r2}</td><td style="color:${currentViewingRound==1?'var(--emerald-dark)':'var(--round2-blue)'}; font-weight:900; font-size:0.85rem; background:#f0f0f0;">${totals[t].r1+totals[t].r2}</td>`;
+    document.getElementById(footerId).innerHTML = `<td style="text-align:left; padding-left:12px; font-weight:900; text-transform:uppercase; font-size:0.6rem; color:#555;">Team Total</td><td ${h1}>${totals[t].r1}</td><td ${h2}>${totals[t].r2}</td><td style="color:${currentViewingRound==1?'var(--emerald-dark)':'var(--round2-blue)'}; font-weight:900; font-size:0.85rem; background:#f0f0f0;">${totals[t].r1+totals[t].r2}</td>`;
   });
 }
 
