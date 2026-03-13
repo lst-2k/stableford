@@ -41,6 +41,7 @@
     .round-1-theme th { background: linear-gradient(180deg, var(--emerald-primary), var(--emerald-dark)); }
     .round-2-theme th { background: linear-gradient(180deg, var(--round2-blue), var(--round2-dark)); }
     
+    .col-del { width: 30px; display: none; }
     .col-name { width: 140px; min-width: 140px; }
     .col-hcp, .col-team { width: 40px; min-width: 40px; }
     .col-total { width: 50px; min-width: 50px; background: rgba(0,0,0,0.05); }
@@ -48,7 +49,6 @@
     .score-input, .par-input, .si-input { width: 28px; height: 28px; border: 1px solid #ddd; text-align: center; border-radius: 4px; font-weight: 700; background: white; font-size: 0.8rem; outline: none; margin: 0 auto; display: block; }
     .player-name-input { font-weight: 800; border: none; background: transparent; color: #333; font-size: 0.8rem; padding-left: 5px; width: 100%; outline: none; }
     
-    /* Scoring Badges */
     .eagle { border: 2px solid #b8860b !important; border-radius: 50%; width: 24px; height: 24px; line-height: 22px; margin: 0 auto; background: #ffd700 !important; color: #000 !important; }
     .birdie { background: #d32f2f !important; color: white !important; border-radius: 50%; width: 24px; height: 24px; line-height: 24px; margin: 0 auto; }
     .par-gross { background: #2e7d32 !important; color: white !important; border-radius: 50%; width: 24px; height: 24px; line-height: 24px; margin: 0 auto; }
@@ -60,7 +60,6 @@
     .round-2-theme .final-total-box { background: var(--round2-dark) !important; }
     .pts-label { font-weight: 800; font-size: 0.8rem; display: block; }
 
-    /* Team & Individual Layout */
     .dashboard-grid { display: flex; flex-direction: column; gap: 20px; }
     .team-container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
     
@@ -74,11 +73,11 @@
 
     #controls { text-align: center; margin-bottom: 15px; position: sticky; top: 0; z-index: 100; background: rgba(232, 236, 239, 0.9); padding: 10px; border-radius: 0 0 15px 15px; }
     button { padding: 10px 16px; font-size: 0.75rem; margin: 3px; cursor: pointer; border: none; border-radius: 6px; color: white; font-weight: 700; text-transform: uppercase; transition: 0.2s; }
-    button:active { transform: scale(0.95); }
     .toggle-rd { background: #222; }
     .image-btn { background: #8e44ad; }
     .admin-only { display: none; background: #666; }
     .end-event-btn { background: #27ae60; }
+    .del-btn { color: #e74c3c; cursor: pointer; font-weight: bold; border: none; background: transparent; }
 
     @media (max-width: 700px) {
       .col-name { width: 110px; min-width: 110px; }
@@ -92,7 +91,7 @@
   <button class="toggle-rd" onclick="toggleRound()">View Round <span id="next-rd-label">2</span></button>
   <button class="image-btn" onclick="saveAsImage()">📸 Export Standing</button>
   <button class="admin-only" onclick="addPlayer()">+ Player</button>
-  <button class="admin-only" onclick="addTeam()">+ Team</button>
+  <button class="admin-only" onclick="removeTeam()">- Remove Team</button>
   <button class="admin-only end-event-btn" onclick="endEvent()">🏆 Finalize Week</button>
   <button class="admin-only" onclick="exportData()">💾 JSON Backup</button>
   <button class="admin-only" onclick="resetScores()" style="background: #c0392b;">🗑️ Reset All</button>
@@ -113,21 +112,12 @@
     <table id="scorecard" class="round-1-theme">
       <thead>
         <tr>
+          <th class="col-del admin-only">DEL</th>
           <th class="col-name" style="text-align:left; padding-left:15px">Player</th>
           <th class="col-hcp">Hcp</th>
           <th class="col-team">T</th>
           <script>for(let i=1; i<=18; i++) document.write(`<th>${i}</th>`);</script>
           <th class="col-total">TOT</th>
-        </tr>
-        <tr style="background: #fafafa;">
-          <td colspan="3" style="text-align:right; font-weight:800; color:#aaa; font-size:0.5rem; padding-right:5px">PAR</td>
-          <script>for(let i=0; i<18; i++) document.write(`<td><input type="number" class="par-input" value="4" oninput="updateCalculations()"></td>`);</script>
-          <td>-</td>
-        </tr>
-        <tr style="background: #fafafa;">
-          <td colspan="3" style="text-align:right; font-weight:800; color:#aaa; font-size:0.5rem; padding-right:5px">S.I.</td>
-          <script>for(let i=0; i<18; i++) document.write(`<td><input type="number" class="si-input" value="${i+1}" oninput="updateCalculations()"></td>`);</script>
-          <td>-</td>
         </tr>
       </thead>
       <tbody id="players-body"></tbody>
@@ -150,7 +140,6 @@
             <tbody id="individual-leaderboard-body"></tbody>
         </table>
     </div>
-
     <div id="team-container" class="team-container"></div>
   </div>
 </div>
@@ -161,13 +150,14 @@ let teams = ['A', 'B'];
 let seasonStandings = {}; 
 let previousRanks = {};
 let currentViewingRound = 1;
-const STORAGE_KEY = 'emerald_tour_v31_season';
+const STORAGE_KEY = 'emerald_tour_v34_season';
 
 window.onload = () => { checkAdmin(); loadData(); };
 
 function checkAdmin() {
   if (new URLSearchParams(window.location.search).get('admin') === 'true') {
-    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'inline-block');
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'table-cell');
+    document.querySelectorAll('button.admin-only').forEach(el => el.style.display = 'inline-block');
     document.querySelectorAll('input').forEach(el => el.readOnly = false);
   }
 }
@@ -181,10 +171,6 @@ function loadData() {
     seasonStandings = state.seasonStandings || {};
     previousRanks = state.previousRanks || {};
     document.getElementById('venue-name').value = state.venueName || '';
-    const parInputs = document.querySelectorAll('.par-input');
-    const siInputs = document.querySelectorAll('.si-input');
-    if (state.pars) state.pars.forEach((v, i) => { if(parInputs[i]) parInputs[i].value = v; });
-    if (state.sis) state.sis.forEach((v, i) => { if(siInputs[i]) siInputs[i].value = v; });
     renderPlayers();
   }
 }
@@ -196,20 +182,15 @@ function renderPlayers() {
   players.forEach((p, pIdx) => {
     const scores = currentViewingRound === 1 ? p.r1Scores : p.r2Scores;
     let trScore = `<tr>
+      <td class="admin-only" style="${isAdmin ? 'display:table-cell' : 'display:none'}"><button class="del-btn" onclick="deletePlayer(${pIdx})">✕</button></td>
       <td style="text-align:left; padding-left:8px"><input class="player-name-input" value="${p.name}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].name=this.value; saveState();"></td>
       <td><input type="number" class="score-input" value="${p.handicap}" ${isAdmin ? '' : 'readonly'} oninput="players[${pIdx}].handicap=this.value; updateCalculations();"></td>
       <td><input class="score-input" style="width:35px" value="${p.team}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].team=this.value.toUpperCase(); renderPlayers();"></td>`;
-    
-    for(let i=0; i<18; i++) {
-        trScore += `<td><input type="number" class="score-input" data-p="${pIdx}" data-h="${i}" value="${scores[i] || ''}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
-    }
-    
+    for(let i=0; i<18; i++) trScore += `<td><input type="number" class="score-input" data-p="${pIdx}" data-h="${i}" value="${scores[i] || ''}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
     trScore += `<td class="final-total-box" id="tot-gross-${pIdx}">0</td></tr>`;
-    
-    let trNet = ''; 
-    for(let i=0; i<18; i++) trNet += `<td id="net-${pIdx}-${i}" style="padding:1px 0;">-</td>`;
-    
+    let trNet = ''; for(let i=0; i<18; i++) trNet += `<td id="net-${pIdx}-${i}" style="padding:1px 0;">-</td>`;
     tbody.innerHTML += trScore + `<tr style="background: rgba(0,0,0,0.02); height:22px">
+        <td class="admin-only" style="${isAdmin ? 'display:table-cell' : 'display:none'}"></td>
         <td colspan="3" style="text-align:right; font-weight:700; color:#aaa; font-size:0.45rem; padding-right:5px">NET/PTS</td>
         ${trNet}
         <td id="p-total-${pIdx}" style="background:#333; color:white; font-weight:bold; font-size:0.75rem;">0</td>
@@ -218,37 +199,43 @@ function renderPlayers() {
   updateCalculations();
 }
 
+function deletePlayer(idx) {
+    if(confirm(`Delete ${players[idx].name}?`)) {
+        players.splice(idx, 1);
+        renderPlayers();
+        saveState();
+    }
+}
+
+function removeTeam() {
+    const t = prompt("Which Team Letter to remove?").toUpperCase();
+    if (t && teams.includes(t)) {
+        teams = teams.filter(item => item !== t);
+        updateTeamTables();
+        saveState();
+    }
+}
+
 function updateCalculations() {
   players.forEach((p, pIdx) => {
     let rdStb = 0, rdGross = 0;
     const hcap = parseInt(p.handicap) || 0;
     const inputs = document.querySelectorAll(`.score-input[data-p="${pIdx}"]`);
-    
     inputs.forEach((inp, hIdx) => {
-      const gross = parseInt(inp.value);
-      const par = parseInt(document.querySelectorAll('.par-input')[hIdx].value) || 4;
-      const si = parseInt(document.querySelectorAll('.si-input')[hIdx].value) || (hIdx + 1);
-      
+      const gross = parseInt(inp.value), par = 4, si = (hIdx + 1); 
       inp.classList.remove('birdie', 'eagle', 'par-gross', 'bogey-plus', 'blob-state');
       if (currentViewingRound === 1) p.r1Scores[hIdx] = inp.value; else p.r2Scores[hIdx] = inp.value;
-      
       const netCell = document.getElementById(`net-${pIdx}-${hIdx}`);
       if (!isNaN(gross) && gross > 0) {
         rdGross += gross;
-        if (gross-par <= -2) inp.classList.add('eagle'); 
-        else if (gross-par === -1) inp.classList.add('birdie'); 
-        else if (gross-par === 0) inp.classList.add('par-gross'); 
-        else inp.classList.add('bogey-plus');
-        
-        const hcapStrokes = Math.floor(hcap/18) + (si <= (hcap%18) ? 1 : 0);
-        const net = gross - hcapStrokes;
+        if (gross-par <= -2) inp.classList.add('eagle'); else if (gross-par === -1) inp.classList.add('birdie'); else if (gross-par === 0) inp.classList.add('par-gross'); else inp.classList.add('bogey-plus');
+        const net = gross - (Math.floor(hcap/18) + (si <= (hcap%18) ? 1 : 0));
         let pts = Math.max(0, 2 - (net - par));
         if (pts === 0) inp.classList.add('blob-state');
         rdStb += pts;
         netCell.innerHTML = `<span style="font-size:0.5rem; color:#888; display:block; line-height:1;">${net}</span><span class="pts-label" style="color:${currentViewingRound==1?'var(--emerald-primary)':'var(--round2-blue)'}">${pts}</span>`;
       } else { netCell.textContent = '-'; }
     });
-    
     if (currentViewingRound === 1) p.r1Total = rdStb; else p.r2Total = rdStb;
     document.getElementById(`tot-gross-${pIdx}`).textContent = rdGross;
     document.getElementById(`p-total-${pIdx}`).textContent = rdStb;
@@ -265,7 +252,6 @@ function updateIndividualLeaderboard() {
         const seasonTotal = (seasonStandings[p.name] || 0) + weekTotal;
         return { name: p.name, team: p.team, week: weekTotal, season: seasonTotal };
     }).sort((a, b) => b.season - a.season);
-    
     tbody.innerHTML = sorted.map((p, idx) => {
         const rank = idx + 1;
         const lastRank = previousRanks[p.name];
@@ -274,13 +260,7 @@ function updateIndividualLeaderboard() {
             if (rank < lastRank) trend = '<span style="color:#27ae60">▲</span>';
             else if (rank > lastRank) trend = '<span style="color:#c0392b">▼</span>';
         }
-        return `<tr>
-            <td style="font-weight:800; color:#888;">${rank}</td>
-            <td class="trend-cell">${trend}</td>
-            <td class="team-player-name">${p.name} <span style="font-size:0.6rem; color:#999;">(${p.team})</span></td>
-            <td style="font-weight:700;">${p.week}</td>
-            <td style="font-weight:900; background:#f8f9fa; color:var(--emerald-dark); font-size:1rem;">${p.season}</td>
-        </tr>`;
+        return `<tr><td style="font-weight:800; color:#888;">${rank}</td><td class="trend-cell">${trend}</td><td class="team-player-name">${p.name} <span style="font-size:0.6rem; color:#999;">(${p.team})</span></td><td>${p.week}</td><td style="font-weight:900; background:#f8f9fa; color:var(--emerald-dark); font-size:1rem;">${p.season}</td></tr>`;
     }).join('');
 }
 
@@ -288,7 +268,6 @@ function updateTeamTables() {
   const container = document.getElementById('team-container');
   container.innerHTML = '';
   const theme = currentViewingRound === 1 ? 'var(--emerald-dark)' : 'var(--round2-blue)';
-  
   teams.forEach(tId => {
     const teamPlayers = players.filter(p => p.team === tId);
     let r1T = 0, r2T = 0;
@@ -296,43 +275,24 @@ function updateTeamTables() {
         r1T += (p.r1Total || 0); r2T += (p.r2Total || 0);
         return `<tr><td class="team-player-name">${p.name}</td><td>${p.r1Total}</td><td>${p.r2Total}</td><td style="font-weight:900;">${p.r1Total+p.r2Total}</td></tr>`;
     }).join('');
-
-    container.innerHTML += `
-      <div class="team-table-wrapper">
-        <table class="team-table">
-          <thead>
-            <tr style="background:${theme}"><th colspan="4">TEAM ${tId}</th></tr>
-            <tr class="team-header-row"><th>PLAYER</th><th>R1</th><th>R2</th><th>TOT</th></tr>
-          </thead>
-          <tbody>${rows}</tbody>
-          <tr style="background:#f8f9fa; font-weight:900;">
-            <td class="team-player-name">TOTAL</td><td>${r1T}</td><td>${r2T}</td>
-            <td style="color:${theme}">${r1T+r2T}</td>
-          </tr>
-        </table>
-      </div>`;
+    container.innerHTML += `<div class="team-table-wrapper"><table class="team-table"><thead><tr style="background:${theme}"><th colspan="4">TEAM ${tId}</th></tr><tr class="team-header-row"><th>PLAYER</th><th>R1</th><th>R2</th><th>TOT</th></tr></thead><tbody>${rows}</tbody><tr style="background:#f8f9fa; font-weight:900;"><td class="team-player-name">TOTAL</td><td>${r1T}</td><td>${r2T}</td><td style="color:${theme}">${r1T+r2T}</td></tr></table></div>`;
   });
 }
 
 function endEvent() {
-    if (!confirm("This will lock this week's points into the Season Total and clear the scorecard for next week. Continue?")) return;
-    
-    // Save current ranks for trend arrows next time
+    if (!confirm("Add current points to Season Total and clear the scorecard?")) return;
     const finalSorted = [...players].sort((a, b) => {
         const aS = (seasonStandings[a.name] || 0) + (a.r1Total + a.r2Total);
         const bS = (seasonStandings[b.name] || 0) + (b.r1Total + b.r2Total);
         return bS - aS;
     });
-    
     previousRanks = {};
     finalSorted.forEach((p, i) => previousRanks[p.name] = i + 1);
-
     players.forEach(p => {
         seasonStandings[p.name] = (seasonStandings[p.name] || 0) + (p.r1Total + p.r2Total);
         p.r1Scores = Array(18).fill(''); p.r2Scores = Array(18).fill('');
         p.r1Total = 0; p.r2Total = 0;
     });
-
     document.getElementById('venue-name').value = '';
     saveState();
     renderPlayers();
@@ -350,17 +310,12 @@ function toggleRound() {
 }
 
 function saveState() {
-  const state = { 
-    players, teams, seasonStandings, previousRanks,
-    venueName: document.getElementById('venue-name').value, 
-    pars: Array.from(document.querySelectorAll('.par-input')).map(i => i.value), 
-    sis: Array.from(document.querySelectorAll('.si-input')).map(i => i.value) 
-  };
+  const state = { players, teams, seasonStandings, previousRanks, venueName: document.getElementById('venue-name').value };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 function addPlayer() {
-  const name = prompt("Name:"), team = prompt("Team (A/B/C...):", "A").toUpperCase();
+  const name = prompt("Name:"), team = prompt("Team Letter:", "A").toUpperCase();
   if (name) {
     if (!teams.includes(team)) teams.push(team);
     players.push({ name, handicap: 0, team, r1Scores: Array(18).fill(''), r2Scores: Array(18).fill(''), r1Total: 0, r2Total: 0 });
@@ -368,16 +323,10 @@ function addPlayer() {
   }
 }
 
-function addTeam() {
-    const t = prompt("New Team Letter:").toUpperCase();
-    if (t && !teams.includes(t)) { teams.push(t); updateTeamTables(); saveState(); }
-}
-
 function exportData() {
   const blob = new Blob([localStorage.getItem(STORAGE_KEY)], {type: "application/json"});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = `emerald_season_backup_${new Date().toISOString().split('T')[0]}.json`;
-  a.click();
+  a.download = `emerald_season_backup.json`; a.click();
 }
 
 function saveAsImage() {
@@ -388,7 +337,7 @@ function saveAsImage() {
 }
 
 function resetScores() {
-  if (confirm("DANGER: This wipes the WHOLE SEASON. Use 'Finalize Week' for normal resets.")) {
+  if (confirm("DANGER: This wipes the WHOLE SEASON history.")) {
     localStorage.removeItem(STORAGE_KEY);
     location.reload();
   }
