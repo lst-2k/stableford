@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>LST74 Stableford League</title>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     :root {
       --emerald-primary: #2e7d32;
@@ -166,7 +165,8 @@ let teamLabels = { 'A': 'Team A', 'B': 'Team B' };
 let seasonStandings = {}; 
 let previousRanks = {};
 let currentViewingRound = 1;
-const STORAGE_KEY = 'emerald_tour_v38_season';
+// UNIFIED KEY FOR ALL LST74 VERSIONS
+const STORAGE_KEY = 'lst74_league_data';
 
 window.onload = () => { checkAdmin(); loadData(); };
 
@@ -184,6 +184,7 @@ function loadData() {
 }
 
 function applyState(state) {
+    if (!state) return;
     players = state.players || [];
     teams = state.teams || ['A', 'B'];
     teamLabels = state.teamLabels || { 'A': 'Team A', 'B': 'Team B' };
@@ -302,9 +303,9 @@ function importData(event) {
         try {
             const state = JSON.parse(e.target.result);
             applyState(state);
-            saveState();
-            alert("Scoreboard Imported!");
-        } catch (err) { alert("Invalid JSON."); }
+            saveState(); // Writes it to the new unified local storage key
+            alert("Scoreboard Imported Successfully!");
+        } catch (err) { alert("Error: Invalid JSON file."); console.error(err); }
     };
     reader.readAsText(file);
 }
@@ -383,9 +384,19 @@ function addPlayer() {
 }
 
 function exportData() {
-  const blob = new Blob([localStorage.getItem(STORAGE_KEY)], {type: "application/json"});
+  const state = { 
+    players, 
+    teams, 
+    teamLabels, 
+    seasonStandings, 
+    previousRanks, 
+    venueName: document.getElementById('venue-name').value,
+    pars: Array.from(document.querySelectorAll('.par-input')).map(i => i.value),
+    sis: Array.from(document.querySelectorAll('.si-input')).map(i => i.value)
+  };
+  const blob = new Blob([JSON.stringify(state)], {type: "application/json"});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = `lst74_backup.json`; a.click();
+  a.download = `lst74_export_${new Date().toLocaleDateString()}.json`; a.click();
 }
 
 function resetScores() {
