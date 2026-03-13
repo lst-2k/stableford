@@ -71,6 +71,8 @@
     .team-player-name { text-align: left !important; padding-left: 12px !important; color: #333; font-weight: 700; }
     .trend-cell { font-size: 0.9rem; width: 30px; }
 
+    .team-title-input { background: transparent; color: white; border: none; text-align: center; font-weight: 900; width: 100%; text-transform: uppercase; outline: none; cursor: pointer; }
+
     #controls { text-align: center; margin-bottom: 15px; position: sticky; top: 0; z-index: 100; background: rgba(232, 236, 239, 0.9); padding: 10px; border-radius: 0 0 15px 15px; }
     button { padding: 10px 16px; font-size: 0.75rem; margin: 3px; cursor: pointer; border: none; border-radius: 6px; color: white; font-weight: 700; text-transform: uppercase; transition: 0.2s; }
     .toggle-rd { background: #222; }
@@ -99,7 +101,7 @@
 
 <div id="capture-area">
   <div class="header-block">
-    <div class="brand-main">NEW EMERALD TOUR</div>
+    <div class="brand-main">LST74 Stableford League</div>
     <div class="sub-brand">Season Order of Merit</div>
     <input type="text" id="venue-name" class="venue-input" placeholder="ENTER VENUE" readonly>
   </div>
@@ -132,7 +134,7 @@
                 <tr class="team-header-row">
                     <th style="width:50px">POS</th>
                     <th style="width:40px">+/-</th>
-                    <th style="text-align:left; padding-left:12px;">PLAYER (TEAM)</th>
+                    <th style="text-align:left; padding-left:12px;">PLAYER</th>
                     <th style="width:80px">WEEK PTS</th>
                     <th style="width:100px">SEASON TOTAL</th>
                 </tr>
@@ -147,10 +149,11 @@
 <script>
 let players = [];
 let teams = ['A', 'B'];
+let teamLabels = { 'A': 'Team A', 'B': 'Team B' };
 let seasonStandings = {}; 
 let previousRanks = {};
 let currentViewingRound = 1;
-const STORAGE_KEY = 'emerald_tour_v34_season';
+const STORAGE_KEY = 'emerald_tour_v35_season';
 
 window.onload = () => { checkAdmin(); loadData(); };
 
@@ -168,6 +171,7 @@ function loadData() {
     const state = JSON.parse(saved);
     players = state.players || [];
     teams = state.teams || ['A', 'B'];
+    teamLabels = state.teamLabels || { 'A': 'Team A', 'B': 'Team B' };
     seasonStandings = state.seasonStandings || {};
     previousRanks = state.previousRanks || {};
     document.getElementById('venue-name').value = state.venueName || '';
@@ -197,23 +201,6 @@ function renderPlayers() {
     </tr>`;
   });
   updateCalculations();
-}
-
-function deletePlayer(idx) {
-    if(confirm(`Delete ${players[idx].name}?`)) {
-        players.splice(idx, 1);
-        renderPlayers();
-        saveState();
-    }
-}
-
-function removeTeam() {
-    const t = prompt("Which Team Letter to remove?").toUpperCase();
-    if (t && teams.includes(t)) {
-        teams = teams.filter(item => item !== t);
-        updateTeamTables();
-        saveState();
-    }
 }
 
 function updateCalculations() {
@@ -250,7 +237,7 @@ function updateIndividualLeaderboard() {
     const sorted = players.map(p => {
         const weekTotal = (p.r1Total || 0) + (p.r2Total || 0);
         const seasonTotal = (seasonStandings[p.name] || 0) + weekTotal;
-        return { name: p.name, team: p.team, week: weekTotal, season: seasonTotal };
+        return { name: p.name, week: weekTotal, season: seasonTotal };
     }).sort((a, b) => b.season - a.season);
     tbody.innerHTML = sorted.map((p, idx) => {
         const rank = idx + 1;
@@ -260,7 +247,7 @@ function updateIndividualLeaderboard() {
             if (rank < lastRank) trend = '<span style="color:#27ae60">▲</span>';
             else if (rank > lastRank) trend = '<span style="color:#c0392b">▼</span>';
         }
-        return `<tr><td style="font-weight:800; color:#888;">${rank}</td><td class="trend-cell">${trend}</td><td class="team-player-name">${p.name} <span style="font-size:0.6rem; color:#999;">(${p.team})</span></td><td>${p.week}</td><td style="font-weight:900; background:#f8f9fa; color:var(--emerald-dark); font-size:1rem;">${p.season}</td></tr>`;
+        return `<tr><td style="font-weight:800; color:#888;">${rank}</td><td class="trend-cell">${trend}</td><td class="team-player-name">${p.name}</td><td>${p.week}</td><td style="font-weight:900; background:#f8f9fa; color:var(--emerald-dark); font-size:1rem;">${p.season}</td></tr>`;
     }).join('');
 }
 
@@ -268,6 +255,8 @@ function updateTeamTables() {
   const container = document.getElementById('team-container');
   container.innerHTML = '';
   const theme = currentViewingRound === 1 ? 'var(--emerald-dark)' : 'var(--round2-blue)';
+  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
+  
   teams.forEach(tId => {
     const teamPlayers = players.filter(p => p.team === tId);
     let r1T = 0, r2T = 0;
@@ -275,8 +264,27 @@ function updateTeamTables() {
         r1T += (p.r1Total || 0); r2T += (p.r2Total || 0);
         return `<tr><td class="team-player-name">${p.name}</td><td>${p.r1Total}</td><td>${p.r2Total}</td><td style="font-weight:900;">${p.r1Total+p.r2Total}</td></tr>`;
     }).join('');
-    container.innerHTML += `<div class="team-table-wrapper"><table class="team-table"><thead><tr style="background:${theme}"><th colspan="4">TEAM ${tId}</th></tr><tr class="team-header-row"><th>PLAYER</th><th>R1</th><th>R2</th><th>TOT</th></tr></thead><tbody>${rows}</tbody><tr style="background:#f8f9fa; font-weight:900;"><td class="team-player-name">TOTAL</td><td>${r1T}</td><td>${r2T}</td><td style="color:${theme}">${r1T+r2T}</td></tr></table></div>`;
+    
+    const label = teamLabels[tId] || `Team ${tId}`;
+    container.innerHTML += `<div class="team-table-wrapper"><table class="team-table"><thead><tr style="background:${theme}"><th colspan="4"><input class="team-title-input" value="${label}" ${isAdmin ? '' : 'readonly'} onchange="teamLabels['${tId}']=this.value; saveState();"></th></tr><tr class="team-header-row"><th>PLAYER</th><th>R1</th><th>R2</th><th>TOT</th></tr></thead><tbody>${rows}</tbody><tr style="background:#f8f9fa; font-weight:900;"><td class="team-player-name">TOTAL</td><td>${r1T}</td><td>${r2T}</td><td style="color:${theme}">${r1T+r2T}</td></tr></table></div>`;
   });
+}
+
+function deletePlayer(idx) {
+    if(confirm(`Delete ${players[idx].name}?`)) {
+        players.splice(idx, 1);
+        renderPlayers();
+        saveState();
+    }
+}
+
+function removeTeam() {
+    const t = prompt("Which Team Letter to remove?").toUpperCase();
+    if (t && teams.includes(t)) {
+        teams = teams.filter(item => item !== t);
+        updateTeamTables();
+        saveState();
+    }
 }
 
 function endEvent() {
@@ -310,14 +318,17 @@ function toggleRound() {
 }
 
 function saveState() {
-  const state = { players, teams, seasonStandings, previousRanks, venueName: document.getElementById('venue-name').value };
+  const state = { players, teams, teamLabels, seasonStandings, previousRanks, venueName: document.getElementById('venue-name').value };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 function addPlayer() {
   const name = prompt("Name:"), team = prompt("Team Letter:", "A").toUpperCase();
   if (name) {
-    if (!teams.includes(team)) teams.push(team);
+    if (!teams.includes(team)) {
+        teams.push(team);
+        if(!teamLabels[team]) teamLabels[team] = `Team ${team}`;
+    }
     players.push({ name, handicap: 0, team, r1Scores: Array(18).fill(''), r2Scores: Array(18).fill(''), r1Total: 0, r2Total: 0 });
     renderPlayers();
   }
