@@ -76,7 +76,6 @@
     #controls { text-align: center; margin-bottom: 15px; position: sticky; top: 0; z-index: 100; background: rgba(232, 236, 239, 0.9); padding: 10px; border-radius: 0 0 15px 15px; }
     button { padding: 10px 16px; font-size: 0.75rem; margin: 3px; cursor: pointer; border: none; border-radius: 6px; color: white; font-weight: 700; text-transform: uppercase; transition: 0.2s; }
     .toggle-rd { background: #222; }
-    .image-btn { background: #8e44ad; }
     .import-btn { background: #2980b9; }
     .admin-only { display: none; background: #666; }
     .end-event-btn { background: #27ae60; }
@@ -92,7 +91,6 @@
 
 <div id="controls">
   <button class="toggle-rd" onclick="toggleRound()">View Round <span id="next-rd-label">2</span></button>
-  <button class="image-btn" onclick="saveAsImage()">📸 Export Standing</button>
   <button class="admin-only" onclick="addPlayer()">+ Player</button>
   <button class="admin-only" onclick="removeTeam()">- Team</button>
   <button class="admin-only import-btn" onclick="document.getElementById('file-import').click()">📂 Import</button>
@@ -123,6 +121,18 @@
           <th class="col-team">T</th>
           <script>for(let i=1; i<=18; i++) document.write(`<th>${i}</th>`);</script>
           <th class="col-total">TOT</th>
+        </tr>
+        <tr style="background: #fafafa;">
+          <td class="admin-only"></td>
+          <td colspan="3" style="text-align:right; font-weight:800; color:#aaa; font-size:0.5rem; padding-right:5px">PAR</td>
+          <script>for(let i=0; i<18; i++) document.write(`<td><input type="number" class="par-input" value="4" oninput="updateCalculations()"></td>`);</script>
+          <td>-</td>
+        </tr>
+        <tr style="background: #fafafa;">
+          <td class="admin-only"></td>
+          <td colspan="3" style="text-align:right; font-weight:800; color:#aaa; font-size:0.5rem; padding-right:5px">S.I.</td>
+          <script>for(let i=0; i<18; i++) document.write(`<td><input type="number" class="si-input" value="${i+1}" oninput="updateCalculations()"></td>`);</script>
+          <td>-</td>
         </tr>
       </thead>
       <tbody id="players-body"></tbody>
@@ -156,7 +166,7 @@ let teamLabels = { 'A': 'Team A', 'B': 'Team B' };
 let seasonStandings = {}; 
 let previousRanks = {};
 let currentViewingRound = 1;
-const STORAGE_KEY = 'emerald_tour_v36_season';
+const STORAGE_KEY = 'emerald_tour_v38_season';
 
 window.onload = () => { checkAdmin(); loadData(); };
 
@@ -180,6 +190,12 @@ function applyState(state) {
     seasonStandings = state.seasonStandings || {};
     previousRanks = state.previousRanks || {};
     document.getElementById('venue-name').value = state.venueName || '';
+    
+    const parInputs = document.querySelectorAll('.par-input');
+    const siInputs = document.querySelectorAll('.si-input');
+    if (state.pars) state.pars.forEach((v, i) => { if(parInputs[i]) parInputs[i].value = v; });
+    if (state.sis) state.sis.forEach((v, i) => { if(siInputs[i]) siInputs[i].value = v; });
+    
     renderPlayers();
 }
 
@@ -208,12 +224,18 @@ function renderPlayers() {
 }
 
 function updateCalculations() {
+  const parInputs = document.querySelectorAll('.par-input');
+  const siInputs = document.querySelectorAll('.si-input');
+  
   players.forEach((p, pIdx) => {
     let rdStb = 0, rdGross = 0;
     const hcap = parseInt(p.handicap) || 0;
     const inputs = document.querySelectorAll(`.score-input[data-p="${pIdx}"]`);
     inputs.forEach((inp, hIdx) => {
-      const gross = parseInt(inp.value), par = 4, si = (hIdx + 1); 
+      const gross = parseInt(inp.value), 
+            par = parseInt(parInputs[hIdx].value) || 4, 
+            si = parseInt(siInputs[hIdx].value) || (hIdx + 1); 
+            
       inp.classList.remove('birdie', 'eagle', 'par-gross', 'bogey-plus', 'blob-state');
       if (currentViewingRound === 1) p.r1Scores[hIdx] = inp.value; else p.r2Scores[hIdx] = inp.value;
       const netCell = document.getElementById(`net-${pIdx}-${hIdx}`);
@@ -335,7 +357,16 @@ function toggleRound() {
 }
 
 function saveState() {
-  const state = { players, teams, teamLabels, seasonStandings, previousRanks, venueName: document.getElementById('venue-name').value };
+  const state = { 
+    players, 
+    teams, 
+    teamLabels, 
+    seasonStandings, 
+    previousRanks, 
+    venueName: document.getElementById('venue-name').value,
+    pars: Array.from(document.querySelectorAll('.par-input')).map(i => i.value),
+    sis: Array.from(document.querySelectorAll('.si-input')).map(i => i.value)
+  };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
@@ -355,13 +386,6 @@ function exportData() {
   const blob = new Blob([localStorage.getItem(STORAGE_KEY)], {type: "application/json"});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = `lst74_backup.json`; a.click();
-}
-
-function saveAsImage() {
-  html2canvas(document.getElementById('capture-area'), { scale: 2, backgroundColor: '#e8ecef' }).then(canvas => {
-    const link = document.createElement('a'); link.download = `LST74_Standings.png`;
-    link.href = canvas.toDataURL(); link.click();
-  });
 }
 
 function resetScores() {
