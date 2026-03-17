@@ -62,7 +62,7 @@
     .dashboard-grid { display: flex; flex-direction: column; gap: 20px; }
     .team-container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
     
-    .team-table-wrapper { flex: 1; min-width: 300px; max-width: 500px; }
+    .team-table-wrapper { flex: 1; min-width: 300px; max-width: 800px; margin: 0 auto; width: 100%; }
     .team-table { width: 100%; border-radius: 10px; overflow: hidden; background: white; box-shadow: var(--shadow-soft); font-size: 0.8rem; border-collapse: collapse; }
     .team-table thead th { padding: 10px; color: white; font-weight: 900; }
     .team-header-row th { background: #f1f3f5 !important; color: #666 !important; font-size: 0.6rem !important; padding: 6px !important; }
@@ -80,9 +80,22 @@
     .end-event-btn { background: #27ae60; }
     .del-btn { color: #e74c3c; cursor: pointer; font-weight: bold; border: none; background: transparent; }
 
+    .indiv-team-indicator { color: transparent !important; background: transparent !important; border: none !important; }
+
+    /* History Section Styles */
+    #history-container { width: 100%; max-width: 800px; margin: 30px auto; padding: 0 10px; }
+    .history-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; border-bottom: 1px solid #eee; }
+    .history-team-name { font-weight: 700; flex-grow: 1; padding-right: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .history-score { font-weight: 900; min-width: 60px; text-align: right; color: var(--emerald-dark); }
+    
+    summary::-webkit-details-marker { display: none; }
+    summary:hover { background: #eee !important; }
+    details { transition: all 0.3s ease; }
+
     @media (max-width: 700px) {
       .col-name { width: 110px; min-width: 110px; }
       .team-table-wrapper { min-width: 100%; }
+      #history-container { max-width: 100%; }
     }
   </style>
 </head>
@@ -139,7 +152,7 @@
   </div>
 
   <div class="dashboard-grid">
-    <div class="team-table-wrapper" style="max-width: 100%; margin: 0 auto;">
+    <div class="team-table-wrapper">
         <h3 style="text-align:center; font-size:0.9rem; color:var(--emerald-dark); letter-spacing:2px; margin-bottom:10px;">INDIVIDUAL ORDER OF MERIT</h3>
         <table class="team-table">
             <thead>
@@ -154,7 +167,25 @@
             <tbody id="individual-leaderboard-body"></tbody>
         </table>
     </div>
+
+    <div class="team-table-wrapper" style="margin-top: 20px;">
+        <h3 style="text-align:center; font-size:0.9rem; color:var(--emerald-dark); letter-spacing:2px; margin-bottom:10px;">TEAM SEASON STANDINGS</h3>
+        <table class="team-table">
+            <thead>
+                <tr class="team-header-row">
+                    <th style="width:50px">POS</th>
+                    <th style="text-align:left; padding-left:12px;">TEAM NAME</th>
+                    <th style="width:60px">🥇<br>WINS</th>
+					<th style="width:60px">🥈<br>R/UP</th>
+                    <th style="width:100px">TOTAL POINTS</th>
+                </tr>
+            </thead>
+            <tbody id="team-season-body"></tbody>
+        </table>
+    </div>
+
     <div id="team-container" class="team-container"></div>
+    <div id="history-container"></div>
   </div>
 </div>
 
@@ -164,6 +195,7 @@ let teams = ['A', 'B'];
 let teamLabels = { 'A': 'Team A', 'B': 'Team B' };
 let seasonStandings = {}; 
 let previousRanks = {};
+let history = [];
 let currentViewingRound = 1;
 const STORAGE_KEY = 'lst74_league_data';
 
@@ -174,20 +206,12 @@ window.onload = () => {
 
 async function loadFromServer() {
   try {
-    // Looks for 'data.json' in your GitHub repo
     const response = await fetch('data.json', { cache: "no-store" });
     if (response.ok) {
       const state = await response.json();
       applyState(state);
-      console.log("Sync: Loaded latest data from GitHub.");
-    } else {
-      console.log("Sync: data.json not found on GitHub. Loading browser memory.");
-      loadData();
-    }
-  } catch (err) {
-    console.log("Sync: Connection failed. Loading browser memory.");
-    loadData();
-  }
+    } else { loadData(); }
+  } catch (err) { loadData(); }
 }
 
 function checkAdmin() {
@@ -210,6 +234,7 @@ function applyState(state) {
     teamLabels = state.teamLabels || { 'A': 'Team A', 'B': 'Team B' };
     seasonStandings = state.seasonStandings || {};
     previousRanks = state.previousRanks || {};
+    history = state.history || [];
     document.getElementById('venue-name').value = state.venueName || '';
     
     const parInputs = document.querySelectorAll('.par-input');
@@ -218,6 +243,7 @@ function applyState(state) {
     if (state.sis) state.sis.forEach((v, i) => { if(siInputs[i]) siInputs[i].value = v; });
     
     renderPlayers();
+    renderHistory();
 }
 
 function renderPlayers() {
@@ -226,11 +252,13 @@ function renderPlayers() {
   const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
   players.forEach((p, pIdx) => {
     const scores = currentViewingRound === 1 ? p.r1Scores : p.r2Scores;
+    const isIndiv = p.team.toUpperCase() === 'X';
+
     let trScore = `<tr>
       <td class="admin-only" style="${isAdmin ? 'display:table-cell' : 'display:none'}"><button class="del-btn" onclick="deletePlayer(${pIdx})">✕</button></td>
       <td style="text-align:left; padding-left:8px"><input class="player-name-input" value="${p.name}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].name=this.value; saveState();"></td>
       <td><input type="number" class="score-input" value="${p.handicap}" ${isAdmin ? '' : 'readonly'} oninput="players[${pIdx}].handicap=this.value; updateCalculations();"></td>
-      <td><input class="score-input" style="width:35px" value="${p.team}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].team=this.value.toUpperCase(); renderPlayers();"></td>`;
+      <td><input class="score-input ${isIndiv ? 'indiv-team-indicator' : ''}" style="width:35px" value="${p.team}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].team=this.value.toUpperCase(); renderPlayers();"></td>`;
     for(let i=0; i<18; i++) trScore += `<td><input type="number" class="score-input" data-p="${pIdx}" data-h="${i}" value="${scores[i] || ''}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
     trScore += `<td class="final-total-box" id="tot-gross-${pIdx}">0</td></tr>`;
     let trNet = ''; for(let i=0; i<18; i++) trNet += `<td id="net-${pIdx}-${i}" style="padding:1px 0;">-</td>`;
@@ -256,7 +284,6 @@ function updateCalculations() {
       const gross = parseInt(inp.value), 
             par = parseInt(parInputs[hIdx].value) || 4, 
             si = parseInt(siInputs[hIdx].value) || (hIdx + 1); 
-            
       inp.classList.remove('birdie', 'eagle', 'par-gross', 'bogey-plus', 'blob-state');
       if (currentViewingRound === 1) p.r1Scores[hIdx] = inp.value; else p.r2Scores[hIdx] = inp.value;
       const netCell = document.getElementById(`net-${pIdx}-${hIdx}`);
@@ -304,7 +331,9 @@ function updateTeamTables() {
   const theme = currentViewingRound === 1 ? 'var(--emerald-dark)' : 'var(--round2-blue)';
   const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
   teams.forEach(tId => {
+    if (tId.toUpperCase() === 'X') return;
     const teamPlayers = players.filter(p => p.team === tId);
+    if (teamPlayers.length === 0) return;
     let r1T = 0, r2T = 0;
     let rows = teamPlayers.map(p => {
         r1T += (p.r1Total || 0); r2T += (p.r2Total || 0);
@@ -313,6 +342,84 @@ function updateTeamTables() {
     const label = teamLabels[tId] || `Team ${tId}`;
     container.innerHTML += `<div class="team-table-wrapper"><table class="team-table"><thead><tr style="background:${theme}"><th colspan="4"><input class="team-title-input" value="${label}" ${isAdmin ? '' : 'readonly'} onchange="teamLabels['${tId}']=this.value; saveState();"></th></tr><tr class="team-header-row"><th>PLAYER</th><th>R1</th><th>R2</th><th>TOT</th></tr></thead><tbody>${rows}</tbody><tr style="background:#f8f9fa; font-weight:900;"><td class="team-player-name">TOTAL</td><td>${r1T}</td><td>${r2T}</td><td style="color:${theme}">${r1T+r2T}</td></tr></table></div>`;
   });
+}
+
+function renderHistory() {
+    const histContainer = document.getElementById('history-container');
+    const teamStandingsBody = document.getElementById('team-season-body');
+    if (!histContainer) return;
+
+    histContainer.innerHTML = `<h3 style="text-align:center; color:var(--emerald-dark); margin-top:30px; letter-spacing:2px;">WEEKLY ARCHIVE</h3>`;
+    
+    // Track stats for Team Season Standings table
+    let teamStats = {};
+    // Initialize stats for all known teams
+    teams.filter(t => t.toUpperCase() !== 'X').forEach(tId => {
+        teamStats[teamLabels[tId] || `Team ${tId}`] = { wins: 0, runnersUp: 0, totalPoints: 0 };
+    });
+
+    if (history.length === 0) {
+        histContainer.innerHTML += `<p style="text-align:center; color:#888; font-size:0.8rem;">No history recorded yet.</p>`;
+        teamStandingsBody.innerHTML = `<tr><td colspan="5" style="color:#aaa; font-style:italic;">Play a week to generate team standings</td></tr>`;
+        return;
+    }
+    
+    // Render History & Calculate Stats
+    [...history].reverse().forEach((entry) => {
+        let currentRank = 1;
+        let rankingHtml = entry.rankings.map((team, idx) => {
+            if (idx > 0 && team.score < entry.rankings[idx - 1].score) {
+                currentRank = idx + 1;
+            }
+            
+            // Accumulate Season Stats
+            if (!teamStats[team.label]) teamStats[team.label] = { wins: 0, runnersUp: 0, totalPoints: 0 };
+            teamStats[team.label].totalPoints += team.score;
+            if (currentRank === 1) teamStats[team.label].wins += 1;
+            if (currentRank === 2) teamStats[team.label].runnersUp += 1;
+
+            let medal = (currentRank === 1) ? "🥇 " : (currentRank === 2) ? "🥈 " : (currentRank === 3) ? "🥉 " : "• ";
+            
+            return `<div class="history-row">
+                        <span class="history-team-name">${medal}${team.label}</span>
+                        <span class="history-score">${team.score} PTS</span>
+                    </div>`;
+        }).join('');
+        
+        histContainer.innerHTML += `
+            <details style="background:white; margin-bottom:12px; border-radius:10px; box-shadow:var(--shadow-soft); overflow:hidden; border: 1px solid var(--glass-border);">
+                <summary style="padding:15px; font-weight:800; cursor:pointer; background:#f8f9fa; color:#333; list-style:none; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="text-transform:uppercase; letter-spacing:1px;">${entry.title}</span>
+                    <span style="font-size:0.7rem; color:#aaa;">VIEW RESULTS ▼</span>
+                </summary>
+                <div style="background: white;">${rankingHtml}</div>
+            </details>`;
+    });
+
+    // Populate the Team Season Standings Table
+		const sortedTeams = Object.entries(teamStats).sort((a, b) => b[1].totalPoints - a[1].totalPoints);
+		teamStandingsBody.innerHTML = sortedTeams.map(([name, stats], idx) => {
+			return `<tr>
+				<td style="font-weight:800; color:#888;">${idx+1}</td>
+				<td class="team-player-name">${name}</td>
+				<td style="font-weight:700;">${stats.wins}</td>
+				<td style="font-weight:700;">${stats.runnersUp}</td>
+				<td style="font-weight:900; background:#f8f9fa; color:var(--emerald-dark); font-size:1rem;">${stats.totalPoints}</td>
+			</tr>`;
+		}).join('');
+}
+
+function addPlayer() {
+  const name = prompt("Name:");
+  const team = prompt("Team Letter (Enter 'X' for Individual Only):", "A").toUpperCase();
+  if (name) {
+    if (!teams.includes(team)) {
+        teams.push(team);
+        if(team !== 'X' && !teamLabels[team]) teamLabels[team] = `Team ${team}`;
+    }
+    players.push({ name, handicap: 0, team, r1Scores: Array(18).fill(''), r2Scores: Array(18).fill(''), r1Total: 0, r2Total: 0 });
+    renderPlayers();
+  }
 }
 
 function importData(event) {
@@ -348,7 +455,14 @@ function removeTeam() {
 }
 
 function endEvent() {
-    if (!confirm("Finalize week and clear scorecard?")) return;
+    if (!confirm("Finalize week and record results to history?")) return;
+    const weeklyTeams = teams.filter(t => t.toUpperCase() !== 'X').map(tId => {
+        const teamPlayers = players.filter(p => p.team === tId);
+        const total = teamPlayers.reduce((sum, p) => sum + (p.r1Total || 0) + (p.r2Total || 0), 0);
+        return { label: teamLabels[tId] || `Team ${tId}`, score: total };
+    }).sort((a, b) => b.score - a.score);
+    const venue = document.getElementById('venue-name').value || "Unknown Venue";
+    history.push({ title: `Week ${history.length + 1} - ${venue}`, rankings: weeklyTeams });
     const finalSorted = [...players].sort((a, b) => {
         const aS = (seasonStandings[a.name] || 0) + (a.r1Total + a.r2Total);
         const bS = (seasonStandings[b.name] || 0) + (b.r1Total + b.r2Total);
@@ -364,7 +478,8 @@ function endEvent() {
     document.getElementById('venue-name').value = '';
     saveState();
     renderPlayers();
-    alert("Season Updated! Export and Upload to GitHub now.");
+    renderHistory();
+    alert("Season Updated and Recorded!");
 }
 
 function toggleRound() {
@@ -379,7 +494,7 @@ function toggleRound() {
 
 function saveState() {
   const state = { 
-    players, teams, teamLabels, seasonStandings, previousRanks, 
+    players, teams, teamLabels, seasonStandings, previousRanks, history,
     venueName: document.getElementById('venue-name').value,
     pars: Array.from(document.querySelectorAll('.par-input')).map(i => i.value),
     sis: Array.from(document.querySelectorAll('.si-input')).map(i => i.value)
@@ -387,21 +502,9 @@ function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-function addPlayer() {
-  const name = prompt("Name:"), team = prompt("Team Letter:", "A").toUpperCase();
-  if (name) {
-    if (!teams.includes(team)) {
-        teams.push(team);
-        if(!teamLabels[team]) teamLabels[team] = `Team ${team}`;
-    }
-    players.push({ name, handicap: 0, team, r1Scores: Array(18).fill(''), r2Scores: Array(18).fill(''), r1Total: 0, r2Total: 0 });
-    renderPlayers();
-  }
-}
-
 function exportData() {
   const state = { 
-    players, teams, teamLabels, seasonStandings, previousRanks, 
+    players, teams, teamLabels, seasonStandings, previousRanks, history,
     venueName: document.getElementById('venue-name').value,
     pars: Array.from(document.querySelectorAll('.par-input')).map(i => i.value),
     sis: Array.from(document.querySelectorAll('.si-input')).map(i => i.value)
@@ -412,37 +515,25 @@ function exportData() {
 }
 
 function resetScores() {
-  const choice = confirm("Click OK to start a NEW SEASON (Keep players, wipe scores).\nClick CANCEL to wipe EVERYTHING (Delete all players).");
-  
+  const choice = confirm("Click OK to start a NEW SEASON (Keep players/history, wipe scores).\nClick CANCEL to wipe EVERYTHING.");
   if (choice) {
-    // NEW SEASON: Keep players/teams, but zero out all points
     players.forEach(p => {
-      p.r1Scores = Array(18).fill('');
-      p.r2Scores = Array(18).fill('');
-      p.r1Total = 0;
-      p.r2Total = 0;
+      p.r1Scores = Array(18).fill(''); p.r2Scores = Array(18).fill('');
+      p.r1Total = 0; p.r2Total = 0;
     });
-    seasonStandings = {}; 
-    previousRanks = {};
+    seasonStandings = {}; previousRanks = {};
     document.getElementById('venue-name').value = '';
-    alert("Scores cleared! The player list and teams have been kept.");
   } else {
-    // FULL WIPE: Back to factory settings
-    if(confirm("Are you sure you want to delete ALL players and teams?")) {
-      players = [];
-      teams = ['A', 'B'];
-      seasonStandings = {};
+    if(confirm("Delete EVERYTHING?")) {
+      players = []; teams = ['A', 'B']; seasonStandings = {}; history = [];
       localStorage.removeItem(STORAGE_KEY);
-      sessionStorage.setItem('skipSync', 'true');
       location.reload();
       return;
     }
   }
-  
   saveState();
   renderPlayers();
-  // Reminder to push the reset to GitHub
-  alert("Local reset complete. Now click 'JSON Backup' and upload to GitHub to update your members.");
+  renderHistory();
 }
 </script>
 </body>
