@@ -166,34 +166,6 @@
     padding-top: 10px;
   }
 }
-/* 1. Make the header sticky */
-thead {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-/* 2. Ensure the background color stays solid so rows don't bleed through while scrolling */
-th {
-  color: white;
-  text-transform: uppercase;
-  font-size: 0.6rem;
-  letter-spacing: 1px;
-  padding: 8px 2px;
-  position: sticky; /* Necessary for some browser engines */
-  top: 0;
-}
-
-/* 3. Also make the PAR and S.I. rows sticky if you want them to follow the header */
-thead tr:nth-child(2), 
-thead tr:nth-child(3) {
-  position: sticky;
-  z-index: 9;
-}
-
-thead tr:nth-child(2) { top: 31px; } /* Adjust based on height of first row */
-thead tr:nth-child(3) { top: 62px; } /* Adjust based on height of second row */
-}
   </style>
 </head>
 <body>
