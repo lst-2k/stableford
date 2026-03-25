@@ -141,15 +141,37 @@
   border-bottom: 1px solid var(--glass-border);
 }
 
+#logo-container {
+  text-align: center;
+  padding: 0; /* Removed padding for true edge-to-edge on mobile */
+  width: 100%;
+  overflow: hidden;
+}
+
 #logo-container img {
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  width: 100%;      /* Forces full width on mobile */
+  height: auto;     /* Maintains aspect ratio */
+  display: block;   /* Removes bottom whitespace gap */
+  max-width: 100%;  /* Ensures it doesn't overflow container */
+}
+
+/* Desktop override: If you don't want it massive on huge screens */
+@media (min-width: 768px) {
+  #logo-container img {
+    max-width: 600px; /* Adjust this value for your preferred desktop size */
+    margin: 0 auto;
+    border-radius: 0 0 15px 15px; /* Optional: rounds bottom corners on desktop */
+  }
+  #logo-container {
+    padding-top: 10px;
+  }
 }
   </style>
 </head>
 <body>
 
-<div id="logo-container" style="text-align: center; padding: 15px 0 5px 0;">
-  <img src="logo.png" alt="LST74 Logo" style="max-width: 180px; height: auto;">
+<div id="logo-container">
+  <img src="logo.png" alt="LST74 Logo">
 </div>
 
 <div id="controls">
