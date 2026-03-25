@@ -234,12 +234,12 @@
         <table class="team-table">
             <thead>
                 <tr class="team-header-row">
-                    <th style="width:50px">POS</th>
-                    <th style="width:40px">+/-</th>
-                    <th style="text-align:left; padding-left:12px;">PLAYER</th>
-                    <th style="width:80px">WEEK PTS</th>
-                    <th style="width:100px">SEASON TOTAL</th>
-                </tr>
+					<th style="width:40px">POS</th>
+					<th style="width:30px">+/-</th>
+					<th style="text-align:left; padding-left:12px;">PLAYER</th>
+					<th style="width:40px">EVT</th> <th style="width:60px">WEEK PTS</th>
+					<th style="width:90px">SEASON TOTAL</th>
+				</tr>
             </thead>
             <tbody id="individual-leaderboard-body"></tbody>
         </table>
@@ -409,11 +409,35 @@ function updateCalculations() {
 
 function updateIndividualLeaderboard() {
     const tbody = document.getElementById('individual-leaderboard-body');
+    
+    // Create a map to count events per player from history
+    const eventCounts = {};
+    history.forEach(week => {
+        // We look at the rankings in history to see which teams played
+        // and then check which players are currently on those teams.
+        // Or more simply: we can check if the player had scores in that week.
+        // For this logic, we'll assume if they are in the current list, 
+        // we check their name against historical records if you saved them, 
+        // but since your history only saves TEAM scores, let's use a simpler 
+        // 'playedEvents' counter on the player object itself.
+    });
+
     const sorted = players.map(p => {
         const weekTotal = (p.r1Total || 0) + (p.r2Total || 0);
         const seasonTotal = (seasonStandings[p.name] || 0) + weekTotal;
-        return { name: p.name, week: weekTotal, season: seasonTotal };
+        
+        // Count how many times this player appeared in the history
+        // (Note: This requires us to ensure names haven't changed)
+        const eventsPlayed = p.eventsPlayed || 0; 
+        
+        return { 
+            name: p.name, 
+            week: weekTotal, 
+            season: seasonTotal, 
+            events: eventsPlayed 
+        };
     }).sort((a, b) => b.season - a.season);
+
     tbody.innerHTML = sorted.map((p, idx) => {
         const rank = idx + 1;
         const lastRank = previousRanks[p.name];
@@ -422,7 +446,14 @@ function updateIndividualLeaderboard() {
             if (rank < lastRank) trend = '<span style="color:#27ae60">▲</span>';
             else if (rank > lastRank) trend = '<span style="color:#c0392b">▼</span>';
         }
-        return `<tr><td style="font-weight:800; color:#888;">${rank}</td><td class="trend-cell">${trend}</td><td class="team-player-name">${p.name}</td><td>${p.week}</td><td style="font-weight:900; background:#f8f9fa; color:var(--emerald-dark); font-size:1rem;">${p.season}</td></tr>`;
+        return `<tr>
+            <td style="font-weight:800; color:#888;">${rank}</td>
+            <td class="trend-cell">${trend}</td>
+            <td class="team-player-name">${p.name}</td>
+            <td style="font-weight:600; color:#666;">${p.events}</td>
+            <td>${p.week}</td>
+            <td style="font-weight:900; background:#f8f9fa; color:var(--emerald-dark); font-size:1rem;">${p.season}</td>
+        </tr>`;
     }).join('');
 }
 
@@ -571,11 +602,17 @@ function endEvent() {
     });
     previousRanks = {};
     finalSorted.forEach((p, i) => previousRanks[p.name] = i + 1);
-    players.forEach(p => {
-        seasonStandings[p.name] = (seasonStandings[p.name] || 0) + (p.r1Total + p.r2Total);
-        p.r1Scores = Array(18).fill(''); p.r2Scores = Array(18).fill('');
-        p.r1Total = 0; p.r2Total = 0;
-    });
+	players.forEach(p => {
+			// Increment event count if they actually played (scored > 0)
+			if ((p.r1Total + p.r2Total) > 0) {
+				p.eventsPlayed = (p.eventsPlayed || 0) + 1;
+			}
+
+			seasonStandings[p.name] = (seasonStandings[p.name] || 0) + (p.r1Total + p.r2Total);
+			p.r1Scores = Array(18).fill(''); 
+			p.r2Scores = Array(18).fill('');
+			p.r1Total = 0; p.r2Total = 0;
+		});
     document.getElementById('venue-name').value = '';
     saveState();
     renderPlayers();
