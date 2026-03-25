@@ -129,12 +129,30 @@
 	  transform: translateY(-5px);
 	  background: var(--emerald-primary);
 	}
+	#controls {
+  text-align: center;
+  margin-bottom: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(232, 236, 239, 0.95);
+  backdrop-filter: blur(5px); /* Adds a nice glass effect when scrolling */
+  padding: 8px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+#logo-container img {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
   </style>
 </head>
 <body>
 
+<div id="logo-container" style="text-align: center; padding: 15px 0 5px 0;">
+  <img src="logo.png" alt="LST74 Logo" style="max-width: 180px; height: auto;">
+</div>
+
 <div id="controls">
-  <button class="toggle-rd" onclick="toggleRound()">View Round <span id="next-rd-label">2</span></button>
   <button class="admin-only" onclick="addPlayer()">+ Player</button>
   <button class="admin-only" onclick="removeTeam()">- Team</button>
   <button class="admin-only import-btn" onclick="document.getElementById('file-import').click()">📂 Import File</button>
@@ -151,8 +169,13 @@
     <input type="text" id="venue-name" class="venue-input" placeholder="ENTER VENUE" readonly>
   </div>
   
-  <div style="text-align: center;">
-    <div id="round-display" style="background: var(--emerald-dark); color: white; display: inline-block; padding: 6px 20px; border-radius: 20px; font-weight: 900; margin-bottom: 15px; font-size: 0.8rem;">ROUND 1</div>
+  <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px;">
+    <button class="toggle-rd" onclick="toggleRound()" style="margin: 0; height: 32px; padding: 0 15px; font-size: 0.7rem;">
+        View Round <span id="next-rd-label">2</span>
+    </button>
+    <div id="round-display" style="background: var(--emerald-dark); color: white; padding: 6px 20px; border-radius: 20px; font-weight: 900; font-size: 0.8rem; height: 32px; display: flex; align-items: center;">
+        ROUND 1
+    </div>
   </div>
 
   <div class="table-wrapper">
