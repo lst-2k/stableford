@@ -235,10 +235,14 @@
             <thead>
                 <tr class="team-header-row">
 					<th style="width:40px">POS</th>
-					<th style="width:30px">+/-</th>
 					<th style="text-align:left; padding-left:12px;">PLAYER</th>
-					<th style="width:40px">EVT</th> <th style="width:60px">WEEK PTS</th>
-					<th style="width:90px">SEASON TOTAL</th>
+					<th style="width:30px">EVT</th>
+					<th style="width:30px; color:#b8860b">EAGLE</th>
+					<th style="width:30px; color:#d32f2f">BIRDIE</th>
+					<th style="width:30px; color:#2e7d32">PAR</th>
+					<th style="width:30px; color:#333">BOGEY+</th>
+					<th style="width:60px">WEEK</th>
+					<th style="width:80px">TOTAL</th>
 				</tr>
             </thead>
             <tbody id="individual-leaderboard-body"></tbody>
@@ -409,50 +413,24 @@ function updateCalculations() {
 
 function updateIndividualLeaderboard() {
     const tbody = document.getElementById('individual-leaderboard-body');
-    
-    // Create a map to count events per player from history
-    const eventCounts = {};
-    history.forEach(week => {
-        // We look at the rankings in history to see which teams played
-        // and then check which players are currently on those teams.
-        // Or more simply: we can check if the player had scores in that week.
-        // For this logic, we'll assume if they are in the current list, 
-        // we check their name against historical records if you saved them, 
-        // but since your history only saves TEAM scores, let's use a simpler 
-        // 'playedEvents' counter on the player object itself.
-    });
-
     const sorted = players.map(p => {
         const weekTotal = (p.r1Total || 0) + (p.r2Total || 0);
         const seasonTotal = (seasonStandings[p.name] || 0) + weekTotal;
-        
-        // Count how many times this player appeared in the history
-        // (Note: This requires us to ensure names haven't changed)
-        const eventsPlayed = p.eventsPlayed || 0; 
-        
-        return { 
-            name: p.name, 
-            week: weekTotal, 
-            season: seasonTotal, 
-            events: eventsPlayed 
-        };
-    }).sort((a, b) => b.season - a.season);
+        return { ...p, weekTotal, seasonTotal };
+    }).sort((a, b) => b.seasonTotal - a.seasonTotal);
 
     tbody.innerHTML = sorted.map((p, idx) => {
-        const rank = idx + 1;
-        const lastRank = previousRanks[p.name];
-        let trend = '<span style="color:#ccc">-</span>';
-        if (lastRank) {
-            if (rank < lastRank) trend = '<span style="color:#27ae60">▲</span>';
-            else if (rank > lastRank) trend = '<span style="color:#c0392b">▼</span>';
-        }
+        const s = p.stats || { eagle: 0, birdie: 0, par: 0, bogey: 0 };
         return `<tr>
-            <td style="font-weight:800; color:#888;">${rank}</td>
-            <td class="trend-cell">${trend}</td>
+            <td style="font-weight:800; color:#888;">${idx + 1}</td>
             <td class="team-player-name">${p.name}</td>
-            <td style="font-weight:600; color:#666;">${p.events}</td>
-            <td>${p.week}</td>
-            <td style="font-weight:900; background:#f8f9fa; color:var(--emerald-dark); font-size:1rem;">${p.season}</td>
+            <td>${Math.floor(p.eventsPlayed || 0)}</td>
+            <td style="color:#b8860b; font-weight:bold;">${s.eagle}</td>
+            <td style="color:#d32f2f; font-weight:bold;">${s.birdie}</td>
+            <td style="color:#2e7d32; font-weight:bold;">${s.par}</td>
+            <td style="color:#777;">${s.bogey}</td>
+            <td style="background:rgba(0,0,0,0.02)">${p.weekTotal}</td>
+            <td style="font-weight:900; color:var(--emerald-dark);">${p.seasonTotal}</td>
         </tr>`;
     }).join('');
 }
@@ -588,36 +566,51 @@ function removeTeam() {
 
 function endEvent() {
     if (!confirm("Finalize week and record results to history?")) return;
+    
+    const parInputs = document.querySelectorAll('.par-input');
+    const venue = document.getElementById('venue-name').value || "Unknown Venue";
+
+    players.forEach(p => {
+        // Initialize season stats if they don't exist
+        if (!p.stats) p.stats = { eagle: 0, birdie: 0, par: 0, bogey: 0 };
+
+        // Process both Round 1 and Round 2
+        [p.r1Scores, p.r2Scores].forEach(rdScores => {
+            let rdHasScore = false;
+            rdScores.forEach((score, i) => {
+                const gross = parseInt(score);
+                const par = parseInt(parInputs[i].value);
+                if (!isNaN(gross) && gross > 0) {
+                    rdHasScore = true;
+                    const diff = gross - par;
+                    if (diff <= -2) p.stats.eagle++;
+                    else if (diff === -1) p.stats.birdie++;
+                    else if (diff === 0) p.stats.par++;
+                    else if (diff >= 1) p.stats.bogey++;
+                }
+            });
+            if (rdHasScore) p.eventsPlayed = (p.eventsPlayed || 0) + 0.5; // Counts half-events for rounds
+        });
+
+        // Update season points and clear weekly data
+        seasonStandings[p.name] = (seasonStandings[p.name] || 0) + (p.r1Total + p.r2Total);
+        p.r1Scores = Array(18).fill(''); 
+        p.r2Scores = Array(18).fill('');
+        p.r1Total = 0; p.r2Total = 0;
+    });
+
+    // Record to history
     const weeklyTeams = teams.filter(t => t.toUpperCase() !== 'X').map(tId => {
         const teamPlayers = players.filter(p => p.team === tId);
-        const total = teamPlayers.reduce((sum, p) => sum + (p.r1Total || 0) + (p.r2Total || 0), 0);
-        return { label: teamLabels[tId] || `Team ${tId}`, score: total };
+        return { label: teamLabels[tId], score: teamPlayers.reduce((sum, p) => sum + (p.r1Total + p.r2Total), 0) };
     }).sort((a, b) => b.score - a.score);
-    const venue = document.getElementById('venue-name').value || "Unknown Venue";
-    history.push({ title: `Week ${history.length + 1} - ${venue}`, rankings: weeklyTeams });
-    const finalSorted = [...players].sort((a, b) => {
-        const aS = (seasonStandings[a.name] || 0) + (a.r1Total + a.r2Total);
-        const bS = (seasonStandings[b.name] || 0) + (b.r1Total + b.r2Total);
-        return bS - aS;
-    });
-    previousRanks = {};
-    finalSorted.forEach((p, i) => previousRanks[p.name] = i + 1);
-	players.forEach(p => {
-			// Increment event count if they actually played (scored > 0)
-			if ((p.r1Total + p.r2Total) > 0) {
-				p.eventsPlayed = (p.eventsPlayed || 0) + 1;
-			}
 
-			seasonStandings[p.name] = (seasonStandings[p.name] || 0) + (p.r1Total + p.r2Total);
-			p.r1Scores = Array(18).fill(''); 
-			p.r2Scores = Array(18).fill('');
-			p.r1Total = 0; p.r2Total = 0;
-		});
-    document.getElementById('venue-name').value = '';
+    history.push({ title: `Week ${history.length + 1} - ${venue}`, rankings: weeklyTeams });
+    
     saveState();
     renderPlayers();
     renderHistory();
-    alert("Season Updated and Recorded!");
+    alert("Stats and Standings Updated!");
 }
 
 function toggleRound() {
