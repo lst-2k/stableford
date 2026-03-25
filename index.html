@@ -415,6 +415,8 @@ function updateCalculations() {
 
 function updateIndividualLeaderboard() {
     const tbody = document.getElementById('individual-leaderboard-body');
+    
+    // Sort players by season total (descending)
     const sorted = players.map(p => {
         const weekTotal = (p.r1Total || 0) + (p.r2Total || 0);
         const seasonTotal = (seasonStandings[p.name] || 0) + weekTotal;
@@ -422,17 +424,30 @@ function updateIndividualLeaderboard() {
     }).sort((a, b) => b.seasonTotal - a.seasonTotal);
 
     tbody.innerHTML = sorted.map((p, idx) => {
+        const rank = idx + 1;
+        const lastRank = previousRanks[p.name];
+        let trend = '<span style="color:#ccc">-</span>';
+        
+        if (lastRank) {
+            if (rank < lastRank) trend = '<span style="color:#27ae60">▲</span>';
+            else if (rank > lastRank) trend = '<span style="color:#c0392b">▼</span>';
+        }
+        
+        // Ensure stats object exists
         const s = p.stats || { eagle: 0, birdie: 0, par: 0, bogey: 0 };
+        
+        // This row MUST have exactly 10 <td> cells to match the 10 <th> cells
         return `<tr>
-            <td style="font-weight:800; color:#888;">${idx + 1}</td>
+            <td style="font-weight:800; color:#888;">${rank}</td>
+            <td class="trend-cell">${trend}</td>
             <td class="team-player-name">${p.name}</td>
-            <td>${Math.floor(p.eventsPlayed || 0)}</td>
-            <td style="color:#b8860b; font-weight:bold;">${s.eagle}</td>
-            <td style="color:#d32f2f; font-weight:bold;">${s.birdie}</td>
-            <td style="color:#2e7d32; font-weight:bold;">${s.par}</td>
-            <td style="color:#777;">${s.bogey}</td>
-            <td style="background:rgba(0,0,0,0.02)">${p.weekTotal}</td>
-            <td style="font-weight:900; color:var(--emerald-dark);">${p.seasonTotal}</td>
+            <td style="font-weight:600;">${Math.floor(p.eventsPlayed || 0)}</td>
+            <td style="color:#b8860b; font-weight:bold;">${s.eagle || 0}</td>
+            <td style="color:#d32f2f; font-weight:bold;">${s.birdie || 0}</td>
+            <td style="color:#2e7d32; font-weight:bold;">${s.par || 0}</td>
+            <td style="color:#777;">${s.bogey || 0}</td>
+            <td style="background:rgba(0,0,0,0.02); font-weight:700;">${p.weekTotal}</td>
+            <td style="font-weight:900; background:#f8f9fa; color:var(--emerald-dark); font-size:1rem;">${p.seasonTotal}</td>
         </tr>`;
     }).join('');
 }
