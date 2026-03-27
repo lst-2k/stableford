@@ -238,6 +238,7 @@
 						<th style="width:30px">+/-</th>
 						<th style="text-align:left; padding-left:12px; min-width:120px;">PLAYER</th>
 						<th style="width:60px">WEEK</th> <th style="width:80px">TOTAL</th> <th style="width:35px">EVT</th>
+						<th style="width:35px; color:#1565c0">ALBY</th> <th style="width:35px; color:#b8860b">EAG</th>
 						<th style="width:35px; color:#b8860b">EAG</th>
 						<th style="width:35px; color:#d32f2f">BIR</th>
 						<th style="width:35px; color:#2e7d32">PAR</th>
@@ -412,80 +413,7 @@ function updateCalculations() {
   saveState();
 }
 
-function updateIndividualLeaderboard() {
-    const tbody = document.getElementById('individual-leaderboard-body');
-    const parInputs = document.querySelectorAll('.par-input');
-
-    const sorted = players.map(p => {
-        const weekTotal = (p.r1Total || 0) + (p.r2Total || 0);
-        const seasonTotal = (seasonStandings[p.name] || 0) + weekTotal;
-        
-        // Live participation check
-        const hasLiveScores = p.r1Scores.some(s => s !== '') || p.r2Scores.some(s => s !== '');
-        const liveEvents = (p.eventsPlayed || 0) + (hasLiveScores ? 1 : 0);
-
-        // Live stats calculation
-        let liveStats = { 
-            eagle: (p.stats?.eagle || 0), 
-            birdie: (p.stats?.birdie || 0), 
-            par: (p.stats?.par || 0), 
-            bogey: (p.stats?.bogey || 0) 
-        };
-
-        [p.r1Scores, p.r2Scores].forEach(rdScores => {
-            rdScores.forEach((score, i) => {
-                const gross = parseInt(score);
-                const par = parseInt(parInputs[i]?.value);
-                if (!isNaN(gross) && gross > 0 && !isNaN(par)) {
-                    const diff = gross - par;
-                    if (diff <= -2) liveStats.eagle++;
-                    else if (diff === -1) liveStats.birdie++;
-                    else if (diff === 0) liveStats.par++;
-                    else if (diff >= 1) liveStats.bogey++;
-                }
-            });
-        });
-
-        return { ...p, weekTotal, seasonTotal, liveStats, liveEvents };
-    }).sort((a, b) => b.seasonTotal - a.seasonTotal);
-
-    // --- TIED RANKING LOGIC ---
-    let displayRank = 0;
-    let playersAtRank = 0;
-
-    tbody.innerHTML = sorted.map((p, idx) => {
-        // Determine if this player is tied with the previous player
-        const isTied = idx > 0 && p.seasonTotal === sorted[idx - 1].seasonTotal;
-        
-        if (!isTied) {
-            displayRank = idx + 1; // Update rank to current position
-            playersAtRank = sorted.filter(player => player.seasonTotal === p.seasonTotal).length;
-        }
-
-        // Add "T" prefix if more than one player shares this total
-        const rankText = playersAtRank > 1 ? `T${displayRank}` : displayRank;
-
-        const lastRank = previousRanks[p.name];
-        let trend = '<span style="color:#ccc">-</span>';
-        if (lastRank) {
-            if (displayRank < lastRank) trend = '<span style="color:#27ae60">▲</span>';
-            else if (displayRank > lastRank) trend = '<span style="color:#c0392b">▼</span>';
-        }
-        
-        return `<tr>
-            <td style="font-weight:800; color:#888;">${rankText}</td>
-            <td class="trend-cell">${trend}</td>
-            <td class="team-player-name">${p.name}</td>
-            <td style="background:rgba(0,0,0,0.02); font-weight:700;">${p.weekTotal}</td>
-            <td style="font-weight:900; background:#f8f9fa; color:var(--emerald-dark);">${p.seasonTotal}</td>
-            <td style="font-weight:600;">${p.liveEvents}</td>
-            <td style="color:#b8860b; font-weight:bold;">${p.liveStats.eagle}</td>
-            <td style="color:#d32f2f; font-weight:bold;">${p.liveStats.birdie}</td>
-            <td style="color:#2e7d32; font-weight:bold;">${p.liveStats.par}</td>
-            <td style="color:#777;">${p.liveStats.bogey}</td>
-        </tr>`;
-    }).join('');
-}
+updateIndividualLeaderboard
 
 function updateTeamTables() {
   const container = document.getElementById('team-container');
@@ -651,14 +579,15 @@ function endEvent() {
         if (played) p.eventsPlayed = (p.eventsPlayed || 0) + 1;
 
         // Save Live Stats to Permanent Stats
-        if (!p.stats) p.stats = { eagle: 0, birdie: 0, par: 0, bogey: 0 };
+        if (!p.stats) p.stats = { albatross: 0, eagle: 0, birdie: 0, par: 0, bogey: 0 };
         [p.r1Scores, p.r2Scores].forEach(rdScores => {
             rdScores.forEach((score, i) => {
                 const gross = parseInt(score);
                 const par = parseInt(parInputs[i]?.value);
                 if (!isNaN(gross) && gross > 0) {
                     const diff = gross - par;
-                    if (diff <= -2) p.stats.eagle++;
+                    if (diff <= -3) p.stats.albatross++;
+					else if (diff === -2) p.stats.eagle++;
                     else if (diff === -1) p.stats.birdie++;
                     else if (diff === 0) p.stats.par++;
                     else if (diff >= 1) p.stats.bogey++;
