@@ -234,16 +234,18 @@
 		<div class="table-wrapper"> <table class="team-table">
 				<thead>
 					<tr class="team-header-row">
-						<th style="width:40px">POS</th>
-						<th style="width:30px">+/-</th>
-						<th style="text-align:left; padding-left:12px; min-width:120px;">PLAYER</th>
-						<th style="width:60px">WEEK</th> <th style="width:80px">TOTAL</th> <th style="width:35px">EVT</th>
-						<th style="width:35px; color:#1565c0">ALBY</th> <th style="width:35px; color:#b8860b">EAG</th>
-						<th style="width:35px; color:#b8860b">EAG</th>
-						<th style="width:35px; color:#d32f2f">BIR</th>
-						<th style="width:35px; color:#2e7d32">PAR</th>
-						<th style="width:35px; color:#777">BOG++</th>
-					</tr>
+					<th style="width:40px">POS</th>
+					<th style="width:30px">+/-</th>
+					<th style="text-align:left; padding-left:12px; min-width:120px;">PLAYER</th>
+					<th style="width:60px">WEEK</th>
+					<th style="width:80px">TOTAL</th>
+					<th style="width:35px">EVT</th>
+					<th style="width:35px; color:#1565c0">ALBY</th>
+					<th style="width:35px; color:#b8860b">EAG</th>
+					<th style="width:35px; color:#d32f2f">BIR</th>
+					<th style="width:35px; color:#2e7d32">PAR</th>
+					<th style="width:35px; color:#777">BOG++</th>
+				</tr>
 				</thead>
 				<tbody id="individual-leaderboard-body"></tbody>
 			</table>
@@ -413,7 +415,83 @@ function updateCalculations() {
   saveState();
 }
 
-updateIndividualLeaderboard
+function updateIndividualLeaderboard() {
+    const tbody = document.getElementById('individual-leaderboard-body');
+    const parInputs = document.querySelectorAll('.par-input');
+
+    // 1. Process data and calculate all stats
+    const sorted = players.map(p => {
+        const weekTotal = (p.r1Total || 0) + (p.r2Total || 0);
+        const seasonTotal = (seasonStandings[p.name] || 0) + weekTotal;
+        
+        // Participation check (Live)
+        const hasLiveScores = p.r1Scores.some(s => s !== '') || p.r2Scores.some(s => s !== '');
+        const liveEvents = (p.eventsPlayed || 0) + (hasLiveScores ? 1 : 0);
+
+        // Stats calculation (Live)
+        let liveStats = { 
+            albatross: (p.stats?.albatross || 0),
+            eagle: (p.stats?.eagle || 0), 
+            birdie: (p.stats?.birdie || 0), 
+            par: (p.stats?.par || 0), 
+            bogey: (p.stats?.bogey || 0) 
+        };
+
+        [p.r1Scores, p.r2Scores].forEach(rdScores => {
+            rdScores.forEach((score, i) => {
+                const gross = parseInt(score);
+                const par = parseInt(parInputs[i]?.value);
+                if (!isNaN(gross) && gross > 0 && !isNaN(par)) {
+                    const diff = gross - par;
+                    if (diff <= -3) liveStats.albatross++;
+                    else if (diff === -2) liveStats.eagle++;
+                    else if (diff === -1) liveStats.birdie++;
+                    else if (diff === 0) liveStats.par++;
+                    else if (diff >= 1) liveStats.bogey++;
+                }
+            });
+        });
+
+        return { ...p, weekTotal, seasonTotal, liveStats, liveEvents };
+    }).sort((a, b) => b.seasonTotal - a.seasonTotal);
+
+    // 2. Apply Tied Ranking Logic
+    let displayRank = 0;
+    let playersAtRank = 0;
+
+    tbody.innerHTML = sorted.map((p, idx) => {
+        const isTied = idx > 0 && p.seasonTotal === sorted[idx - 1].seasonTotal;
+        
+        if (!isTied) {
+            displayRank = idx + 1;
+            playersAtRank = sorted.filter(player => player.seasonTotal === p.seasonTotal).length;
+        }
+
+        const rankText = playersAtRank > 1 ? `T${displayRank}` : displayRank;
+        const lastRank = previousRanks[p.name];
+        let trend = '<span style="color:#ccc">-</span>';
+        
+        if (lastRank) {
+            if (displayRank < lastRank) trend = '<span style="color:#27ae60">▲</span>';
+            else if (displayRank > lastRank) trend = '<span style="color:#c0392b">▼</span>';
+        }
+        
+        // 3. Render the 11 columns to match the new header
+        return `<tr>
+            <td style="font-weight:800; color:#888;">${rankText}</td>
+            <td class="trend-cell">${trend}</td>
+            <td class="team-player-name">${p.name}</td>
+            <td style="background:rgba(0,0,0,0.02); font-weight:700;">${p.weekTotal}</td>
+            <td style="font-weight:900; background:#f8f9fa; color:var(--emerald-dark);">${p.seasonTotal}</td>
+            <td style="font-weight:600;">${p.liveEvents}</td>
+            <td style="color:#1565c0; font-weight:bold;">${p.liveStats.albatross}</td>
+            <td style="color:#b8860b; font-weight:bold;">${p.liveStats.eagle}</td>
+            <td style="color:#d32f2f; font-weight:bold;">${p.liveStats.birdie}</td>
+            <td style="color:#2e7d32; font-weight:bold;">${p.liveStats.par}</td>
+            <td style="color:#777;">${p.liveStats.bogey}</td>
+        </tr>`;
+    }).join('');
+}
 
 function updateTeamTables() {
   const container = document.getElementById('team-container');
