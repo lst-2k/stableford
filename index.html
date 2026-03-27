@@ -41,32 +41,47 @@
     .round-2-theme th { background: linear-gradient(180deg, var(--round2-blue), var(--round2-dark)); }
     
     .col-del { width: 30px; display: none; }
-   .col-name {
+	/* MEMBER VIEW: Sticky Player Name */
+	.col-name, 
+	#players-body td.col-name {
 		position: sticky;
-		left: 40px; /* Offset for the DEL column */
-		z-index: 8;
-		background-color: white !important; /* Ensures names don't become transparent */
+		left: 0; /* Sticks to the very left edge for members */
+		z-index: 10;
+		background-color: white !important; /* Prevents transparency */
 		
-		/* Character Limit & Width */
+		/* 18 Character Width */
 		width: 18ch !important;
 		min-width: 18ch !important;
 		max-width: 18ch !important;
 		
-		/* Handle overflow gracefully */
 		white-space: nowrap;
 		overflow: hidden;
-		text-overflow: ellipsis; /* Adds '...' if a name is over 18 chars */
-		
+		text-overflow: ellipsis;
 		padding-left: 12px;
-		padding-right: 15px;
-		
-		/* The Shadow Effect */
-		box-shadow: 4px 0 8px -2px rgba(0,0,0,0.1);
-		border-right: 1px solid #eee;
+		border-right: 1px solid #ddd;
+
+		/* Subtle Shadow Effect */
+		box-shadow: 5px 0 10px -5px rgba(0,0,0,0.2);
 	}
-	#players-body tr:nth-child(even) td.col-name,
-	#players-body tr:nth-child(even) td.col-del {
-		background-color: #fcfcfc !important;
+
+	/* Ensure the Header for Player Name also sticks at the top and left */
+	#scorecard thead tr:first-child th.col-name {
+		position: sticky;
+		left: 0;
+		top: 48px; /* Adjusted to sit under your top nav/controls */
+		z-index: 20; /* Higher than the player rows */
+		background: linear-gradient(180deg, var(--emerald-primary), var(--emerald-dark));
+	}
+
+	/* Maintain background for striped rows in Member View */
+	#players-body tr:nth-child(even) td.col-name {
+		background-color: #f9f9f9 !important;
+	}
+
+	/* If Admin Mode is ON, we offset the name so it doesn't overlap DEL */
+	body.admin-mode .col-name,
+	body.admin-mode #players-body td.col-name {
+		left: 40px; 
 	}
     .col-hcp, .col-team { width: 40px; min-width: 40px; }
     .col-total { width: 50px; min-width: 50px; background: rgba(0,0,0,0.05); }
