@@ -31,14 +31,15 @@
 
 	.table-wrapper { 
 	  width: 100%; 
-	  max-height: 500px; /* Adjust this height to fit your screen preference */
-	  overflow: auto;    /* Enables both horizontal and vertical scrolling */
+	  max-height: 70vh;    /* This limits the table to 70% of the screen height */
+	  overflow-y: auto;    /* Enables vertical scrolling INSIDE the box */
+	  overflow-x: auto;    /* Keeps horizontal scrolling for the 18 holes */
 	  border-radius: 10px; 
 	  box-shadow: var(--shadow-soft); 
 	  margin-bottom: 20px; 
 	  background: white; 
 	  border: 1px solid var(--glass-border);
-	  position: relative;
+	  -webkit-overflow-scrolling: touch; /* Smooth scrolling for iPhone */
 	}
     table { border-collapse: separate; border-spacing: 0; width: 100%; }
     th { color: white; text-transform: uppercase; font-size: 0.6rem; letter-spacing: 1px; padding: 8px 2px; }
@@ -161,13 +162,13 @@
 	  display: block;   /* Removes bottom whitespace gap */
 	  max-width: 100%;  /* Ensures it doesn't overflow container */
 	}
-	#scorecard thead tr:first-child th {
+	#scorecard thead th {
 	  position: sticky;
 	  top: 0;
 	  z-index: 10;
 	}
 
-	/* 3. Ensure the colors stay solid so player names slide UNDER the green bar */
+	/* 3. Ensure the Green/Blue background stays solid so players slide UNDER it */
 	.round-1-theme thead tr:first-child th {
 	  background: linear-gradient(180deg, var(--emerald-primary), var(--emerald-dark)) !important;
 	}
@@ -176,17 +177,17 @@
 	  background: linear-gradient(180deg, var(--round2-blue), var(--round2-dark)) !important;
 	}
 
-	/* 4. Keep the PAR and SI rows sticky as well so they don't vanish */
+	/* 4. Make the PAR and S.I. rows stay pinned as well */
 	#scorecard thead tr:nth-child(2) td {
 	  position: sticky;
-	  top: 32px; /* Sits right below the hole numbers */
+	  top: 31px; /* Sits right below the hole numbers */
 	  z-index: 9;
 	  background: #fafafa !important;
 	}
 
 	#scorecard thead tr:nth-child(3) td {
 	  position: sticky;
-	  top: 60px; /* Sits below the PAR row */
+	  top: 58px; 
 	  z-index: 9;
 	  background: #fafafa !important;
 	}
