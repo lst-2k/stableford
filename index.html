@@ -29,10 +29,16 @@
 
     #capture-area { padding: 15px; border-radius: 16px; border: 1px solid var(--glass-border); }
 
-    .table-wrapper { 
-      width: 100%; overflow-x: auto; border-radius: 10px; box-shadow: var(--shadow-soft); 
-      margin-bottom: 20px; background: var(--glass-bg); border: 1px solid var(--glass-border);
-    }
+	.table-wrapper { 
+	  width: 100%; 
+	  overflow-x: auto; /* Allows horizontal scrolling for the 18 holes */
+	  overflow-y: visible; /* Crucial for sticky headers to work */
+	  border-radius: 10px;
+	  box-shadow: var(--shadow-soft); 
+	  margin-bottom: 20px; 
+	  background: var(--glass-bg); 
+	  border: 1px solid var(--glass-border);
+	}
     table { border-collapse: separate; border-spacing: 0; width: 100%; }
     th { color: white; text-transform: uppercase; font-size: 0.6rem; letter-spacing: 1px; padding: 8px 2px; }
     td { border-bottom: 1px solid rgba(0,0,0,0.05); padding: 4px; text-align: center; }
@@ -153,6 +159,35 @@
   height: auto;     /* Maintains aspect ratio */
   display: block;   /* Removes bottom whitespace gap */
   max-width: 100%;  /* Ensures it doesn't overflow container */
+}
+#scorecard thead tr:first-child th {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Apply theme colors to the sticky cells so they aren't transparent */
+.round-1-theme thead tr:first-child th {
+  background: linear-gradient(180deg, var(--emerald-primary), var(--emerald-dark)) !important;
+}
+
+.round-2-theme thead tr:first-child th {
+  background: linear-gradient(180deg, var(--round2-blue), var(--round2-dark)) !important;
+}
+
+/* Optional: Make PAR and S.I. rows sticky too */
+#scorecard thead tr:nth-child(2) td {
+  position: sticky;
+  top: 31px; /* Adjust based on height of first row */
+  z-index: 90;
+  background: #fafafa !important;
+}
+
+#scorecard thead tr:nth-child(3) td {
+  position: sticky;
+  top: 58px; 
+  z-index: 90;
+  background: #fafafa !important;
 }
 
 /* Desktop override: If you don't want it massive on huge screens */
