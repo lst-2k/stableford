@@ -530,24 +530,70 @@ function updateIndividualLeaderboard() {
     }).join('');
 }
 
-function updateTeamTables() {
-  const container = document.getElementById('team-container');
-  container.innerHTML = '';
-  const theme = currentViewingRound === 1 ? 'var(--emerald-dark)' : 'var(--round2-blue)';
-  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
-  teams.forEach(tId => {
-    if (tId.toUpperCase() === 'X') return;
-    const teamPlayers = players.filter(p => p.team === tId);
-    if (teamPlayers.length === 0) return;
-    let r1T = 0, r2T = 0;
-    let rows = teamPlayers.map(p => {
-        r1T += (p.r1Total || 0); r2T += (p.r2Total || 0);
-        return `<tr><td class="team-player-name">${p.name}</td><td>${p.r1Total}</td><td>${p.r2Total}</td><td style="font-weight:900;">${p.r1Total+p.r2Total}</td></tr>`;
-    }).join('');
-    const label = teamLabels[tId] || `Team ${tId}`;
-    container.innerHTML += `<div class="team-table-wrapper"><table class="team-table"><thead><tr style="background:${theme}"><th colspan="4"><input class="team-title-input" value="${label}" ${isAdmin ? '' : 'readonly'} onchange="teamLabels['${tId}']=this.value; saveState();"></th></tr><tr class="team-header-row"><th>PLAYER</th><th>R1</th><th>R2</th><th>TOT</th></tr></thead><tbody>${rows}</tbody><tr style="background:#f8f9fa; font-weight:900;"><td class="team-player-name">TOTAL</td><td>${r1T}</td><td>${r2T}</td><td style="color:${theme}">${r1T+r2T}</td></tr></table></div>`;
-  });
-}
+	function updateTeamTables() {
+	  const container = document.getElementById('team-container');
+	  container.innerHTML = '';
+	  const theme = currentViewingRound === 1 ? 'var(--emerald-dark)' : 'var(--round2-blue)';
+	  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
+	  
+	  const teamColors = {
+		'A': '#2e7d32', // Emerald
+		'B': '#1565c0', // Royal Blue
+		'C': '#880e4f', // Deep Burgundy
+		'D': '#ef6c00', // Pumpkin Orange
+		'DEFAULT': '#444' // Fallback
+	  };
+	  
+	  teams.forEach(tId => {
+		if (tId.toUpperCase() === 'X') return;
+		
+		// 1. Filter players for this team
+		let teamPlayers = players.filter(p => p.team === tId);
+		if (teamPlayers.length === 0) return;
+
+		// 2. SORT players by their combined total (Highest to Lowest)
+		teamPlayers.sort((a, b) => {
+			const totalA = (a.r1Total || 0) + (a.r2Total || 0);
+			const totalB = (b.r1Total || 0) + (b.r2Total || 0);
+			return totalB - totalA; 
+		});
+
+		let r1T = 0, r2T = 0;
+		let rows = teamPlayers.map(p => {
+			r1T += (p.r1Total || 0); 
+			r2T += (p.r2Total || 0);
+			return `<tr>
+				<td class="team-player-name">${p.name}</td>
+				<td>${p.r1Total}</td>
+				<td>${p.r2Total}</td>
+				<td style="font-weight:900;">${p.r1Total + p.r2Total}</td>
+			</tr>`;
+		}).join('');
+
+		const label = teamLabels[tId] || `Team ${tId}`;
+		container.innerHTML += `<div class="team-table-wrapper">
+			<table class="team-table">
+				<thead>
+					<tr style="background:${theme}">
+						<th colspan="4">
+							<input class="team-title-input" value="${label}" ${isAdmin ? '' : 'readonly'} onchange="teamLabels['${tId}']=this.value; saveState();">
+						</th>
+					</tr>
+					<tr class="team-header-row">
+						<th>PLAYER</th><th>R1</th><th>R2</th><th>TOT</th>
+					</tr>
+				</thead>
+				<tbody>${rows}</tbody>
+				<tr style="background:#f8f9fa; font-weight:900;">
+					<td class="team-player-name">TOTAL</td>
+					<td>${r1T}</td>
+					<td>${r2T}</td>
+					<td style="color:${theme}">${r1T+r2T}</td>
+				</tr>
+			</table>
+		</div>`;
+	  });
+	}
 
 function renderHistory() {
     const histContainer = document.getElementById('history-container');
