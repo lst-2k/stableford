@@ -535,7 +535,7 @@ function updateIndividualLeaderboard() {
 		  container.innerHTML = '';
 		  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
 
-		  // 1. Defined professional color palette
+		  // 1. Professional color palette
 		  const teamColors = {
 			'A': '#2e7d32', // Emerald Green
 			'B': '#1565c0', // Royal Blue
@@ -544,39 +544,43 @@ function updateIndividualLeaderboard() {
 			'DEFAULT': '#444'
 		  };
 
-		  teams.forEach(tId => {
-			if (tId.toUpperCase() === 'X') return;
+		  // Filter out the 'X' individual category
+		  const activeTeams = teams.filter(t => t.toUpperCase().trim() !== 'X');
+
+		  activeTeams.forEach(tId => {
+			// Standardize the ID for color lookup (remove spaces, make uppercase)
+			const lookupId = tId.toUpperCase().trim();
 			
-			// 2. Filter players for this specific team
-			let teamPlayers = players.filter(p => p.team === tId);
+			// Filter players belonging to this team
+			let teamPlayers = players.filter(p => p.team.toUpperCase().trim() === lookupId);
 			if (teamPlayers.length === 0) return;
 
-			// 3. SORT: Highest combined total (R1+R2) at the top
+			// SORT: Highest combined total (R1+R2) at the top
 			teamPlayers.sort((a, b) => {
 				const totalA = (a.r1Total || 0) + (a.r2Total || 0);
 				const totalB = (b.r1Total || 0) + (b.r2Total || 0);
 				return totalB - totalA; 
 			});
 
-			// 4. Assign the color based on the Letter
-			const headerColor = teamColors[tId.toUpperCase()] || teamColors['DEFAULT'];
+			// Assign the color based on the standardized Lookup ID
+			const headerColor = teamColors[lookupId] || teamColors['DEFAULT'];
 
 			let r1T = 0, r2T = 0;
 			let rows = teamPlayers.map(p => {
-				r1T += (p.r1Total || 0); 
-				r2T += (p.r2Total || 0);
-				const playerTotal = (p.r1Total || 0) + (p.r2Total || 0);
+				const pR1 = parseFloat(p.r1Total) || 0;
+				const pR2 = parseFloat(p.r2Total) || 0;
+				r1T += pR1; 
+				r2T += pR2;
 				return `<tr>
 					<td class="team-player-name">${p.name}</td>
-					<td>${p.r1Total}</td>
-					<td>${p.r2Total}</td>
-					<td style="font-weight:900;">${playerTotal}</td>
+					<td>${p.r1Total || 0}</td>
+					<td>${p.r2Total || 0}</td>
+					<td style="font-weight:900;">${pR1 + pR2}</td>
 				</tr>`;
 			}).join('');
 
 			const label = teamLabels[tId] || `Team ${tId}`;
 			
-			// 5. Build the table with the dynamic color
 			container.innerHTML += `
 			  <div class="team-table-wrapper">
 				<table class="team-table">
