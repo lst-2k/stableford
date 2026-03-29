@@ -531,69 +531,76 @@ function updateIndividualLeaderboard() {
 }
 
 	function updateTeamTables() {
-	  const container = document.getElementById('team-container');
-	  container.innerHTML = '';
-	  const theme = currentViewingRound === 1 ? 'var(--emerald-dark)' : 'var(--round2-blue)';
-	  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
-	  
-	  const teamColors = {
-		'A': '#2e7d32', // Emerald
-		'B': '#1565c0', // Royal Blue
-		'C': '#880e4f', // Deep Burgundy
-		'D': '#ef6c00', // Pumpkin Orange
-		'DEFAULT': '#444' // Fallback
-	  };
-	  
-	  teams.forEach(tId => {
-		if (tId.toUpperCase() === 'X') return;
-		
-		// 1. Filter players for this team
-		let teamPlayers = players.filter(p => p.team === tId);
-		if (teamPlayers.length === 0) return;
+		  const container = document.getElementById('team-container');
+		  container.innerHTML = '';
+		  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
 
-		// 2. SORT players by their combined total (Highest to Lowest)
-		teamPlayers.sort((a, b) => {
-			const totalA = (a.r1Total || 0) + (a.r2Total || 0);
-			const totalB = (b.r1Total || 0) + (b.r2Total || 0);
-			return totalB - totalA; 
-		});
+		  // 1. Defined professional color palette
+		  const teamColors = {
+			'A': '#2e7d32', // Emerald Green
+			'B': '#1565c0', // Royal Blue
+			'C': '#880e4f', // Burgundy/Claret
+			'D': '#e65100', // Deep Orange
+			'DEFAULT': '#444'
+		  };
 
-		let r1T = 0, r2T = 0;
-		let rows = teamPlayers.map(p => {
-			r1T += (p.r1Total || 0); 
-			r2T += (p.r2Total || 0);
-			return `<tr>
-				<td class="team-player-name">${p.name}</td>
-				<td>${p.r1Total}</td>
-				<td>${p.r2Total}</td>
-				<td style="font-weight:900;">${p.r1Total + p.r2Total}</td>
-			</tr>`;
-		}).join('');
+		  teams.forEach(tId => {
+			if (tId.toUpperCase() === 'X') return;
+			
+			// 2. Filter players for this specific team
+			let teamPlayers = players.filter(p => p.team === tId);
+			if (teamPlayers.length === 0) return;
 
-		const label = teamLabels[tId] || `Team ${tId}`;
-		container.innerHTML += `<div class="team-table-wrapper">
-			<table class="team-table">
-				<thead>
-					<tr style="background:${theme}">
-						<th colspan="4">
-							<input class="team-title-input" value="${label}" ${isAdmin ? '' : 'readonly'} onchange="teamLabels['${tId}']=this.value; saveState();">
-						</th>
+			// 3. SORT: Highest combined total (R1+R2) at the top
+			teamPlayers.sort((a, b) => {
+				const totalA = (a.r1Total || 0) + (a.r2Total || 0);
+				const totalB = (b.r1Total || 0) + (b.r2Total || 0);
+				return totalB - totalA; 
+			});
+
+			// 4. Assign the color based on the Letter
+			const headerColor = teamColors[tId.toUpperCase()] || teamColors['DEFAULT'];
+
+			let r1T = 0, r2T = 0;
+			let rows = teamPlayers.map(p => {
+				r1T += (p.r1Total || 0); 
+				r2T += (p.r2Total || 0);
+				const playerTotal = (p.r1Total || 0) + (p.r2Total || 0);
+				return `<tr>
+					<td class="team-player-name">${p.name}</td>
+					<td>${p.r1Total}</td>
+					<td>${p.r2Total}</td>
+					<td style="font-weight:900;">${playerTotal}</td>
+				</tr>`;
+			}).join('');
+
+			const label = teamLabels[tId] || `Team ${tId}`;
+			
+			// 5. Build the table with the dynamic color
+			container.innerHTML += `
+			  <div class="team-table-wrapper">
+				<table class="team-table">
+					<thead>
+						<tr style="background:${headerColor}">
+							<th colspan="4">
+								<input class="team-title-input" value="${label}" ${isAdmin ? '' : 'readonly'} onchange="teamLabels['${tId}']=this.value; saveState();">
+							</th>
+						</tr>
+						<tr class="team-header-row">
+							<th>PLAYER</th><th>R1</th><th>R2</th><th>TOT</th>
+						</tr>
+					</thead>
+					<tbody>${rows}</tbody>
+					<tr style="background:#f8f9fa; font-weight:900;">
+						<td class="team-player-name">TOTAL</td>
+						<td>${r1T}</td>
+						<td>${r2T}</td>
+						<td style="color:${headerColor}">${r1T+r2T}</td>
 					</tr>
-					<tr class="team-header-row">
-						<th>PLAYER</th><th>R1</th><th>R2</th><th>TOT</th>
-					</tr>
-				</thead>
-				<tbody>${rows}</tbody>
-				<tr style="background:#f8f9fa; font-weight:900;">
-					<td class="team-player-name">TOTAL</td>
-					<td>${r1T}</td>
-					<td>${r2T}</td>
-					<td style="color:${theme}">${r1T+r2T}</td>
-				</tr>
-			</table>
-		</div>`;
-	  });
-	}
+				</table>
+			  </div>`;
+		  });
+		}
 
 function renderHistory() {
     const histContainer = document.getElementById('history-container');
