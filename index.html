@@ -647,7 +647,12 @@ function toggleRound() {
 
 function saveState() {
   const state = { 
-    players, teams, teamLabels, seasonStandings, previousRanks, history,
+    players, // This now includes p.stats.ace if endEvent was updated
+    teams, 
+    teamLabels, 
+    seasonStandings, 
+    previousRanks, 
+    history,
     venueName: document.getElementById('venue-name').value,
     pars: Array.from(document.querySelectorAll('.par-input')).map(i => i.value),
     sis: Array.from(document.querySelectorAll('.si-input')).map(i => i.value)
@@ -656,15 +661,23 @@ function saveState() {
 }
 
 function exportData() {
+  // Use the same structure as saveState to ensure all stats are in the file
   const state = { 
-    players, teams, teamLabels, seasonStandings, previousRanks, history,
+    players, 
+    teams, 
+    teamLabels, 
+    seasonStandings, 
+    previousRanks, 
+    history,
     venueName: document.getElementById('venue-name').value,
     pars: Array.from(document.querySelectorAll('.par-input')).map(i => i.value),
     sis: Array.from(document.querySelectorAll('.si-input')).map(i => i.value)
   };
   const blob = new Blob([JSON.stringify(state)], {type: "application/json"});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = `data.json`; a.click();
+  const a = document.createElement('a'); 
+  a.href = URL.createObjectURL(blob);
+  a.download = `lst74_backup.json`; 
+  a.click();
 }
 
 function resetScores() {
