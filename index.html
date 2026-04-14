@@ -602,28 +602,26 @@ function endEvent() {
         if (played) p.eventsPlayed = (p.eventsPlayed || 0) + 1;
 
         if (!p.stats) p.stats = { ace: 0, albatross: 0, eagle: 0, birdie: 0, par: 0, bogey: 0 };
-        [p.r1Scores, p.r2Scores].forEach(rdScores => {
-            rdScores.forEach((score, i) => {
-                const gross = parseInt(score);
-                const par = parseInt(parInputs[i]?.value);
-                if (!isNaN(gross) && gross > 0) {
-                    
-                    // EXCLUSIVE ACE LOGIC START
-                    if (gross === 1) {
-                        p.stats.ace++;
-                    } else {
-                        const diff = gross - par;
-                        if (diff <= -3) p.stats.albatross++;
-                        else if (diff === -2) p.stats.eagle++;
-                        else if (diff === -1) p.stats.birdie++;
-                        else if (diff === 0) p.stats.par++;
-                        else if (diff >= 1) p.stats.bogey++;
-                    }
-                    // EXCLUSIVE ACE LOGIC END
-
-                }
-            });
-        });
+    
+		[p.r1Scores, p.r2Scores].forEach(rdScores => {
+			rdScores.forEach((score, i) => {
+				const gross = parseInt(score);
+				const par = parseInt(parInputs[i]?.value);
+				if (!isNaN(gross) && gross > 0) {
+					// Rule: If gross is 1, it's an Ace and nothing else
+					if (gross === 1) {
+						p.stats.ace++;
+					} else {
+						const diff = gross - par;
+						if (diff <= -3) p.stats.albatross++;
+						else if (diff === -2) p.stats.eagle++;
+						else if (diff === -1) p.stats.birdie++;
+						else if (diff === 0) p.stats.par++;
+						else if (diff >= 1) p.stats.bogey++;
+					}
+				}
+			});
+		});
 
         seasonStandings[p.name] = (seasonStandings[p.name] || 0) + (p.r1Total + p.r2Total);
         p.r1Scores = Array(18).fill(''); p.r2Scores = Array(18).fill('');
