@@ -770,18 +770,27 @@ function toggleRound() {
 }
 
 function saveState() {
-  const state = { 
-    players, 
-    teams, 
-    teamLabels, 
-    seasonStandings, 
-    previousRanks, 
+  const state = {
+    // 1. Core Data
+    players,
+    teams,
+    teamLabels,
+    
+    // 2. Standings & History
+    seasonStandings,
+    previousRanks,
     history,
-    seasonEnded: window.seasonEndedFlag || false, // Saves the season status
+    
+    // 3. Season Status (The key for your summary view)
+    seasonEnded: window.seasonEndedFlag || false,
+    
+    // 4. Course/Venue Info
     venueName: document.getElementById('venue-name').value,
     pars: Array.from(document.querySelectorAll('.par-input')).map(i => i.value),
     sis: Array.from(document.querySelectorAll('.si-input')).map(i => i.value)
   };
+
+  // Save to browser memory
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
@@ -837,23 +846,30 @@ function hideLiveScoringElements() {
 }
 
 function exportData() {
-  // Use the same structure as saveState to ensure all stats are in the file
-  const state = { 
-    players, 
-    teams, 
-    teamLabels, 
-    seasonStandings, 
-    previousRanks, 
-    history,
-    venueName: document.getElementById('venue-name').value,
-    pars: Array.from(document.querySelectorAll('.par-input')).map(i => i.value),
-    sis: Array.from(document.querySelectorAll('.si-input')).map(i => i.value)
-  };
-  const blob = new Blob([JSON.stringify(state)], {type: "application/json"});
-  const a = document.createElement('a'); 
-  a.href = URL.createObjectURL(blob);
-  a.download = `data.json`; 
-  a.click();
+    // 1. Force a save to ensure seasonEndedFlag and current inputs are captured
+    saveState();
+
+    // 2. Retrieve the updated state from localStorage
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (!data) {
+        alert("No data found to export!");
+        return;
+    }
+
+    // 3. Create a blob and trigger the download
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    
+    // Naming the file with the current date is helpful for archives
+    const date = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `data.json`;
+	
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 function resetScores() {
