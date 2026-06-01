@@ -681,24 +681,38 @@ function endSeasonSummary() {
 function hideLiveScoringElements() {
     window.seasonEndedFlag = true;
     
-    // Hide the live scorecard and round switchers
+    // 1. Hide the live scorecard and round switchers
     if(document.getElementById('main-scorecard-wrapper')) document.getElementById('main-scorecard-wrapper').style.display = 'none';
     if(document.getElementById('round-toggle-area')) document.getElementById('round-toggle-area').style.display = 'none';
     
-    // Hide the venue header block completely
+    // 2. Hide the venue header block completely
     const headerBlock = document.querySelector('.header-block');
     if(headerBlock) headerBlock.style.display = 'none';
     
-    // Clear out the live individual team grids
+    // 3. Clear out the live individual team grids
     const teamContainer = document.getElementById('team-container');
     if(teamContainer) {
         teamContainer.innerHTML = '';
         teamContainer.style.display = 'none';
     }
     
-    // Clear the main controls header bar (except Backup/Import if needed, but safer to hide)
+    // 4. SAFELY FILTER ADMIN BUTTONS: Keep only JSON Backup visible
     const controls = document.getElementById('controls');
-    if(controls) controls.style.display = 'none';
+    if(controls) {
+        // Find all buttons inside controls
+        const buttons = controls.querySelectorAll('button');
+        buttons.forEach(btn => {
+            // If it's NOT the backup button, hide it completely
+            if (!btn.onclick.toString().includes('exportData')) {
+                btn.style.display = 'none';
+            } else {
+                // Force the backup button to stay visible for download
+                btn.style.display = 'inline-block';
+                btn.style.background = '#2980b9'; // Clean blue color
+                btn.innerHTML = '💾 Export Final Season Backup';
+            }
+        });
+    }
     
     // Refresh calculations silently just to ensure final leaderboards render cleanly
     updateIndividualLeaderboard();
