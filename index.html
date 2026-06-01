@@ -806,70 +806,80 @@ function endSeasonSummary() {
 
 // NEW FUNCTION: Handles the UI cleanup
 function hideLiveScoringElements() {
+    // 1. Set the global flag to true
     window.seasonEndedFlag = true;
     
-    // 1. Hide the live scorecard and round switchers
-    if(document.getElementById('main-scorecard-wrapper')) document.getElementById('main-scorecard-wrapper').style.display = 'none';
-    if(document.getElementById('round-toggle-area')) document.getElementById('round-toggle-area').style.display = 'none';
+    // 2. Hide the Scorecard and Round Switchers
+    const mainScorecard = document.getElementById('main-scorecard-wrapper');
+    if (mainScorecard) mainScorecard.style.display = 'none';
+
+    const roundToggle = document.getElementById('round-toggle-area');
+    if (roundToggle) roundToggle.style.display = 'none';
     
-    // 2. Hide the venue header block completely
+    // 3. Hide the Venue/Par/SI header block
     const headerBlock = document.querySelector('.header-block');
-    if(headerBlock) headerBlock.style.display = 'none';
+    if (headerBlock) headerBlock.style.display = 'none';
     
-    // 3. Clear out the live individual team grids
+    // 4. Wipe and hide the Team Breakdown containers
     const teamContainer = document.getElementById('team-container');
-    if(teamContainer) {
+    if (teamContainer) {
         teamContainer.innerHTML = '';
         teamContainer.style.display = 'none';
     }
     
-    // 4. SAFELY FILTER ADMIN BUTTONS: Keep only JSON Backup visible
+    // 5. Handle the Admin Controls / Title Swap
     const controls = document.getElementById('controls');
-    if(controls) {
-        // Find all buttons inside controls
-        const buttons = controls.querySelectorAll('button');
-        buttons.forEach(btn => {
-            // If it's NOT the backup button, hide it completely
-            if (!btn.onclick.toString().includes('exportData')) {
-                btn.style.display = 'none';
-            } else {
-                // Force the backup button to stay visible for download
-                btn.style.display = 'inline-block';
-                btn.style.background = '#2980b9'; // Clean blue color
-                btn.innerHTML = '💾 Export Final Season Backup';
-            }
-        });
+    if (controls) {
+        // Check if we've already saved the 'End Season' state to local storage
+        const savedState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        
+        if (savedState.seasonEnded) {
+            // If the JSON already knows the season is over, show the permanent Title
+            controls.innerHTML = `<h2 style="color: #2c3e50; margin: 20px 0; font-family: sans-serif; text-align: center;">🏆 Season 1 Summary</h2>`;
+        } else {
+            // If we just clicked the button but haven't exported yet, show the Export button
+            controls.innerHTML = `
+                <div style="text-align:center; padding: 20px;">
+                    <button onclick="exportData()" style="background: #2980b9; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                        💾 Export Final Season Backup
+                    </button>
+                    <p style="color: #666; font-size: 0.8rem; margin-top: 10px;">Click to download your final archive file and lock the season summary.</p>
+                </div>`;
+        }
     }
     
-    // Refresh calculations silently just to ensure final leaderboards render cleanly
+    // 6. Refresh the Leaderboards
+    // These remain visible so people can see the final rankings
     updateIndividualLeaderboard();
+    if (typeof updateTeamSeasonTable === 'function') updateTeamSeasonTable();
+    renderHistory();
 }
 
 function exportData() {
-    // 1. Force a save to ensure seasonEndedFlag and current inputs are captured
+    // 1. Force a save to ensure seasonEndedFlag is captured
     saveState();
 
-    // 2. Retrieve the updated state from localStorage
     const data = localStorage.getItem(STORAGE_KEY);
-    if (!data) {
-        alert("No data found to export!");
-        return;
-    }
+    if (!data) return;
 
-    // 3. Create a blob and trigger the download
+    // 2. Trigger the file download
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    
-    // Naming the file with the current date is helpful for archives
     const date = new Date().toISOString().slice(0, 10);
     a.href = url;
     a.download = `data.json`;
-	
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+
+    // 3. TRANSFORM THE UI
+    const controls = document.getElementById('controls');
+    if (controls) {
+        // Replace the button with a permanent, non-clickable heading
+        controls.innerHTML = `<h2 style="color: #2c3e50; margin: 10px 0; font-family: sans-serif;">🏆 Season 1 Summary</h2>`;
+    }
 }
 
 function resetScores() {
