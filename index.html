@@ -685,8 +685,25 @@ function importData(event) {
     const file = event.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (e) => {
-        try { applyState(JSON.parse(e.target.result)); saveState(); alert("File Imported!"); } catch (err) { alert("Invalid JSON."); }
+    reader.onload = function(e) {
+        try {
+            const state = JSON.parse(e.target.result);
+            
+            // 1. Apply the data to the variables
+            applyState(state);
+            
+            // 2. FORCE a save to the PC's local storage immediately
+            // This ensures the PC knows the season is ended and exported
+            saveState();
+            
+            alert("Data imported and synced successfully!");
+            
+            // 3. Refresh the UI one last time to trigger the Title Swap
+            hideLiveScoringElements(); 
+            
+        } catch (err) {
+            alert("Error importing JSON: " + err.message);
+        }
     };
     reader.readAsText(file);
 }
