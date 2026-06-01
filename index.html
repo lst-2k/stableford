@@ -1,664 +1,745 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LST Legends Sim Tours</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>LST74 Stableford League</title>
+  <style>
+    :root {
+      --emerald-primary: #2e7d32;
+      --emerald-dark: #1b5e20;
+      --round2-blue: #1565c0;
+      --round2-dark: #0d47a1;
+      --glass-bg: rgba(255, 255, 255, 0.9);
+      --glass-border: rgba(255, 255, 255, 0.3);
+      --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    }
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    * { box-sizing: border-box; }
+    html, body { width: 100%; margin: 0; padding: 0; background: #e8ecef; background-image: linear-gradient(135deg, #e8ecef 0%, #c8e6c9 100%); background-attachment: fixed; }
+    body { font-family: 'Inter', -apple-system, sans-serif; padding: 10px; }
+    
+    input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
-    <script>
-        const APP_VERSION = '1.1.10';
+    .header-block { text-align: center; margin-bottom: 15px; }
+    .brand-main { font-size: 1.1rem; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; color: var(--emerald-dark); margin: 0; }
+    .sub-brand { font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: #555; margin: 2px 0; }
+    .venue-input { border: none; background: transparent; font-weight: 800; text-align: center; color: #000; width: 90%; font-size: 1.3rem; text-transform: uppercase; outline: none; }
 
-        const tours = {
-            home: {
-                shade: "#8F8F8F"
-            },
-            emerald: {
-                name: "Emerald Tour",
-                url: "https://lst-2k.github.io/newemeraldtourseason2/",
-                logo: "emeraldlogo.png",
-                shade: "#195e19",
-                settingsImage: "emeraldsettings.png",
-                description: `NEW EMERALD TOUR - SEASON 2\n\nJoin the excitement in our 12-week season featuring signature events.`,
-				archive: [
-					{ name: "Season 2", url: "https://lst-2k.github.io/newemeraldtourseason2/" },
-					{ name: "Season 1", url: "https://lst-2k.github.io/new-emerald-tour/" }
-				],
-                videos: [
-                        {file: "geordieboypar4.mp4", title: "Geordieboy drives the par 4 at Olympic"},
-						{file: "tuggadart.mp4", title: "Tugga dart at Olympic"},
-						{file: "rendallio2.mp4", title: "Rendallio opens with an Eagle at North Beach" }
-				]
-            },
-            grip: {
-                name: "Grip & Rip",
-                url: "https://geordieboy85.github.io/GripRipRebirth74LeaderboardS6/",
-                logo: "gripnriplogo.png",
-                shade: "#ba1919",
-                settingsImage: "gripnripsettings.png",
-                videos: [
-					{
-                        file: "Rendalliodart.mp4",
-                        title: "Rendallio dart at Kincruan"
-                    },
-                    {
-                        file: "rendeagle.mp4",
-                        title: "Rendallio Eagle at Chubby Pines"
-                    },
-                    {
-                        file: "collysand.mp4",
-                        title: "Colly from the sand"
-                    },
-                    {
-                        file: "tuggacelebration.mp4",
-                        title: "Tugga's Big Fish moment 🎣"
-                    },
-                    {
-                        file: "davina230.mp4",
-                        title: "Davina stone dead from 230"
-                    }
-                ]
-            },
-            links: { 
-				name: "Linksland",
-				url: "https://lst-2k.github.io/linkslandseason4/",
-				logo: "linkslandlogo.png",
-				shade: "#194775",
-				settingsImage: "linkslandsettings.png",
-				archive: [
-					{ name: "Season 3", url: "https://lst-2k.github.io/linkslandseason3/" },
-					{ name: "Season 2", url: "https://lst-2k.github.io/linkslandseason2/" },
-					{ name: "Season 1", url: "https://lst-2k.github.io/linkslandseason1/" }
-				],
-				videos: [{file: "x3ace.mp4", title: "x3 Aces the 5th" }]
-			},
-            match: {
-                name: "Matchplay",
-                url: "https://lst-2k.github.io/matchplayseason3/",
-                logo: "matchplaylogo.png",
-				btnText: "Current Tournament",
-                shade: "#5d198e",
-                description: `LST Matchplay Championship. Season 3 is now live!`,
-                archive: [
-						{name: "Season 2", url: "https://lst-2k.github.io/matchplayseason2/"},
-						{name: "Season 1", url: "https://lst-2k.github.io/matchplayseason1/"
-                    }
-                ],
-                settingsImage: "matchplaysettings.png",
-                videos: [{
-                    file: "daveagle.mp4",
-					title: "Davina eagles 15 at Indian Trace"
-                }]
-            },
-            stable: {
-                name: "Stableford",
-                url: "https://lst-2k.github.io/stableford/",
-                logo: "stablefordlogo.png",
-				btnText: "Current Tournament",
-                shade: "#ff9719",
-                settingsImage: "stablefordsettings.png",
-				archive: [
-					{ name: "Season 1", url: "https://lst-2k.github.io/stableford/" }
-				],
-                videos: [
-					{
-                        file: "Davinahio.mp4",
-                        title: "Davina Hole in One at Charli's Park"
-                    },
-					{
-						file: "collyeagle.mp4",
-						title: "Colly eagles 18 at Duna de Costa Sul"
-					},
-					{
-                        file: "Geordieboyclose1.mp4",
-                        title: "Geordieboy close but.....😬"
-                    },
-                    {
-                        file: "tenbobace.mp4",
-                        title: "Tenbobnote ace in West Australia"
-                    }
-					
-                ]
-            },
-            owgr: {
-                name: "LST OWGR",
-                url: "https://lst-2k.github.io/lst-owgr/",
-                logo: "owgr.png",
-                btnText: "View Full Rankings",
-                shade: "#383838 ",
-                description: `LST-2k25 Official World Golf Rankings are LIVE!
-				
-				Ladies and Gentlemen, the hunt for World Number One is officially on. 
+    #capture-area { padding: 15px; border-radius: 16px; border: 1px solid var(--glass-border); }
 
-LST -OWGR has had a major overhaul so from now on we are moving to a Rolling 50-Event Weighted Ranking System.
-Here is how you earn your spot at the top:
-📊 The 2kOWGR Formula
-Your rank is based on efficiency and consistency, not just showing up.
-• The Rolling 50: We only count your last 50 events. Old baggage eventually falls off the map—staying at the top requires current form.
-• The Minimum Divisor (20): To prevent "one-hit wonders" from sitting at #1, your total points are divided by a minimum of 20.
-• Commissioner's Note: If you've played 5 events, your total is divided by 20. Once you hit 21 events, your real average takes over. The more you play, the easier it is to climb.
-🏆 The Points Structure
-Every standard event pays out as follows:
-• 1st: 150 pts | 2nd: 130 pts | 3rd: 110 pts
-• 4th–12th: 90, 80, 70, 60, 50, 40, 30, 20, 10
-• 13th–16th: 10 pts
-• All other finishers: 5 pts
-⚡ Field & Event Multipliers
-• 💎 Signature Events: Points are DOUBLED (1st place = 300 pts).
-• 👥 Small Fields: If the field is less than 10 players, points are reduced by 50% (1st place = 75 pts).
-🟢 The Movement Arrows
-Every week, I will "Finalize the Standings" and update the ‘live link’
-• ▲ Green: You outpaced the field this week.
-• ▼ Red: You're sliding—time to hit the range.
-• ● Grey: Position maintained.
+	.table-wrapper { 
+	  width: 100%; 
+	  max-height: 70vh;    
+	  overflow-y: auto;    
+	  overflow-x: auto;    
+	  border-radius: 10px; 
+	  box-shadow: var(--shadow-soft); 
+	  margin-bottom: 20px; 
+	  background: white; 
+	  border: 1px solid var(--glass-border);
+	  -webkit-overflow-scrolling: touch; 
+	}
+    table { border-collapse: separate; border-spacing: 0; width: 100%; }
+    th { color: white; text-transform: uppercase; font-size: 0.6rem; letter-spacing: 1px; padding: 8px 2px; }
+    td { border-bottom: 1px solid rgba(0,0,0,0.05); padding: 4px; text-align: center; }
+    
+    .round-1-theme th { background: linear-gradient(180deg, var(--emerald-primary), var(--emerald-dark)); }
+    .round-2-theme th { background: linear-gradient(180deg, var(--round2-blue), var(--round2-dark)); }
+    
+    .col-del { width: 30px; display: none; }
+    .col-name { width: 140px; min-width: 140px; }
+    .col-hcp, .col-team { width: 40px; min-width: 40px; }
+    .col-total { width: 50px; min-width: 50px; background: rgba(0,0,0,0.05); }
 
-Thanks for everyone’s continued support. Happy golfing.. 🏌️`, // Added backtick and comma
-                videos: []
-            }
-        };
+    .score-input, .par-input, .si-input { width: 28px; height: 28px; border: 1px solid #ddd; text-align: center; border-radius: 4px; font-weight: 700; background: white; font-size: 0.8rem; outline: none; margin: 0 auto; display: block; }
+    .player-name-input { font-weight: 800; border: none; background: transparent; color: #333; font-size: 0.8rem; padding-left: 5px; width: 100%; outline: none; }
+    
+    .eagle { border: 2px solid #b8860b !important; border-radius: 50%; width: 24px; height: 24px; line-height: 22px; margin: 0 auto; background: #ffd700 !important; color: #000 !important; }
+    .birdie { background: #d32f2f !important; color: white !important; border-radius: 50%; width: 24px; height: 24px; line-height: 24px; margin: 0 auto; }
+    .par-gross { background: #2e7d32 !important; color: white !important; border-radius: 50%; width: 24px; height: 24px; line-height: 24px; margin: 0 auto; }
+    .bogey-plus { background: #333 !important; color: white !important; width: 24px; height: 24px; line-height: 24px; margin: 0 auto; }
+    .blob-state { opacity: 0.35; }
 
-        function toggleHistory(header) {
-            const content = header.nextElementSibling;
-            header.classList.toggle('active');
-            if (content.style.maxHeight) {
-                content.style.maxHeight = null;
-                content.style.padding = "0 20px";
-            } else {
-                content.style.maxHeight = content.scrollHeight + "px";
-                content.style.padding = "20px";
-            }
-        }
+    .final-total-box { font-size: 1rem !important; color: white !important; }
+    .round-1-theme .final-total-box { background: var(--emerald-dark) !important; }
+    .round-2-theme .final-total-box { background: var(--round2-dark) !important; }
+    .pts-label { font-weight: 800; font-size: 0.8rem; display: block; }
 
-        function showPage(id) {
-            const data = tours[id];
-            if (!data) return;
+    .dashboard-grid { display: flex; flex-direction: column; gap: 20px; }
+    .team-container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+    
+    .team-table-wrapper { flex: 1; min-width: 300px; max-width: 800px; margin: 0 auto; width: 100%; }
+    .team-table { width: 100%; border-radius: 10px; overflow: hidden; background: white; box-shadow: var(--shadow-soft); font-size: 0.8rem; border-collapse: collapse; }
+    .team-table thead th { padding: 10px; color: white; font-weight: 900; }
+    .team-header-row th { background: #f1f3f5 !important; color: #666 !important; font-size: 0.6rem !important; padding: 6px !important; }
+    .team-table td { padding: 8px; text-align: center; border-bottom: 1px solid #eee; }
+    .team-player-name { text-align: left !important; padding-left: 12px !important; color: #333; font-weight: 700; }
+    .trend-cell { font-size: 0.9rem; width: 30px; }
 
-            document.getElementById('body-main').style.backgroundColor = data.shade;
-            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+    .team-title-input { background: transparent; color: white; border: none; text-align: center; font-weight: 900; width: 100%; text-transform: uppercase; outline: none; cursor: pointer; }
 
-            const linkBtn = document.getElementById('leaderboard-link');
+    #controls { text-align: center; margin-bottom: 15px; position: sticky; top: 0; z-index: 100; background: rgba(232, 236, 239, 0.9); padding: 10px; border-radius: 0 0 15px 15px; }
+    button { padding: 10px 16px; font-size: 0.75rem; margin: 3px; cursor: pointer; border: none; border-radius: 6px; color: white; font-weight: 700; text-transform: uppercase; transition: 0.2s; }
+    .toggle-rd { background: #222; }
+    .import-btn { background: #2980b9; }
+    .admin-only { display: none; background: #666; }
+    .end-event-btn { background: #27ae60; }
+    .del-btn { color: #e74c3c; cursor: pointer; font-weight: bold; border: none; background: transparent; }
 
-            if (id === 'home') {
-                document.getElementById('home').classList.add('active');
-                if (linkBtn) linkBtn.style.display = 'none';
-            } else {
-                const view = document.getElementById('tour-view');
-                const titleContainer = document.getElementById('title-container');
-                const videoGalleryCard = document.getElementById('video-gallery-card');
-                const videoList = document.getElementById('video-list');
+    .indiv-team-indicator { color: transparent !important; background: transparent !important; border: none !important; }
 
-                if (linkBtn) {
-                    linkBtn.href = data.url;
-                    linkBtn.innerText = "🏆 " + (data.btnText || "Current Leaderboard");
-                    linkBtn.style.display = 'block';
-                }
+    #history-container { width: 100%; max-width: 800px; margin: 30px auto; padding: 0 10px; }
+    .history-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; border-bottom: 1px solid #eee; }
+    .history-team-name { font-weight: 700; flex-grow: 1; padding-right: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .history-score { font-weight: 900; min-width: 60px; text-align: right; color: var(--emerald-dark); }
+    
+    summary::-webkit-details-marker { display: none; }
+    summary:hover { background: #eee !important; }
+    details { transition: all 0.3s ease; }
 
-                const oldDesc = document.getElementById('dynamic-description');
-                if (oldDesc) oldDesc.remove();
+    @media (max-width: 700px) {
+      .col-name { width: 110px; min-width: 110px; }
+      .team-table-wrapper { min-width: 100%; }
+      #history-container { max-width: 100%; }
+    }
+	#backToTop {
+	  position: fixed;
+	  bottom: calc(20px + env(safe-area-inset-bottom)); 
+	  right: 20px;
+	  width: 45px;
+	  height: 45px;
+	  background: var(--emerald-dark);
+	  color: white;
+	  border-radius: 50%;
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	  font-size: 20px;
+	  cursor: pointer;
+	  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+	  opacity: 0;
+	  visibility: hidden;
+	  transition: all 0.3s ease;
+	  z-index: 1000;
+	  border: 2px solid var(--glass-border);
+	}
 
-                titleContainer.innerHTML = data.logo ?
-                    `<img src="${data.logo}?v=${APP_VERSION}" class="tour-logo-header">` :
-                    `<h1>${data.name}</h1>`;
+	#backToTop.show { opacity: 1; visibility: visible; }
+	#backToTop:hover { transform: translateY(-5px); background: var(--emerald-primary); }
 
-                if (data.description || data.settingsImage) {
-                    const descCard = document.createElement('div');
-                    descCard.id = 'dynamic-description';
-                    descCard.className = 'card crimson-style';
-                    let html = "";
-                    if (data.settingsImage) html += `<img src="${data.settingsImage}?v=${APP_VERSION}" class="settings-image">`;
-                    if (data.description) html += `<div class="description-text">${data.description}</div>`;
-                    descCard.innerHTML = html;
-                    titleContainer.after(descCard);
-                }
+	#controls {
+	  text-align: center;
+	  margin-bottom: 10px;
+	  position: sticky;
+	  top: 0;
+	  z-index: 100;
+	  background: rgba(232, 236, 239, 0.95);
+	  backdrop-filter: blur(5px);
+	  padding: 8px;
+	  border-bottom: 1px solid var(--glass-border);
+	}
 
-                // Video Carousel Logic
-                if (videoList) {
-                    videoList.innerHTML = '';
-                    const oldDots = videoGalleryCard.querySelector('.video-dots');
-                    if (oldDots) oldDots.remove();
+	#logo-container { text-align: center; padding: 0; width: 100%; overflow: hidden; }
+	#logo-container img { width: 100%; height: auto; display: block; max-width: 100%; }
+	#scorecard thead th { position: sticky; top: 0; z-index: 10; }
 
-                    if (data.videos && data.videos.length > 0) {
-                        const dotsContainer = document.createElement('div');
-                        dotsContainer.className = 'video-dots';
+	.round-1-theme thead tr:first-child th { background: linear-gradient(180deg, var(--emerald-primary), var(--emerald-dark)) !important; }
+	.round-2-theme thead tr:first-child th { background: linear-gradient(180deg, var(--round2-blue), var(--round2-dark)) !important; }
 
-                        data.videos.forEach((vid, index) => {
-                            videoList.innerHTML += `
-                                <div class="video-item">
-                                    <video controls preload="metadata"><source src="${vid.file}" type="video/mp4"></video>
-                                    <h3 style="text-align:center; font-size:0.9rem; margin-top:8px;">${vid.title}</h3>
-                                </div>`;
-                            const dot = document.createElement('div');
-                            dot.className = `dot ${index === 0 ? 'active' : ''}`;
-                            dotsContainer.appendChild(dot);
-                        });
+	#scorecard thead tr:nth-child(2) td { position: sticky; top: 31px; z-index: 9; background: #fafafa !important; }
+	#scorecard thead tr:nth-child(3) td { position: sticky; top: 58px; z-index: 9; background: #fafafa !important; }
 
-                        videoGalleryCard.appendChild(dotsContainer);
-                        videoGalleryCard.style.display = 'block';
-
-                        videoList.onscroll = () => {
-                            const index = Math.round(videoList.scrollLeft / videoList.offsetWidth);
-                            const allDots = dotsContainer.querySelectorAll('.dot');
-                            allDots.forEach((d, i) => d.classList.toggle('active', i === index));
-                        };
-                    } else {
-                        videoGalleryCard.style.display = 'none';
-                    }
-                }
-
-                let arcCont = document.getElementById('archive-container');
-                if (!arcCont) {
-                    arcCont = document.createElement('div');
-                    arcCont.id = 'archive-container';
-                    view.appendChild(arcCont);
-                }
-                arcCont.innerHTML = '';
-                if (data.archive) {
-                    const h = document.createElement('div');
-                    h.className = 'history-header';
-                    h.innerHTML = '<h3>Tournament Archives</h3>';
-                    h.onclick = function() {
-                        toggleHistory(this);
-                    };
-                    const b = document.createElement('div');
-                    b.className = 'history-content';
-                    data.archive.forEach(item => {
-                        b.innerHTML += `<a href="${item.url}" target="_blank" class="archive-sub-btn">${item.name}</a>`;
-                    });
-                    arcCont.appendChild(h);
-                    arcCont.appendChild(b);
-                }
-                view.classList.add('active');
-            }
-        }
-
-        function scrollCarousel(direction) {
-            const slider = document.getElementById('video-list');
-            if (!slider) return;
-
-            // Calculate how much to scroll (the width of one video item)
-            const scrollAmount = slider.offsetWidth * 0.85;
-            slider.scrollBy({
-                left: direction * scrollAmount,
-                behavior: 'smooth'
-            });
-        }
-
-        window.onload = () => showPage('home');
-        // ENABLE DRAG-TO-SCROLL FOR DESKTOP
-        const slider = document.getElementById('video-list');
-        let isDown = false;
-        let startX;
-        let scrollLeft;
-
-        slider.addEventListener('mousedown', (e) => {
-            isDown = true;
-            slider.classList.add('active');
-            startX = e.pageX - slider.offsetLeft;
-            scrollLeft = slider.scrollLeft;
-        });
-        slider.addEventListener('mouseleave', () => {
-            isDown = false;
-        });
-        slider.addEventListener('mouseup', () => {
-            isDown = false;
-        });
-        slider.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - slider.offsetLeft;
-            const walk = (x - startX) * 2; // The number 2 determines scroll speed
-            slider.scrollLeft = scrollLeft - walk;
-        });
-    </script>
-
-    <style>
-        body {
-            font-family: sans-serif;
-            transition: background-color 0.5s ease;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: auto;
-            padding: 15px;
-            box-sizing: border-box;
-        }
-
-        /* SCROLLING NAV */
-        .nav-wrapper {
-            margin-bottom: 20px;
-        }
-
-        .nav-menu {
-            display: flex;
-            overflow-x: auto;
-            white-space: nowrap;
-            gap: 10px;
-            padding: 10px 5px 20px 5px;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .nav-menu::-webkit-scrollbar {
-            display: none;
-        }
-
-        .nav-menu button {
-            flex: 0 0 auto;
-            min-width: 130px;
-            padding: 15px 10px;
-            cursor: pointer;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            color: white;
-            background: #333;
-        }
-
-        #leaderboard-link {
-            display: none;
-            width: 100%;
-            background: white;
-            color: #333 !important;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            text-align: center;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(0, 0, 0, 0.1);
-            box-sizing: border-box;
-        }
-
-        /* CARD STYLES */
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        #home .card {
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.18);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-
-        .crimson-style {
-            border-left: 8px solid #800000;
-        }
-
-        .description-text {
-            white-space: pre-line;
-        }
-
-        /* IMAGES */
-        .main-logo,
-        .tour-logo-header,
-        .settings-image {
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        /* VIDEO CAROUSEL */
-        #video-list {
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            gap: 15px;
-            padding-bottom: 10px;
-            scrollbar-width: none;
-            cursor: grab;
-            /* Shows the grab hand on desktop */
-            user-select: none;
-            /* Prevents highlighting text while dragging */
-        }
-
-        #video-list:active {
-            cursor: grabbing;
-            /* Shows the closed fist when clicking */
-        }
-
-        .video-item {
-            flex: 0 0 85%;
-            /* Keep showing 85% of the width */
-            scroll-snap-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .video-item video {
-            width: 100%;
-            /* This forces all videos to be the same shape (Widescreen) */
-            aspect-ratio: 16 / 9;
-            background: #000;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            /* This ensures the video fills the 16:9 box without distorting */
-            object-fit: cover;
-        }
-
-        .video-item h3 {
-            text-align: center;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            height: 1.2rem;
-            /* Limits title to one line height */
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            width: 90%;
-        }
-
-        .video-dots {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            background: #ccc;
-            border-radius: 50%;
-            transition: all 0.3s;
-        }
-
-        .dot.active {
-            background: #5865F2;
-            transform: scale(1.2);
-        }
-
-        .page-content {
-            display: none;
-        }
-
-        .page-content.active {
-            display: block;
-        }
-
-        .social-group {
-			position: fixed;
-			bottom: 25px;
-			right: 25px;
-			display: flex;
-			flex-direction: column;
-			gap: 15px; /* Space between Twitch and Discord */
-			z-index: 1000;
-		}
-
-		.social-float {
-			width: 60px;
-			height: 60px;
-			color: white;
-			border-radius: 50%;
-			display: flex; 
-			align-items: center; 
-			justify-content: center; 
-			box-shadow: 0 4px 15px rgba(0,0,0,0.4); 
-			text-decoration: none; 
-			transition: transform 0.2s;
-		}
-
-		.social-float:hover { transform: scale(1.1); }
-		.social-float i { font-size: 30px; }
-
-		/* BRAND COLORS */
-		.twitch { background-color: #9146FF; }
-		.discord { background-color: #5865F2; }
-
-        .history-header {
-            background: #333;
-            color: white;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-
-        .history-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.3s ease-out;
-            background: #eee;
-            border-radius: 0 0 8px 8px;
-        }
-
-        .archive-sub-btn {
-            display: block;
-            padding: 12px;
-            margin: 10px;
-            background: #666;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        /* ARROW NAVIGATION */
-        .video-carousel-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .nav-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.3);
-            /* Faded background */
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 10;
-            transition: background 0.3s, opacity 0.3s;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .nav-arrow:hover {
-            background: rgba(0, 0, 0, 0.6);
-        }
-
-        .nav-arrow.left {
-            left: 5px;
-        }
-
-        .nav-arrow.right {
-            right: 5px;
-        }
-
-        /* Ensure video-list stays clean */
-        #video-list {
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            gap: 15px;
-            padding: 10px 0;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
-            scroll-behavior: smooth;
-            /* Smooth sliding animation */
-        }
-    </style>
+    @media (min-width: 768px) {
+    #logo-container img { max-width: 600px; margin: 0 auto; border-radius: 0 0 15px 15px; }
+    #logo-container { padding-top: 10px; }
+    }
+  </style>
 </head>
+<body>
 
-<body id="body-main">
-
-    <div class="container" id="main-area">
-        <div class="nav-wrapper">
-            <div class="nav-menu">
-                <button onclick="showPage('home')" style="background:#555;">Home</button>
-                <button onclick="showPage('emerald')" style="background:#004d00;">Emerald Tour</button>
-                <button onclick="showPage('grip')" style="background:#b30000;">Grip & Rip</button>
-                <button onclick="showPage('links')" style="background:#003366;">Linksland</button>
-                <button onclick="showPage('match')" style="background:#4b0082;">Matchplay</button>
-                <button onclick="showPage('stable')" style="background:#ff8c00;">Stableford</button>
-                <button onclick="showPage('owgr')" style="background:#222222;">LST OWGR</button>
-            </div>
-            <a id="leaderboard-link" target="_blank"></a>
-        </div>
-
-        <div id="home" class="page-content active">
-            <img src="logo.png" class="main-logo" alt="LST Logo">
-            <div class="card">
-                <h1>LST Legend Sim Tours</h1>
-                <p>Welcome to Legend Sim Tours (LST) Stock 74, we have a few different societies in here, they are all using the stock 74 golfer.</p>
-                <p> Whats a stock 74 golfer I hear you ask,</p>
-                <p> The greatest form of realism the game can offer, simply create a new golfer, then use only the 24 rebirth points to allocate to your player taking your overall player to 74,</p>
-                <p> No more attributes can be added, no skills tree, no silly shots unlocked, no swiss army golf bag with a millions shots to get out of trouble, no limited edition clubs, cosmetic items can only applied to golfer, and no manipulated controller,</p>
-                <p> We run an honesty system here, as enjoyment is the most important thing here, we are proud of what we run and offer here, so if you enjoy true sim, and realism then sure you will love whats provided for the great community of Legend true simmers we have here.</p>
-                <p> Each society offers something different, formats, scoring, bonus points etc.</p>
-                <p> Above is a link to each, just click on the link per society to give you an overview of what each society can offer, links to current tournaments and past seasons. Just ask in the chitchat channel if you need anymore help or anything explained there will always be someone about who can help out.</p>
-                <p> Hopefully there is something in here which you enjoy, or they might all be right up your street, remember to have fun and par is always a good score, go get em</p>
-				<p> Click the Social links to join our Discord and watch Mr Longpole aka 'Tugga Myshaft' and his faithful caddy Leroy on Twitch.
-                <img src="settings.png" class="settings-image" alt="Master Settings">
-            </div>
-        </div>
-
-        <div id="tour-view" class="page-content">
-            <div id="title-container"></div>
-            <div id="video-gallery-card" class="card" style="display:none; padding: 15px 10px;">
-                <h2 style="margin-left: 10px;">Tournament Highlights</h2>
-
-                <div class="video-carousel-container">
-                    <button class="nav-arrow left" onclick="scrollCarousel(-1)">&#10094;</button>
-                    <div id="video-list"></div>
-                    <button class="nav-arrow right" onclick="scrollCarousel(1)">&#10095;</button>
-                </div>
-            </div>
-            <div id="archive-container"></div>
-        </div>
-    </div>
-
-    <div class="social-group">
-    <a href="https://www.twitch.tv/longp0le" target="_blank" class="social-float twitch">
-        <i class="fab fa-twitch"></i>
-    </a>
-    <a href="https://discord.gg/HxGJk9HRC3" target="_blank" class="social-float discord">
-        <i class="fab fa-discord"></i>
-    </a>
+<div id="logo-container">
+  <img src="logo.png" alt="LST74 Logo">
 </div>
 
-</body>
+<div id="controls">
+  <button class="admin-only" onclick="addPlayer()">+ Player</button>
+  <button class="admin-only" onclick="removeTeam()">- Team</button>
+  <button class="admin-only import-btn" onclick="document.getElementById('file-import').click()">📂 Import File</button>
+  <button class="admin-only end-event-btn" onclick="endEvent()">🏆 Finalize Week</button>
+  <button class="admin-only" onclick="endSeasonSummary()" style="background: #8e44ad;">🏆 End Season Summary</button>
+  <button class="admin-only" onclick="exportData()">💾 JSON Backup</button>
+  <button class="admin-only" onclick="resetScores()" style="background: #c0392b;">🗑️ Reset All</button>
+  <input type="file" id="file-import" style="display:none" accept=".json" onchange="importData(event)">
+</div>
 
+<div id="capture-area">
+  <div class="header-block">
+    <div class="brand-main">LST74 STABLEFORD LEAGUE</div>
+    <div class="sub-brand">End of Season - Order of Merit</div>
+    <input type="text" id="venue-name" class="venue-input" placeholder="ENTER VENUE" readonly>
+  </div>
+  
+  <div id="round-toggle-area" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px;">
+    <button class="toggle-rd" onclick="toggleRound()" style="margin: 0; height: 32px; padding: 0 15px; font-size: 0.7rem;">
+        View Round <span id="next-rd-label">2</span>
+    </button>
+    <div id="round-display" style="background: var(--emerald-dark); color: white; padding: 6px 20px; border-radius: 20px; font-weight: 900; font-size: 0.8rem; height: 32px; display: flex; align-items: center;">
+        ROUND 1
+    </div>
+  </div>
+
+  <div id="main-scorecard-wrapper" class="table-wrapper">
+    <table id="scorecard" class="round-1-theme">
+      <thead>
+        <tr>
+          <th class="col-del admin-only">DEL</th>
+          <th class="col-name" style="text-align:left; padding-left:15px">Player</th>
+          <th class="col-hcp">Hcp</th>
+          <th class="col-team">T</th>
+          <script>for(let i=1; i<=18; i++) document.write(`<th>${i}</th>`);</script>
+          <th class="col-total">TOT</th>
+        </tr>
+        <tr style="background: #fafafa;">
+          <td class="admin-only"></td>
+          <td colspan="3" style="text-align:right; font-weight:800; color:#aaa; font-size:0.5rem; padding-right:5px">PAR</td>
+          <script>for(let i=0; i<18; i++) document.write(`<td><input type="number" class="par-input" value="4" oninput="updateCalculations()"></td>`);</script>
+          <td id="total-par" style="font-weight:800; background:rgba(0,0,0,0.05);">72</td>
+        </tr>
+        <tr style="background: #fafafa;">
+          <td class="admin-only"></td>
+          <td colspan="3" style="text-align:right; font-weight:800; color:#aaa; font-size:0.5rem; padding-right:5px">S.I.</td>
+          <script>for(let i=0; i<18; i++) document.write(`<td><input type="number" class="si-input" value="${i+1}" oninput="updateCalculations()"></td>`);</script>
+          <td>-</td>
+        </tr>
+      </thead>
+      <tbody id="players-body"></tbody>
+    </table>
+  </div>
+
+  <div class="dashboard-grid">
+	<div class="team-table-wrapper">
+		<h3 style="text-align:center; font-size:0.9rem; color:var(--emerald-dark); letter-spacing:2px; margin-bottom:10px;">INDIVIDUAL ORDER OF MERIT</h3>
+		<div class="table-wrapper"> 
+            <table class="team-table">
+				<thead>
+					<tr class="team-header-row">
+					<th style="width:40px">POS</th>
+					<th style="width:30px">+/-</th>
+					<th style="text-align:left; padding-left:12px; min-width:120px;">PLAYER</th>
+					<th style="width:60px">WEEK</th>
+					<th style="width:80px">TOTAL</th>
+					<th style="width:35px">EVT</th>
+                    <th style="width:35px; color:#e74c3c">ACE</th>
+					<th style="width:35px; color:#1565c0">ALBY</th>
+					<th style="width:35px; color:#b8860b">EAG</th>
+					<th style="width:35px; color:#d32f2f">BIR</th>
+					<th style="width:35px; color:#2e7d32">PAR</th>
+					<th style="width:35px; color:#777">BOG++</th>
+				</tr>
+				</thead>
+				<tbody id="individual-leaderboard-body"></tbody>
+			</table>
+		</div>
+	</div>
+
+    <div class="team-table-wrapper" style="margin-top: 20px;">
+        <h3 style="text-align:center; font-size:0.9rem; color:var(--emerald-dark); letter-spacing:2px; margin-bottom:10px;">TEAM SEASON STANDINGS</h3>
+        <table class="team-table">
+            <thead>
+                <tr class="team-header-row">
+                    <th style="width:50px">POS</th>
+                    <th style="text-align:left; padding-left:12px;">TEAM NAME</th>
+                    <th style="width:60px">🥇<br>WINS</th>
+					<th style="width:60px">🥈<br>R/UP</th>
+                    <th style="width:100px">TOTAL POINTS</th>
+                </tr>
+            </thead>
+            <tbody id="team-season-body"></tbody>
+        </table>
+    </div>
+
+    <div id="team-container" class="team-container"></div>
+    <div id="history-container"></div>
+	<div id="backToTop" onclick="scrollToTop()">↑</div>
+  </div>
+</div>
+
+<script>
+let players = [];
+let teams = ['A', 'B'];
+let teamLabels = { 'A': 'Team A', 'B': 'Team B' };
+let seasonStandings = {}; 
+let previousRanks = {};
+let history = [];
+let currentViewingRound = 1;
+const STORAGE_KEY = 'lst74_league_data';
+
+window.onload = () => { 
+  checkAdmin(); 
+  loadFromServer();
+};
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('backToTop');
+  if (window.scrollY > 300) btn.classList.add('show');
+  else btn.classList.remove('show');
+});
+
+async function loadFromServer() {
+  try {
+    const response = await fetch('data.json', { cache: "no-store" });
+    if (response.ok) {
+      const state = await response.json();
+      applyState(state);
+    } else { loadData(); }
+  } catch (err) { loadData(); }
+}
+
+function checkAdmin() {
+  if (new URLSearchParams(window.location.search).get('admin') === 'true') {
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'table-cell');
+    document.querySelectorAll('button.admin-only').forEach(el => el.style.display = 'inline-block');
+    document.querySelectorAll('input').forEach(el => el.readOnly = false);
+  }
+}
+
+function loadData() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) { applyState(JSON.parse(saved)); }
+}
+
+function applyState(state) {
+    if(!state) return;
+    players = state.players || [];
+    teams = state.teams || ['A', 'B'];
+    teamLabels = state.teamLabels || { 'A': 'Team A', 'B': 'Team B' };
+    seasonStandings = state.seasonStandings || {};
+    previousRanks = state.previousRanks || {};
+    history = state.history || [];
+    window.teamSeasonPoints = state.teamSeasonPoints || {};
+    document.getElementById('venue-name').value = state.venueName || '';
+    
+    const parInputs = document.querySelectorAll('.par-input');
+    const siInputs = document.querySelectorAll('.si-input');
+    if (state.pars) state.pars.forEach((v, i) => { if(parInputs[i]) parInputs[i].value = v; });
+    if (state.sis) state.sis.forEach((v, i) => { if(siInputs[i]) siInputs[i].value = v; });
+    
+    // Check if the season has ended
+    if (state.seasonEnded) {
+        hideLiveScoringElements();
+    } else {
+        renderPlayers();
+    }
+    renderHistory();
+}
+
+function renderPlayers() {
+  const tbody = document.getElementById('players-body');
+  tbody.innerHTML = '';
+  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
+  players.forEach((p, pIdx) => {
+    const scores = currentViewingRound === 1 ? p.r1Scores : p.r2Scores;
+    const isIndiv = p.team.toUpperCase() === 'X';
+
+    let trScore = `<tr>
+      <td class="admin-only" style="${isAdmin ? 'display:table-cell' : 'display:none'}"><button class="del-btn" onclick="deletePlayer(${pIdx})">✕</button></td>
+      <td style="text-align:left; padding-left:8px"><input class="player-name-input" value="${p.name}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].name=this.value; saveState();"></td>
+      <td><input type="number" class="score-input" value="${p.handicap}" ${isAdmin ? '' : 'readonly'} oninput="players[${pIdx}].handicap=this.value; updateCalculations();"></td>
+      <td><input class="score-input ${isIndiv ? 'indiv-team-indicator' : ''}" style="width:35px" value="${p.team}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].team=this.value.toUpperCase(); renderPlayers();"></td>`;
+    for(let i=0; i<18; i++) trScore += `<td><input type="number" class="score-input" data-p="${pIdx}" data-h="${i}" value="${scores[i] || ''}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
+    trScore += `<td class="final-total-box" id="tot-gross-${pIdx}">0</td></tr>`;
+    let trNet = ''; for(let i=0; i<18; i++) trNet += `<td id="net-${pIdx}-${i}" style="padding:1px 0;">-</td>`;
+    tbody.innerHTML += trScore + `<tr style="background: rgba(0,0,0,0.02); height:22px">
+        <td class="admin-only" style="${isAdmin ? 'display:table-cell' : 'display:none'}"></td>
+        <td colspan="3" style="text-align:right; font-weight:700; color:#aaa; font-size:0.45rem; padding-right:5px">NET/PTS</td>
+        ${trNet}
+        <td id="p-total-${pIdx}" style="background:#333; color:white; font-weight:bold; font-size:0.75rem;">0</td>
+    </tr>`;
+  });
+  updateCalculations();
+}
+
+function updateCalculations() {
+  const parInputs = document.querySelectorAll('.par-input');
+  const siInputs = document.querySelectorAll('.si-input');
+  let totalCoursePar = 0;
+  parInputs.forEach(input => { totalCoursePar += (parseInt(input.value) || 0); });
+  document.getElementById('total-par').textContent = totalCoursePar;
+  
+  players.forEach((p, pIdx) => {
+    let rdStb = 0, rdGross = 0;
+    const hcap = parseInt(p.handicap) || 0;
+    const inputs = document.querySelectorAll(`.score-input[data-p="${pIdx}"]`);
+    inputs.forEach((inp, hIdx) => {
+      const gross = parseInt(inp.value), 
+            par = parseInt(parInputs[hIdx].value) || 4, 
+            si = parseInt(siInputs[hIdx].value) || (hIdx + 1); 
+      inp.classList.remove('birdie', 'eagle', 'par-gross', 'bogey-plus', 'blob-state');
+      if (currentViewingRound === 1) p.r1Scores[hIdx] = inp.value; else p.r2Scores[hIdx] = inp.value;
+      const netCell = document.getElementById(`net-${pIdx}-${hIdx}`);
+      if (!isNaN(gross) && gross > 0) {
+        rdGross += gross;
+        if (gross-par <= -2) inp.classList.add('eagle'); else if (gross-par === -1) inp.classList.add('birdie'); else if (gross-par === 0) inp.classList.add('par-gross'); else inp.classList.add('bogey-plus');
+        const net = gross - (Math.floor(hcap/18) + (si <= (hcap%18) ? 1 : 0));
+        let pts = Math.max(0, 2 - (net - par));
+        if (pts === 0) inp.classList.add('blob-state');
+        rdStb += pts;
+        netCell.innerHTML = `<span style="font-size:0.5rem; color:#888; display:block; line-height:1;">${net}</span><span class="pts-label" style="color:${currentViewingRound==1?'var(--emerald-primary)':'var(--round2-blue)'}">${pts}</span>`;
+      } else { netCell.textContent = '-'; }
+    });
+    if (currentViewingRound === 1) p.r1Total = rdStb; else p.r2Total = rdStb;
+    document.getElementById(`tot-gross-${pIdx}`).textContent = rdGross;
+    document.getElementById(`p-total-${pIdx}`).textContent = rdStb;
+  });
+  updateTeamTables();
+  updateIndividualLeaderboard();
+  saveState();
+}
+
+function updateIndividualLeaderboard() {
+    const tbody = document.getElementById('individual-leaderboard-body');
+    const parInputs = document.querySelectorAll('.par-input');
+
+    const sorted = players.map(p => {
+        const weekTotal = (p.r1Total || 0) + (p.r2Total || 0);
+        const seasonTotal = (seasonStandings[p.name] || 0) + weekTotal;
+        const hasLiveScores = p.r1Scores.some(s => s !== '') || p.r2Scores.some(s => s !== '');
+        const liveEvents = (p.eventsPlayed || 0) + (hasLiveScores ? 1 : 0);
+
+        let liveStats = { 
+            ace: (p.stats?.ace || 0),
+            albatross: (p.stats?.albatross || 0),
+            eagle: (p.stats?.eagle || 0), 
+            birdie: (p.stats?.birdie || 0), 
+            par: (p.stats?.par || 0), 
+            bogey: (p.stats?.bogey || 0) 
+        };
+
+        [p.r1Scores, p.r2Scores].forEach(rdScores => {
+            rdScores.forEach((score, i) => {
+                const gross = parseInt(score);
+                const par = parseInt(parInputs[i]?.value);
+                if (!isNaN(gross) && gross > 0 && !isNaN(par)) {
+                    
+                    // EXCLUSIVE ACE LOGIC START
+                    if (gross === 1) {
+                        liveStats.ace++;
+                    } else {
+                        // These only run if it is NOT an Ace
+                        const diff = gross - par;
+                        if (diff <= -3) liveStats.albatross++;
+                        else if (diff === -2) liveStats.eagle++;
+                        else if (diff === -1) liveStats.birdie++;
+                        else if (diff === 0) liveStats.par++;
+                        else if (diff >= 1) liveStats.bogey++;
+                    }
+                    // EXCLUSIVE ACE LOGIC END
+
+                }
+            });
+        });
+
+        return { ...p, weekTotal, seasonTotal, liveStats, liveEvents };
+    }).sort((a, b) => b.seasonTotal - a.seasonTotal);
+
+    let displayRank = 0;
+    let playersAtRank = 0;
+
+    tbody.innerHTML = sorted.map((p, idx) => {
+        const isTied = idx > 0 && p.seasonTotal === sorted[idx - 1].seasonTotal;
+        if (!isTied) {
+            displayRank = idx + 1;
+            playersAtRank = sorted.filter(player => player.seasonTotal === p.seasonTotal).length;
+        }
+
+        const rankText = playersAtRank > 1 ? `T${displayRank}` : displayRank;
+        const lastRank = previousRanks[p.name];
+        let trend = '<span style="color:#ccc">-</span>';
+        if (lastRank) {
+            if (displayRank < lastRank) trend = '<span style="color:#27ae60">▲</span>';
+            else if (displayRank > lastRank) trend = '<span style="color:#c0392b">▼</span>';
+        }
+        
+        return `<tr>
+            <td style="font-weight:800; color:#888;">${rankText}</td>
+            <td class="trend-cell">${trend}</td>
+            <td class="team-player-name">${p.name}</td>
+            <td style="background:rgba(0,0,0,0.02); font-weight:700;">${p.weekTotal}</td>
+            <td style="font-weight:900; background:#f8f9fa; color:var(--emerald-dark);">${p.seasonTotal}</td>
+            <td style="font-weight:600;">${p.liveEvents}</td>
+            <td style="color:#e74c3c; font-weight:bold;">${p.liveStats.ace}</td>
+            <td style="color:#1565c0; font-weight:bold;">${p.liveStats.albatross}</td>
+            <td style="color:#b8860b; font-weight:bold;">${p.liveStats.eagle}</td>
+            <td style="color:#d32f2f; font-weight:bold;">${p.liveStats.birdie}</td>
+            <td style="color:#2e7d32; font-weight:bold;">${p.liveStats.par}</td>
+            <td style="color:#777;">${p.liveStats.bogey}</td>
+        </tr>`;
+    }).join('');
+}
+
+function updateTeamTables() {
+  const container = document.getElementById('team-container');
+  container.innerHTML = '';
+  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
+  const teamColors = { 'A': '#2e7d32', 'B': '#1565c0', 'C': '#880e4f', 'D': '#e65100', 'DEFAULT': '#444' };
+  const activeTeams = teams.filter(t => t.toUpperCase().trim() !== 'X');
+
+  activeTeams.forEach(tId => {
+    const lookupId = tId.toUpperCase().trim();
+    let teamPlayers = players.filter(p => p.team.toUpperCase().trim() === lookupId);
+    if (teamPlayers.length === 0) return;
+
+    teamPlayers.sort((a, b) => ((b.r1Total || 0) + (b.r2Total || 0)) - ((a.r1Total || 0) + (a.r2Total || 0)));
+    const headerColor = teamColors[lookupId] || teamColors['DEFAULT'];
+
+    let r1T = 0, r2T = 0;
+    let rows = teamPlayers.map(p => {
+        const pR1 = parseFloat(p.r1Total) || 0;
+        const pR2 = parseFloat(p.r2Total) || 0;
+        r1T += pR1; r2T += pR2;
+        return `<tr><td class="team-player-name">${p.name}</td><td>${p.r1Total || 0}</td><td>${p.r2Total || 0}</td><td style="font-weight:900;">${pR1 + pR2}</td></tr>`;
+    }).join('');
+
+    const label = teamLabels[tId] || `Team ${tId}`;
+    container.innerHTML += `<div class="team-table-wrapper"><table class="team-table"><thead><tr style="background:${headerColor}"><th colspan="4"><input class="team-title-input" value="${label}" ${isAdmin ? '' : 'readonly'} onchange="teamLabels['${tId}']=this.value; saveState();"></th></tr><tr class="team-header-row"><th>PLAYER</th><th>R1</th><th>R2</th><th>TOT</th></tr></thead><tbody>${rows}</tbody><tr style="background:#f8f9fa; font-weight:900;"><td class="team-player-name">TOTAL</td><td>${r1T}</td><td>${r2T}</td><td style="color:${headerColor}">${r1T+r2T}</td></tr></table></div>`;
+  });
+}
+
+function renderHistory() {
+    const histContainer = document.getElementById('history-container');
+    const teamStandingsBody = document.getElementById('team-season-body');
+    if (!histContainer) return;
+
+    histContainer.innerHTML = `<h3 style="text-align:center; color:var(--emerald-dark); margin-top:30px; letter-spacing:2px;">WEEKLY ARCHIVE</h3>`;
+    let teamStats = {};
+    teams.filter(t => t.toUpperCase() !== 'X').forEach(tId => {
+        const label = teamLabels[tId] || `Team ${tId}`;
+        teamStats[label] = { wins: 0, runnersUp: 0, totalPoints: 0 };
+    });
+
+    if (history.length === 0) {
+        histContainer.innerHTML += `<p style="text-align:center; color:#888; font-size:0.8rem;">No history recorded yet.</p>`;
+        teamStandingsBody.innerHTML = `<tr><td colspan="5" style="color:#aaa; font-style:italic;">No data available</td></tr>`;
+        return;
+    }
+    
+    history.forEach((entry) => {
+        entry.rankings.forEach((team, idx) => {
+            if (!teamStats[team.label]) teamStats[team.label] = { wins: 0, runnersUp: 0, totalPoints: 0 };
+            teamStats[team.label].totalPoints += team.score;
+            if (idx === 0) teamStats[team.label].wins += 1;
+            else if (idx === 1) teamStats[team.label].runnersUp += 1;
+        });
+    });
+
+    [...history].reverse().forEach((entry) => {
+        let rankingHtml = entry.rankings.map((team, idx) => {
+            let medal = (idx === 0) ? "🥇 " : (idx === 1) ? "🥈 " : (idx === 2) ? "🥉 " : "• ";
+            return `<div class="history-row"><span class="history-team-name">${medal}${team.label}</span><span class="history-score">${team.score} PTS</span></div>`;
+        }).join('');
+        histContainer.innerHTML += `<details style="background:white; margin-bottom:12px; border-radius:10px; box-shadow:var(--shadow-soft); border: 1px solid var(--glass-border);"><summary style="padding:15px; font-weight:800; cursor:pointer; background:#f8f9fa; list-style:none; border-bottom:1px solid #eee; display:flex; justify-content:space-between;"><span>${entry.title}</span><span style="font-size:0.7rem; color:#aaa;">VIEW ▼</span></summary><div>${rankingHtml}</div></details>`;
+    });
+
+    const sortedTeams = Object.entries(teamStats).sort((a, b) => b[1].totalPoints - a[1].totalPoints);
+    teamStandingsBody.innerHTML = sortedTeams.map(([name, stats], idx) => `<tr><td style="font-weight:800; color:#888;">${idx+1}</td><td class="team-player-name">${name}</td><td style="font-weight:700;">${stats.wins}</td><td style="font-weight:700;">${stats.runnersUp}</td><td style="font-weight:900; background:#f8f9fa; color:var(--emerald-dark);">${stats.totalPoints}</td></tr>`).join('');
+}
+
+function addPlayer() {
+  const name = prompt("Name:");
+  const team = prompt("Team Letter (Enter 'X' for Individual Only):", "A").toUpperCase();
+  if (name) {
+    if (!teams.includes(team)) {
+        teams.push(team);
+        if(team !== 'X' && !teamLabels[team]) teamLabels[team] = `Team ${team}`;
+    }
+    players.push({ name, handicap: 0, team, r1Scores: Array(18).fill(''), r2Scores: Array(18).fill(''), r1Total: 0, r2Total: 0 });
+    renderPlayers();
+  }
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try { applyState(JSON.parse(e.target.result)); saveState(); alert("File Imported!"); } catch (err) { alert("Invalid JSON."); }
+    };
+    reader.readAsText(file);
+}
+
+function deletePlayer(idx) {
+    if(confirm(`Delete ${players[idx].name}?`)) { players.splice(idx, 1); renderPlayers(); saveState(); }
+}
+
+function removeTeam() {
+    const t = prompt("Which Team Letter to remove?").toUpperCase();
+    if (t && teams.includes(t)) { teams = teams.filter(item => item !== t); updateTeamTables(); saveState(); }
+}
+
+function endEvent() {
+    if (!confirm("Finalize week and record results to history?")) return;
+    const parInputs = document.querySelectorAll('.par-input');
+    const venue = document.getElementById('venue-name').value || "Unknown Venue";
+
+    const weeklyTeams = teams.filter(t => t.toUpperCase() !== 'X').map(tId => {
+        const teamPlayers = players.filter(p => p.team === tId);
+        const total = teamPlayers.reduce((sum, p) => sum + (p.r1Total || 0) + (p.r2Total || 0), 0);
+        return { label: teamLabels[tId] || `Team ${tId}`, score: total };
+    }).sort((a, b) => b.score - a.score);
+
+    history.push({ title: `Week ${history.length + 1} - ${venue}`, rankings: weeklyTeams });
+
+    const finalSorted = [...players].sort((a, b) => {
+        const aS = (seasonStandings[a.name] || 0) + (a.r1Total + a.r2Total);
+        const bS = (seasonStandings[b.name] || 0) + (b.r1Total + b.r2Total);
+        return bS - aS;
+    });
+    previousRanks = {};
+    finalSorted.forEach((p, i) => previousRanks[p.name] = i + 1);
+
+    players.forEach(p => {
+        const played = p.r1Scores.some(s => s !== '') || p.r2Scores.some(s => s !== '');
+        if (played) p.eventsPlayed = (p.eventsPlayed || 0) + 1;
+
+        if (!p.stats) p.stats = { ace: 0, albatross: 0, eagle: 0, birdie: 0, par: 0, bogey: 0 };
+    
+		[p.r1Scores, p.r2Scores].forEach(rdScores => {
+			rdScores.forEach((score, i) => {
+				const gross = parseInt(score);
+				const par = parseInt(parInputs[i]?.value);
+				if (!isNaN(gross) && gross > 0) {
+					// Rule: If gross is 1, it's an Ace and nothing else
+					if (gross === 1) {
+						p.stats.ace++;
+					} else {
+						const diff = gross - par;
+						if (diff <= -3) p.stats.albatross++;
+						else if (diff === -2) p.stats.eagle++;
+						else if (diff === -1) p.stats.birdie++;
+						else if (diff === 0) p.stats.par++;
+						else if (diff >= 1) p.stats.bogey++;
+					}
+				}
+			});
+		});
+
+        seasonStandings[p.name] = (seasonStandings[p.name] || 0) + (p.r1Total + p.r2Total);
+        p.r1Scores = Array(18).fill(''); p.r2Scores = Array(18).fill('');
+        p.r1Total = 0; p.r2Total = 0;
+    });
+
+    document.getElementById('venue-name').value = '';
+    saveState();
+    renderPlayers();
+    renderHistory();
+    alert("Week Finalized!");
+}
+
+function toggleRound() {
+  currentViewingRound = currentViewingRound === 1 ? 2 : 1;
+  const theme = currentViewingRound === 1 ? 'var(--emerald-dark)' : 'var(--round2-blue)';
+  document.getElementById('scorecard').className = currentViewingRound === 1 ? 'round-1-theme' : 'round-2-theme';
+  document.getElementById('round-display').style.background = theme;
+  document.getElementById('round-display').textContent = `ROUND ${currentViewingRound}`;
+  document.getElementById('next-rd-label').textContent = currentViewingRound === 1 ? 2 : 1;
+  renderPlayers();
+}
+
+function saveState() {
+  const state = { 
+    players, 
+    teams, 
+    teamLabels, 
+    seasonStandings, 
+    previousRanks, 
+    history,
+    seasonEnded: window.seasonEndedFlag || false, // Saves the season status
+    venueName: document.getElementById('venue-name').value,
+    pars: Array.from(document.querySelectorAll('.par-input')).map(i => i.value),
+    sis: Array.from(document.querySelectorAll('.si-input')).map(i => i.value)
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+// NEW FUNCTION: Triggers the archive state
+function endSeasonSummary() {
+    if (!confirm("Are you absolutely sure you want to END THE SEASON?\nThis will permanently hide player scorecards and individual team tables to leave a final season summary.")) return;
+    
+    window.seasonEndedFlag = true;
+    saveState();
+    hideLiveScoringElements();
+    alert("Season Closed! Back up your data file now for your records.");
+}
+
+// NEW FUNCTION: Handles the UI cleanup
+function hideLiveScoringElements() {
+    window.seasonEndedFlag = true;
+    
+    // Hide the live scorecard and round switchers
+    if(document.getElementById('main-scorecard-wrapper')) document.getElementById('main-scorecard-wrapper').style.display = 'none';
+    if(document.getElementById('round-toggle-area')) document.getElementById('round-toggle-area').style.display = 'none';
+    
+    // Hide the venue header block completely
+    const headerBlock = document.querySelector('.header-block');
+    if(headerBlock) headerBlock.style.display = 'none';
+    
+    // Clear out the live individual team grids
+    const teamContainer = document.getElementById('team-container');
+    if(teamContainer) {
+        teamContainer.innerHTML = '';
+        teamContainer.style.display = 'none';
+    }
+    
+    // Clear the main controls header bar (except Backup/Import if needed, but safer to hide)
+    const controls = document.getElementById('controls');
+    if(controls) controls.style.display = 'none';
+    
+    // Refresh calculations silently just to ensure final leaderboards render cleanly
+    updateIndividualLeaderboard();
+}
+
+function exportData() {
+  // Use the same structure as saveState to ensure all stats are in the file
+  const state = { 
+    players, 
+    teams, 
+    teamLabels, 
+    seasonStandings, 
+    previousRanks, 
+    history,
+    venueName: document.getElementById('venue-name').value,
+    pars: Array.from(document.querySelectorAll('.par-input')).map(i => i.value),
+    sis: Array.from(document.querySelectorAll('.si-input')).map(i => i.value)
+  };
+  const blob = new Blob([JSON.stringify(state)], {type: "application/json"});
+  const a = document.createElement('a'); 
+  a.href = URL.createObjectURL(blob);
+  a.download = `lst74_backup.json`; 
+  a.click();
+}
+
+function resetScores() {
+  const choice = confirm("Click OK to start a NEW SEASON (Keep players/history, wipe scores).\nClick CANCEL to wipe EVERYTHING.");
+  if (choice) {
+    players.forEach(p => { p.r1Scores = Array(18).fill(''); p.r2Scores = Array(18).fill(''); p.r1Total = 0; p.r2Total = 0; });
+    seasonStandings = {}; previousRanks = {};
+    document.getElementById('venue-name').value = '';
+  } else {
+    if(confirm("Delete EVERYTHING?")) {
+      players = []; teams = ['A', 'B']; seasonStandings = {}; history = [];
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+      return;
+    }
+  }
+  saveState(); renderPlayers(); renderHistory();
+}
+</script>
+</body>
 </html>
