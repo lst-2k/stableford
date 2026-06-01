@@ -155,6 +155,9 @@
     #logo-container img { max-width: 600px; margin: 0 auto; border-radius: 0 0 15px 15px; }
     #logo-container { padding-top: 10px; }
     }
+	.hidden-season-end {
+		display: none !important;
+	}
   </style>
 </head>
 <body>
@@ -315,46 +318,98 @@ function loadData() {
 }
 
 function applyState(state) {
-    if(!state) return;
+    if (!state) return;
+
+    // 1. SET GLOBAL FLAG: Determine if the season is active or archived
+    window.seasonEndedFlag = state.seasonEnded || false;
+
+    // 2. LOAD PLAYER & TEAM DATA
     players = state.players || [];
-    teams = state.teams || ['A', 'B'];
-    teamLabels = state.teamLabels || { 'A': 'Team A', 'B': 'Team B' };
+    teams = state.teams || ['A', 'B', 'C'];
+    teamLabels = state.teamLabels || { 'A': 'Team A', 'B': 'Team B', 'C': 'Team C' };
+    
+    // 3. LOAD SEASONAL STANDINGS & HISTORY
     seasonStandings = state.seasonStandings || {};
     previousRanks = state.previousRanks || {};
     history = state.history || [];
-    window.teamSeasonPoints = state.teamSeasonPoints || {};
-    document.getElementById('venue-name').value = state.venueName || '';
+    
+    // 4. LOAD VENUE & COURSE DATA
+    const venueInput = document.getElementById('venue-name');
+    if (venueInput) venueInput.value = state.venueName || '';
     
     const parInputs = document.querySelectorAll('.par-input');
     const siInputs = document.querySelectorAll('.si-input');
-    if (state.pars) state.pars.forEach((v, i) => { if(parInputs[i]) parInputs[i].value = v; });
-    if (state.sis) state.sis.forEach((v, i) => { if(siInputs[i]) siInputs[i].value = v; });
     
-    // Check if the season has ended
-    if (state.seasonEnded) {
+    if (state.pars) {
+        state.pars.forEach((v, i) => { if (parInputs[i]) parInputs[i].value = v; });
+    }
+    if (state.sis) {
+        state.sis.forEach((v, i) => { if (siInputs[i]) siInputs[i].value = v; });
+    }
+
+    // 5. UI INITIALIZATION: Decide what to show based on season status
+    if (window.seasonEndedFlag) {
+        // If archived, trigger the cleanup immediately
         hideLiveScoringElements();
     } else {
+        // If active, render the interactive scorecard and team grids
         renderPlayers();
+        updateTeamTables();
     }
+
+    // 6. ALWAYS RENDER SUMMARY TABLES: These remain visible in both states
+    updateIndividualLeaderboard();
     renderHistory();
 }
 
 function renderPlayers() {
   const tbody = document.getElementById('players-body');
+  const container = document.getElementById('main-scorecard-wrapper');
+  
+  // 1. GATEKEEPER: If season has ended, hide the scorecard and abort rendering
+  if (window.seasonEndedFlag) {
+    if (container) container.style.display = 'none';
+    tbody.innerHTML = ''; // Ensure it's empty
+    return; 
+  }
+
+  // 2. Standard rendering logic if season is still active
+  if (container) container.style.display = 'block';
   tbody.innerHTML = '';
+  
   const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
+  
   players.forEach((p, pIdx) => {
     const scores = currentViewingRound === 1 ? p.r1Scores : p.r2Scores;
     const isIndiv = p.team.toUpperCase() === 'X';
 
+    // Build the Gross Score Row
     let trScore = `<tr>
-      <td class="admin-only" style="${isAdmin ? 'display:table-cell' : 'display:none'}"><button class="del-btn" onclick="deletePlayer(${pIdx})">✕</button></td>
-      <td style="text-align:left; padding-left:8px"><input class="player-name-input" value="${p.name}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].name=this.value; saveState();"></td>
-      <td><input type="number" class="score-input" value="${p.handicap}" ${isAdmin ? '' : 'readonly'} oninput="players[${pIdx}].handicap=this.value; updateCalculations();"></td>
-      <td><input class="score-input ${isIndiv ? 'indiv-team-indicator' : ''}" style="width:35px" value="${p.team}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].team=this.value.toUpperCase(); renderPlayers();"></td>`;
-    for(let i=0; i<18; i++) trScore += `<td><input type="number" class="score-input" data-p="${pIdx}" data-h="${i}" value="${scores[i] || ''}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
+      <td class="admin-only" style="${isAdmin ? 'display:table-cell' : 'display:none'}">
+        <button class="del-btn" onclick="deletePlayer(${pIdx})">✕</button>
+      </td>
+      <td style="text-align:left; padding-left:8px">
+        <input class="player-name-input" value="${p.name}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].name=this.value; saveState();">
+      </td>
+      <td>
+        <input type="number" class="score-input" value="${p.handicap}" ${isAdmin ? '' : 'readonly'} oninput="players[${pIdx}].handicap=this.value; updateCalculations();">
+      </td>
+      <td>
+        <input class="score-input ${isIndiv ? 'indiv-team-indicator' : ''}" style="width:35px" value="${p.team}" ${isAdmin ? '' : 'readonly'} onchange="players[${pIdx}].team=this.value.toUpperCase(); renderPlayers();">
+      </td>`;
+    
+    for(let i=0; i<18; i++) {
+      trScore += `<td><input type="number" class="score-input" data-p="${pIdx}" data-h="${i}" value="${scores[i] || ''}" ${isAdmin ? '' : 'readonly'} oninput="updateCalculations()"></td>`;
+    }
+    
     trScore += `<td class="final-total-box" id="tot-gross-${pIdx}">0</td></tr>`;
-    let trNet = ''; for(let i=0; i<18; i++) trNet += `<td id="net-${pIdx}-${i}" style="padding:1px 0;">-</td>`;
+
+    // Build the Net/Points Row
+    let trNet = ''; 
+    for(let i=0; i<18; i++) {
+      trNet += `<td id="net-${pIdx}-${i}" style="padding:1px 0;">-</td>`;
+    }
+
     tbody.innerHTML += trScore + `<tr style="background: rgba(0,0,0,0.02); height:22px">
         <td class="admin-only" style="${isAdmin ? 'display:table-cell' : 'display:none'}"></td>
         <td colspan="3" style="text-align:right; font-weight:700; color:#aaa; font-size:0.45rem; padding-right:5px">NET/PTS</td>
@@ -362,6 +417,7 @@ function renderPlayers() {
         <td id="p-total-${pIdx}" style="background:#333; color:white; font-weight:bold; font-size:0.75rem;">0</td>
     </tr>`;
   });
+
   updateCalculations();
 }
 
@@ -484,31 +540,93 @@ function updateIndividualLeaderboard() {
 }
 
 function updateTeamTables() {
-  const container = document.getElementById('team-container');
-  container.innerHTML = '';
-  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
-  const teamColors = { 'A': '#2e7d32', 'B': '#1565c0', 'C': '#880e4f', 'D': '#e65100', 'DEFAULT': '#444' };
-  const activeTeams = teams.filter(t => t.toUpperCase().trim() !== 'X');
+    const container = document.getElementById('team-container');
+    if (!container) return;
 
-  activeTeams.forEach(tId => {
-    const lookupId = tId.toUpperCase().trim();
-    let teamPlayers = players.filter(p => p.team.toUpperCase().trim() === lookupId);
-    if (teamPlayers.length === 0) return;
+    // 1. SEASON END CHECK
+    // If the season is over, wipe the HTML and hide the container completely
+    if (window.seasonEndedFlag) {
+        container.innerHTML = '';
+        container.style.display = 'none';
+        return;
+    } else {
+        container.style.display = 'grid'; // Or 'flex' depending on your layout
+    }
 
-    teamPlayers.sort((a, b) => ((b.r1Total || 0) + (b.r2Total || 0)) - ((a.r1Total || 0) + (a.r2Total || 0)));
-    const headerColor = teamColors[lookupId] || teamColors['DEFAULT'];
+    container.innerHTML = '';
+    const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
 
-    let r1T = 0, r2T = 0;
-    let rows = teamPlayers.map(p => {
-        const pR1 = parseFloat(p.r1Total) || 0;
-        const pR2 = parseFloat(p.r2Total) || 0;
-        r1T += pR1; r2T += pR2;
-        return `<tr><td class="team-player-name">${p.name}</td><td>${p.r1Total || 0}</td><td>${p.r2Total || 0}</td><td style="font-weight:900;">${pR1 + pR2}</td></tr>`;
-    }).join('');
+    // Define colors for the team headers
+    const teamColors = {
+        'A': '#2e7d32', // Emerald Green
+        'B': '#1565c0', // Royal Blue
+        'C': '#880e4f', // Burgundy
+        'D': '#e65100', // Deep Orange
+        'DEFAULT': '#444'
+    };
 
-    const label = teamLabels[tId] || `Team ${tId}`;
-    container.innerHTML += `<div class="team-table-wrapper"><table class="team-table"><thead><tr style="background:${headerColor}"><th colspan="4"><input class="team-title-input" value="${label}" ${isAdmin ? '' : 'readonly'} onchange="teamLabels['${tId}']=this.value; saveState();"></th></tr><tr class="team-header-row"><th>PLAYER</th><th>R1</th><th>R2</th><th>TOT</th></tr></thead><tbody>${rows}</tbody><tr style="background:#f8f9fa; font-weight:900;"><td class="team-player-name">TOTAL</td><td>${r1T}</td><td>${r2T}</td><td style="color:${headerColor}">${r1T+r2T}</td></tr></table></div>`;
-  });
+    // Filter out 'X' (Individuals) and empty entries
+    const activeTeams = teams.filter(t => t.toUpperCase().trim() !== 'X' && t.trim() !== '');
+
+    activeTeams.forEach(tId => {
+        const lookupId = tId.toString().toUpperCase().trim();
+        
+        // Find players assigned to this specific team
+        let teamPlayers = players.filter(p => p.team.toUpperCase().trim() === lookupId);
+        if (teamPlayers.length === 0) return;
+
+        // Get the header color or fallback to default
+        const headerColor = teamColors[lookupId] || teamColors['DEFAULT'];
+
+        let r1T = 0, r2T = 0;
+        let rows = teamPlayers.map(p => {
+            const pR1 = parseFloat(p.r1Total) || 0;
+            const pR2 = parseFloat(p.r2Total) || 0;
+            r1T += pR1; r2T += pR2;
+            return `
+                <tr>
+                    <td>${p.name}</td>
+                    <td>${p.r1Total || 0}</td>
+                    <td>${p.r2Total || 0}</td>
+                    <td>${pR1 + pR2}</td>
+                </tr>`;
+        }).join('');
+
+        const label = teamLabels[tId] || `Team ${tId}`;
+        
+        container.innerHTML += `
+          <div class="team-table-wrapper">
+            <table class="team-table">
+                <thead>
+                    <tr style="background:${headerColor} !important">
+                        <th colspan="4">
+                            <input class="team-title-input" 
+                                   value="${label}" 
+                                   ${isAdmin ? '' : 'readonly'} 
+                                   onchange="teamLabels['${tId}']=this.value; saveState();">
+                        </th>
+                    </tr>
+                    <tr class="team-header-row">
+                        <th>PLAYER</th>
+                        <th>R1</th>
+                        <th>R2</th>
+                        <th>TOT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows}
+                </tbody>
+                <tfoot>
+                    <tr class="team-footer">
+                        <td>TEAM TOTAL</td>
+                        <td>${r1T}</td>
+                        <td>${r2T}</td>
+                        <td style="background:#333; color:white;">${r1T + r2T}</td>
+                    </tr>
+                </tfoot>
+            </table>
+          </div>`;
+    });
 }
 
 function renderHistory() {
@@ -734,7 +852,7 @@ function exportData() {
   const blob = new Blob([JSON.stringify(state)], {type: "application/json"});
   const a = document.createElement('a'); 
   a.href = URL.createObjectURL(blob);
-  a.download = `lst74_backup.json`; 
+  a.download = `data.json`; 
   a.click();
 }
 
